@@ -28,20 +28,20 @@ const palette = {
 
 export const Theme = {
   colors: {
-    background: palette.almost_black,
-    foreground: palette.almost_white,
+    background: palette.almost_white,
+    foreground: palette.almost_black,
 
     primary: palette.dark_gray,
     secondary: palette.forest_green,
     tertiary: palette.pale_blue,
     quaternary: palette.ivory,
     
-    tabActive: palette.almost_white,
-    tabAccent: palette.almost_white + '77',
-    tabBackgound: palette.starry_night_blue,
-    tabNotification: palette.new_age,
+    tabActive: palette.almost_black,
+    tabAccent: palette.almost_black + '77',
+    tabBackgound: palette.almost_black,
+    tabNotification: palette.almost_black,
     
-    loadingIndicator: palette.new_age
+    loadingIndicator: palette.almost_black
   },
 
   spacing: {
@@ -95,18 +95,12 @@ export const DarkTheme = {
   colors: {
     ...Theme.colors,
 
-    background: palette.almost_white,
-    foreground: palette.almost_black,
-
-    primary: palette.starry_night_blue,
-    secondary: palette.purple,
+    // tabActive: palette.almost_white,
+    // tabAccent: palette.almost_white + '77',
+    // tabBackgound: palette.starry_night_blue,
+    // tabNotification: palette.new_age,
     
-    tabActive: palette.new_age,
-    tabAccent: palette.starry_night_blue,
-    tabBackgound: palette.black,
-    tabNotification: palette.new_age,
-    
-    loadingIndicator: palette.new_age
+    // loadingIndicator: palette.new_age
   },
   
 };

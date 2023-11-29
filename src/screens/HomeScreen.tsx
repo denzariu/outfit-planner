@@ -10,9 +10,8 @@ const HomeScreen = ({...props}) => {
   const backgroundStyle = {backgroundColor: currentTheme.colors.background}
 
   return (
-    
     <SafeAreaView style={[styles.page, backgroundStyle]}>
-      <Text>hi</Text>
+     
     </SafeAreaView>
   )
 }
