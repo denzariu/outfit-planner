@@ -48,6 +48,7 @@ const DefaultThemePaperModified = {
   }
 }
 import { useTheme } from 'react-native-paper';
+import CalendarScreen from './src/screens/CalendarScreen';
 
 
 const Tab = createMaterialBottomTabNavigator();
@@ -57,6 +58,7 @@ function App(): JSX.Element {
   const theme = useTheme();
   // theme.colors.secondaryContainer = useColorScheme() == 'dark' ? DarkTheme.colors.tertiary : Theme.colors.tertiary
   theme.colors.secondaryContainer = 'transparent'
+  const currentTheme = useColorScheme() == 'dark' ? DarkTheme : Theme
 
   return (
     <SafeAreaProvider>
@@ -68,8 +70,8 @@ function App(): JSX.Element {
         >
           <Stack.Navigator 
             screenOptions={{
-              statusBarStyle: useColorScheme() == 'dark' ? 'light' : 'dark',
-              statusBarColor: useColorScheme() == 'dark' ? DarkTheme.colors.tabBackgound : Theme.colors.background,
+              statusBarStyle: useColorScheme() == 'dark' ? 'dark' : 'light',
+              statusBarColor: currentTheme.colors.background,
               headerShown: false
             }}
             >
@@ -86,7 +88,7 @@ function App(): JSX.Element {
 
 
 function Tabs(): JSX.Element {
-  const isDarkMode = useColorScheme() === 'dark';
+  const isDarkMode = useColorScheme() == 'dark';
   const currentTheme = isDarkMode ? DarkTheme : Theme;
 
   return (
@@ -112,7 +114,7 @@ function Tabs(): JSX.Element {
         />
         <Tab.Screen
           name="Discover"
-          component={HomeScreen}
+          component={CalendarScreen}
           options={{
             tabBarLabel: '',
             // tabBarBadge: true, //2 for instance
@@ -169,19 +171,7 @@ function Tabs(): JSX.Element {
           }}
         />
       </Tab.Navigator>
-      <LinearGradient
-        colors={["#00000000", currentTheme.colors.secondary + '44', currentTheme.colors.secondary + 'FF']}
-        style={{
-          position: 'absolute',
-          overflow: 'visible',
-          pointerEvents: 'none',
-          left: 0,
-          right: 0,
-          bottom: 0,
-          height: "10%",
-          zIndex: 0
-        }}
-      />
+      
       </>
   );
 }

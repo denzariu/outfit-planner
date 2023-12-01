@@ -36,8 +36,8 @@ export const Theme = {
     tertiary: palette.pale_blue,
     quaternary: palette.ivory,
     
-    tabActive: palette.almost_black,
-    tabAccent: palette.almost_black + '77',
+    tabActive: palette.almost_white,
+    tabAccent: palette.almost_white + '77',
     tabBackgound: palette.almost_black,
     tabNotification: palette.almost_black,
     
@@ -94,6 +94,10 @@ export const DarkTheme = {
   ...Theme,
   colors: {
     ...Theme.colors,
+
+    
+    // background: palette.almost_black,
+    // foreground: palette.almost_white,
 
     // tabActive: palette.almost_white,
     // tabAccent: palette.almost_white + '77',
