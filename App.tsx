@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef, useState } from 'react';
 import type {PropsWithChildren} from 'react';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 // import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
@@ -7,6 +7,9 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack'
 import HomeScreen from './src/screens/HomeScreen';
 
 import {
+  Alert,
+  Animated,
+  LayoutAnimation,
   SafeAreaView,
   ScrollView,
   StatusBar,
@@ -49,6 +52,7 @@ const DefaultThemePaperModified = {
 }
 import { useTheme } from 'react-native-paper';
 import CalendarScreen from './src/screens/CalendarScreen';
+import { TouchableOpacity } from 'react-native-gesture-handler';
 
 
 const Tab = createMaterialBottomTabNavigator();
@@ -91,12 +95,67 @@ function Tabs(): JSX.Element {
   const isDarkMode = useColorScheme() == 'dark';
   const currentTheme = isDarkMode ? DarkTheme : Theme;
 
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+  const rotateAnim = useRef(new Animated.Value(0)).current;
+  const spin = rotateAnim.interpolate({
+    inputRange: [0, 90],
+    outputRange: ['0deg', '90deg']
+  })
+
+  // const inputAnim = useRef(new Animated.Value(100)).current;
+  // const [animatedSearch, setAnimatedSearch] = useState<Object>({});
+  const [expanded, setExpanded] = useState<boolean>(false)
+    
+  const fadeIn = () => {
+    console.log('fading in')
+    Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 250,
+        useNativeDriver: true
+    }).start();
+    Animated.timing(rotateAnim, {
+      toValue: 90,
+      duration: 250,
+      useNativeDriver: true
+    }).start();
+    // LayoutAnimation.configureNext(LayoutAnimation.create(2000, 'easeInEaseOut', 'opacity'));
+    setExpanded(true);
+    // LayoutAnimation.configureNext(LayoutAnimation.create(200, 'easeInEaseOut', 'opacity'));
+    // setAnimatedSearch({width: '100%', backgroundColor: currentTheme.colors.primary});
+  };
+
+  const fadeOut = () => {
+    console.log('fading out')
+    Animated.timing(fadeAnim, {
+      toValue: 0,
+      duration: 250,
+      useNativeDriver: true
+    }).start();
+
+    Animated.timing(rotateAnim, {
+      toValue: 0,
+      duration: 250,
+      useNativeDriver: true
+    }).start();
+    // LayoutAnimation.configureNext(LayoutAnimation.create(200, 'easeInEaseOut', 'opacity'));
+    // setAnimatedSearch({
+    //   width: '80%',
+    //   backgroundColor: currentTheme.colors.background,
+    //   borderColor:  currentTheme.colors.foreground,
+    //   borderWidth: currentTheme.spacing.xs / 4,
+    //   height: 35
+    // })
+    // LayoutAnimation.configureNext(LayoutAnimation.create(2000, 'easeInEaseOut', 'opacity'));
+    setExpanded(false);
+  }
+    
+
   return (
       <>
       
       <Tab.Navigator
       
-        initialRouteName="Home"
+        initialRouteName="Calendar"
         activeColor={currentTheme.colors.tabActive}
         inactiveColor={currentTheme.colors.tabAccent}
         style={{zIndex: 0}}
@@ -113,7 +172,7 @@ function Tabs(): JSX.Element {
           }}
         />
         <Tab.Screen
-          name="Discover"
+          name="Calendar"
           component={CalendarScreen}
           options={{
             tabBarLabel: '',
@@ -123,14 +182,30 @@ function Tabs(): JSX.Element {
             ),
           }}
         />
+        
         <Tab.Screen
           name="Add"
           component={HomeScreen}
+          listeners={() => ({
+            tabPress: (e) => {
+              e.preventDefault(); // Prevents navigation
+              // onPress goes here
+              
+              !expanded ? fadeIn() : fadeOut()
+              // fadeIn()
+              // Alert.alert("hi")
+            },
+            blur: (e) => {fadeOut()},
+            focus: () => {
+
+            }
+          })}
           options={{
             tabBarLabel: '',
             tabBarIcon: ({  }) => (
-              <View
-                style={{
+              <Animated.View
+
+                style={[{
                   position: 'absolute',
                   bottom: -20, // space from bottombar
                   height: 64,
@@ -140,18 +215,21 @@ function Tabs(): JSX.Element {
                   justifyContent: 'center',
                   alignItems: 'center',
                   zIndex: 15
-                }}
+                },
+                { transform: [{rotate: spin}] }
+              ]}
               >
-                <MaterialCommunityIcons 
+                  <MaterialCommunityIcons 
                   style={{alignContent: 'center'}}
                   name="plus" color={currentTheme.colors.background} size={48} 
-                  onPress={() => {/* TODO */}} />
-              </View>
+                   />
+              
+              </Animated.View>
             ),
           }}
         />
         <Tab.Screen 
-          name='Search'
+          name='Wardrobe'
           component={HomeScreen}
           options={{
             tabBarLabel: '',
@@ -171,6 +249,18 @@ function Tabs(): JSX.Element {
           }}
         />
       </Tab.Navigator>
+      
+      {/* {expanded && */}
+        <Animated.View style={[{position: 'absolute', bottom: 64 + 8, left: 0, right: 0, flexDirection: 'row', justifyContent: 'space-around'}, {opacity: fadeAnim}]}>
+          <TouchableOpacity style={{flex: 0.5, paddingHorizontal: Theme.spacing.l, paddingVertical: Theme.spacing.m, borderRadius: Theme.spacing.m, backgroundColor: currentTheme.colors.secondary}}>
+            <Text style={{textAlign: 'center', textAlignVertical: 'center', color: currentTheme.colors.quaternary}}>Add item</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={{flex: 0.5, paddingHorizontal: Theme.spacing.l, paddingVertical: Theme.spacing.m, borderRadius: Theme.spacing.m, backgroundColor: currentTheme.colors.tertiary}}>
+            <Text style={{textAlign: 'center', textAlignVertical: 'center', color: currentTheme.colors.quaternary}}>Add item</Text>
+          </TouchableOpacity>
+          
+        </Animated.View>
+      {/* } */}
       
       </>
   );

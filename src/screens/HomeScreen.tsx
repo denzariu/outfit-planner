@@ -92,16 +92,6 @@ const HomeScreen = ({...props}) => {
               </TouchableOpacity>
             </View>
           </View>
-          
-          {/* <View style={[styles.container_items_category, dynamicStyle.container_items_category]}>
-            <Text style={[styles.category_text, dynamicStyle.category_text]}>Tops</Text>
-          </View>
-          <View style={[styles.container_items_category, dynamicStyle.container_items_category]}>
-            <Text style={[styles.category_text, dynamicStyle.category_text]}>Bottoms</Text>
-          </View>
-          <View style={[styles.container_items_category, dynamicStyle.container_items_category]}>
-            <Text style={[styles.category_text, dynamicStyle.category_text]}>Feet</Text>
-          </View> */}
         </View>
       </View>
 
