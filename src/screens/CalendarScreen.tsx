@@ -1,4 +1,4 @@
-import { Alert, SafeAreaView, StyleSheet, Text, TouchableOpacity, View, useColorScheme } from 'react-native'
+import { Alert, Animated, SafeAreaView, StyleSheet, Text, TouchableOpacity, View, useColorScheme } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import { DarkTheme, Theme } from '../defaults/ui'
 import LinearGradient from 'react-native-linear-gradient';
@@ -6,8 +6,9 @@ import { Calendar } from 'react-native-calendars';
 import dayjs from 'dayjs';
 import { Direction } from 'react-native-calendars/src/types';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import AnimatedGradient from '../components/AnimatedGradient';
 
-const CalendarScreen = () => {
+const CalendarScreen = ({...props}) => {
 
   const isDarkMode = useColorScheme() == 'dark';
   const currentTheme = isDarkMode ? DarkTheme : Theme;
@@ -116,27 +117,16 @@ const CalendarScreen = () => {
     background_style: {backgroundColor: currentTheme.colors.background},
     textHeader: {color: currentTheme.colors.tertiary},
     container_clothing: {backgroundColor: currentTheme.colors.tertiary},
-    container_items: {backgroundColor: currentTheme.colors.quaternary},
     container_items_category: {backgroundColor: currentTheme.colors.secondary},
     category_text: {color: currentTheme.colors.quaternary},
     add_item: {backgroundColor: currentTheme.colors.background}
   })
+  
+  const animate = props.props;
 
   return (
     <SafeAreaView style={[styles.page, dynamicStyle.background_style]}>
-      <LinearGradient
-        colors={["#00000000", currentTheme.colors.secondary + '44', currentTheme.colors.secondary + 'FF']}
-        style={{
-          position: 'absolute',
-          overflow: 'visible',
-          pointerEvents: 'none',
-          left: 0,
-          right: 0,
-          bottom: 0,
-          height: "10%",
-          zIndex: 0
-        }}
-      />
+      <AnimatedGradient props={animate}/>
       <Text style={[styles.header, dynamicStyle.textHeader]}>
         Outfit Planner
       </Text>
@@ -184,7 +174,7 @@ const CalendarScreen = () => {
         <View style={styles.container}>
         <View style={[styles.container_clothing, dynamicStyle.container_clothing]}>
         </View>
-        <View style={[styles.container_items, dynamicStyle.container_items]}>
+        <View style={styles.container_items}>
           
           <View style={[styles.container_items_category, dynamicStyle.container_items_category]}>
             <View style={styles.container_category}>

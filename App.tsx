@@ -25,7 +25,7 @@ import {
 } from './src/defaults/ui'
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { LinearGradient } from 'react-native-linear-gradient';
-import { DarkTheme as DarkThemeNav, DefaultTheme as DefaultThemeNav, NavigationContainer } from '@react-navigation/native';
+import { DarkTheme as DarkThemeNav, DefaultTheme as DefaultThemeNav, NavigationContainer, useNavigation } from '@react-navigation/native';
 import { createMaterialBottomTabNavigator } from '@react-navigation/material-bottom-tabs';
 
 
@@ -53,7 +53,11 @@ const DefaultThemePaperModified = {
 import { useTheme } from 'react-native-paper';
 import CalendarScreen from './src/screens/CalendarScreen';
 import { TouchableOpacity } from 'react-native-gesture-handler';
+import AddItemScreen from './src/screens/secondary/AddItemScreen';
 
+import { Logs } from 'expo'
+
+Logs.enableExpoCliLogging()
 
 const Tab = createMaterialBottomTabNavigator();
 const Stack = createNativeStackNavigator();
@@ -78,11 +82,9 @@ function App(): JSX.Element {
               statusBarColor: currentTheme.colors.background,
               headerShown: false
             }}
-            >
-            <Stack.Screen
-              name="Tabs"
-              component={Tabs}
-            />
+          >
+            <Stack.Screen name="Tabs" component={Tabs} />
+            <Stack.Screen name="AddItemScreen" component={AddItemScreen} />
           </Stack.Navigator>
         </NavigationContainer>
       </PaperProvider>
@@ -92,6 +94,8 @@ function App(): JSX.Element {
 
 
 function Tabs(): JSX.Element {
+  const navigator = useNavigation();
+
   const isDarkMode = useColorScheme() == 'dark';
   const currentTheme = isDarkMode ? DarkTheme : Theme;
 
@@ -118,10 +122,8 @@ function Tabs(): JSX.Element {
       duration: 250,
       useNativeDriver: true
     }).start();
-    // LayoutAnimation.configureNext(LayoutAnimation.create(2000, 'easeInEaseOut', 'opacity'));
+    LayoutAnimation.configureNext(LayoutAnimation.create(2000, 'easeInEaseOut', 'opacity'));
     setExpanded(true);
-    // LayoutAnimation.configureNext(LayoutAnimation.create(200, 'easeInEaseOut', 'opacity'));
-    // setAnimatedSearch({width: '100%', backgroundColor: currentTheme.colors.primary});
   };
 
   const fadeOut = () => {
@@ -137,15 +139,7 @@ function Tabs(): JSX.Element {
       duration: 250,
       useNativeDriver: true
     }).start();
-    // LayoutAnimation.configureNext(LayoutAnimation.create(200, 'easeInEaseOut', 'opacity'));
-    // setAnimatedSearch({
-    //   width: '80%',
-    //   backgroundColor: currentTheme.colors.background,
-    //   borderColor:  currentTheme.colors.foreground,
-    //   borderWidth: currentTheme.spacing.xs / 4,
-    //   height: 35
-    // })
-    // LayoutAnimation.configureNext(LayoutAnimation.create(2000, 'easeInEaseOut', 'opacity'));
+    LayoutAnimation.configureNext(LayoutAnimation.create(2000, 'easeInEaseOut', 'opacity'));
     setExpanded(false);
   }
     
@@ -163,17 +157,21 @@ function Tabs(): JSX.Element {
       >
         <Tab.Screen 
           name="Home"
-          component={HomeScreen}
+          // component={HomeScreen}
+          // fade={({ fadePercent })}
           options={{
             tabBarLabel: '',
             tabBarIcon: ({ color, focused }) => (
               <MaterialCommunityIcons style={{top: 20}} name={focused ? "home-variant" : "home-variant-outline"} color={color} size={26} />
             ),
           }}
-        />
+        >
+          {(props) => <HomeScreen props={expanded}></HomeScreen>}
+        </Tab.Screen>
+
         <Tab.Screen
           name="Calendar"
-          component={CalendarScreen}
+          // component={CalendarScreen}
           options={{
             tabBarLabel: '',
             // tabBarBadge: true, //2 for instance
@@ -181,7 +179,10 @@ function Tabs(): JSX.Element {
               <MaterialCommunityIcons style={{top: 20}} name={focused ? "calendar-blank" : "calendar-blank-outline"} color={color} size={26} />
             ),
           }}
-        />
+        >
+          {(props) => <CalendarScreen props={expanded}></CalendarScreen>}
+
+        </Tab.Screen>
         
         <Tab.Screen
           name="Add"
@@ -230,7 +231,7 @@ function Tabs(): JSX.Element {
         />
         <Tab.Screen 
           name='Wardrobe'
-          component={HomeScreen}
+          component={(HomeScreen)}
           options={{
             tabBarLabel: '',
             tabBarIcon: ({ color, focused }) => (
@@ -252,7 +253,9 @@ function Tabs(): JSX.Element {
       
       {/* {expanded && */}
         <Animated.View style={[{position: 'absolute', bottom: 64 + 8, left: 0, right: 0, flexDirection: 'row', justifyContent: 'space-around'}, {opacity: fadeAnim}]}>
-          <TouchableOpacity style={{flex: 0.5, paddingHorizontal: Theme.spacing.l, paddingVertical: Theme.spacing.m, borderRadius: Theme.spacing.m, backgroundColor: currentTheme.colors.secondary}}>
+          <TouchableOpacity style={{flex: 0.5, paddingHorizontal: Theme.spacing.l, paddingVertical: Theme.spacing.m, borderRadius: Theme.spacing.m, backgroundColor: currentTheme.colors.secondary}}
+            onPress={() => {navigator.navigate(AddItemScreen)}}
+          >
             <Text style={{textAlign: 'center', textAlignVertical: 'center', color: currentTheme.colors.quaternary}}>Add item</Text>
           </TouchableOpacity>
           <TouchableOpacity style={{flex: 0.5, paddingHorizontal: Theme.spacing.l, paddingVertical: Theme.spacing.m, borderRadius: Theme.spacing.m, backgroundColor: currentTheme.colors.tertiary}}>

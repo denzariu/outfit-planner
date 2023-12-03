@@ -5,6 +5,7 @@ import { Image } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import { TouchableHighlight } from 'react-native-gesture-handler';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import AnimatedGradient from '../components/AnimatedGradient';
 
 const HomeScreen = ({...props}) => {
   const isDarkMode = useColorScheme() == 'dark';
@@ -14,27 +15,22 @@ const HomeScreen = ({...props}) => {
     background_style: {backgroundColor: currentTheme.colors.background},
     textHeader: {color: currentTheme.colors.tertiary},
     container_clothing: {backgroundColor: currentTheme.colors.tertiary},
-    container_items: {backgroundColor: currentTheme.colors.quaternary},
     container_items_category: {backgroundColor: currentTheme.colors.secondary},
     category_text: {color: currentTheme.colors.quaternary},
     add_item: {backgroundColor: currentTheme.colors.background}
   })
 
+  // const 
+  
+  // // useEffect(() => {
+  // //   setAnimate(animate)
+  // // }, [props])
+  // console.log({animHome: props.props})
+  const animate = props.props;
+
   return (
     <SafeAreaView style={[styles.page, dynamicStyle.background_style]}>
-      <LinearGradient
-        colors={["#00000000", currentTheme.colors.secondary + '44', currentTheme.colors.secondary + 'FF']}
-        style={{
-          position: 'absolute',
-          overflow: 'visible',
-          pointerEvents: 'none',
-          left: 0,
-          right: 0,
-          bottom: 0,
-          height: "10%",
-          zIndex: 0
-        }}
-      />
+      <AnimatedGradient props={animate}/>
 
       <Text style={[styles.header, dynamicStyle.textHeader]}>
         Today's Outfit
@@ -43,7 +39,7 @@ const HomeScreen = ({...props}) => {
       <View style={styles.container}>
         <View style={[styles.container_clothing, dynamicStyle.container_clothing]}>
         </View>
-        <View style={[styles.container_items, dynamicStyle.container_items]}>
+        <View style={styles.container_items}>
           
           <View style={[styles.container_items_category, dynamicStyle.container_items_category]}>
             <View style={styles.container_category}>
