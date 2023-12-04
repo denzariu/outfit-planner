@@ -84,7 +84,11 @@ function App(): JSX.Element {
             }}
           >
             <Stack.Screen name="Tabs" component={Tabs} />
-            <Stack.Screen name="AddItemScreen" component={AddItemScreen} />
+            <Stack.Screen name="AddItemScreen" component={AddItemScreen}
+              options={{
+                animation: 'slide_from_right'
+              }}
+            />
           </Stack.Navigator>
         </NavigationContainer>
       </PaperProvider>
