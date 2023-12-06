@@ -130,8 +130,8 @@ const AnimatedGradient = ({...props}) => {
   }, [expanded])
 
   const leftColor = useSharedValue(currentTheme.colors.quaternary + '22');
-  const middleColor = useSharedValue(currentTheme.colors.secondary + '00');
-  const rightColor = useSharedValue(currentTheme.colors.secondary + 'FF');
+  const middleColor = useSharedValue(currentTheme.colors.tertiary + '00');
+  const rightColor = useSharedValue(currentTheme.colors.tertiary + 'FF');
 
 
   const colors = useDerivedValue(() => {

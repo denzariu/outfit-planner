@@ -71,7 +71,7 @@ function App(): JSX.Element {
   return (
     <SafeAreaProvider>
       <PaperProvider  
-        theme={useColorScheme() == 'dark' ? DarkThemePaperModified : DefaultThemePaperModified}
+        theme={DarkThemePaperModified}
       >
       <NavigationContainer 
           theme={useColorScheme() == 'dark' ? DarkThemeNav : DefaultThemeNav}
@@ -256,14 +256,14 @@ function Tabs(): JSX.Element {
       </Tab.Navigator>
       
       {/* {expanded && */}
-        <Animated.View style={[{position: 'absolute', bottom: 64 + 8, left: 0, right: 0, flexDirection: 'row', justifyContent: 'space-around'}, {opacity: fadeAnim}]}>
-          <TouchableOpacity style={{flex: 0.5, paddingHorizontal: Theme.spacing.l, paddingVertical: Theme.spacing.m, borderRadius: Theme.spacing.m, backgroundColor: currentTheme.colors.secondary}}
+        <Animated.View style={[{position: 'absolute', bottom: 64 + 8, left: 16, right: 16, flexDirection: 'row', justifyContent: 'space-between'}, {opacity: fadeAnim}]}>
+          <TouchableOpacity style={{}}
             onPress={() => {navigator.navigate(AddItemScreen)}}
           >
             <Text style={{textAlign: 'center', textAlignVertical: 'center', color: currentTheme.colors.quaternary}}>Add item</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={{flex: 0.5, paddingHorizontal: Theme.spacing.l, paddingVertical: Theme.spacing.m, borderRadius: Theme.spacing.m, backgroundColor: currentTheme.colors.tertiary}}>
-            <Text style={{textAlign: 'center', textAlignVertical: 'center', color: currentTheme.colors.quaternary}}>Add item</Text>
+          <TouchableOpacity style={{}}>
+            <Text style={{textAlign: 'center', textAlignVertical: 'center', color: currentTheme.colors.quaternary}}>Secret Feature</Text>
           </TouchableOpacity>
           
         </Animated.View>

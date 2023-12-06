@@ -1,15 +1,17 @@
-import { Image, SafeAreaView, StyleSheet, Text, View, useColorScheme } from 'react-native'
+import { Button, Image, SafeAreaView, StyleSheet, Text, View, useColorScheme } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import AnimatedGradient from '../../components/AnimatedGradient'
 import { DarkTheme, Theme } from '../../defaults/ui'
 import { TextInput, TouchableOpacity } from 'react-native-gesture-handler'
 import * as ImagePicker from 'expo-image-picker'
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
-import { Dropdown } from 'react-native-element-dropdown'
+import { Dropdown, MultiSelect } from 'react-native-element-dropdown'
 import { getColors } from 'react-native-image-colors'
+import { useNavigation } from '@react-navigation/native'
 
 const AddItemScreen = () => {
 
+  const navigator = useNavigation();
   const isDarkMode = useColorScheme() == 'dark';
   const currentTheme = isDarkMode ? DarkTheme : Theme;
 
@@ -65,6 +67,40 @@ const AddItemScreen = () => {
 
   ]);
 
+  const [valuesFabrics, setValuesFabrics] = useState(['cotton']);
+  const [fabrics, setFabrics] = useState([
+    {"label": "Cotton", "value": "cotton"},
+    {"label": "Polyester", "value": "polyester"},
+    {"label": "Silk", "value": "silk"},
+    {"label": "Wool", "value": "wool"},
+    {"label": "Linen", "value": "linen"},
+    {"label": "Rayon", "value": "rayon"},
+    {"label": "Nylon", "value": "nylon"},
+    {"label": "Spandex", "value": "spandex"},
+    {"label": "Acrylic", "value": "acrylic"},
+    {"label": "Velvet", "value": "velvet"},
+    {"label": "Satin", "value": "satin"},
+    {"label": "Chiffon", "value": "chiffon"},
+    {"label": "Denim", "value": "denim"},
+    {"label": "Flannel", "value": "flannel"},
+    {"label": "Tulle", "value": "tulle"},
+    {"label": "Cashmere", "value": "cashmere"},
+    {"label": "Leather", "value": "leather"},
+    {"label": "Suede", "value": "suede"},
+    {"label": "Corduroy", "value": "corduroy"},
+    {"label": "Organza", "value": "organza"},
+    {"label": "Tweed", "value": "tweed"},
+    {"label": "Chambray", "value": "chambray"},
+    {"label": "Taffeta", "value": "taffeta"},
+    {"label": "Georgette", "value": "georgette"},
+    {"label": "Jersey", "value": "jersey"},
+    {"label": "Fleece", "value": "fleece"},
+    {"label": "Brocade", "value": "brocade"},
+    {"label": "Tencel", "value": "tencel"},
+    {"label": "Hemp", "value": "hemp"},
+    {"label": "Bamboo", "value": "bamboo"}
+  ]);
+
   const onChangeName = (value: string) => {
     setName(value)
   }
@@ -98,8 +134,11 @@ const AddItemScreen = () => {
   const dynamicStyle = StyleSheet.create({
     background_style: {backgroundColor: currentTheme.colors.background},
     textHeader: {color: currentTheme.colors.tertiary},
-    container: {backgroundColor: mainColor},
-    setting: {backgroundColor: currentTheme.colors.primary}
+    container: {backgroundColor: mainColor, shadowColor: currentTheme.colors.foreground},
+    setting: {backgroundColor: currentTheme.colors.primary},
+    setting_title: {color: currentTheme.colors.quaternary + '88'},
+    button: {backgroundColor: currentTheme.colors.secondary, shadowColor: currentTheme.colors.foreground, borderColor: currentTheme.colors.tertiary},
+    button_text: {color: currentTheme.colors.background}
   })
 
   function seasonPress (season: number) {
@@ -122,7 +161,10 @@ const AddItemScreen = () => {
     <SafeAreaView style={[styles.page, dynamicStyle.background_style]}>
       {/* <AnimatedGradient props={animate}/> */}
       <View style={{flexDirection: 'row', alignItems: 'center', justifyContent:'flex-start', marginVertical: Theme.spacing.m, marginTop: Theme.spacing.l, gap: Theme.spacing.l}}>
-        <MaterialCommunityIcons name="arrow-left" color={currentTheme.colors.tertiary} size={currentTheme.fontSize.l_s} />
+        <TouchableOpacity 
+          children={<MaterialCommunityIcons name="arrow-left" color={currentTheme.colors.tertiary} size={currentTheme.fontSize.l_s} />}
+          onPress={() => navigator.goBack()}
+        />
         <Text style={[styles.header, dynamicStyle.textHeader]}>
           {name == '' ? 'Add Item' : name + ' ' + value.charAt(0).toUpperCase() + value.slice(1)}
         </Text>
@@ -132,9 +174,9 @@ const AddItemScreen = () => {
           <View style={styles.container_upload}>
             {/* <Text style={styles.no_item_text}>Upload</Text> */}
             <View style={{position: 'absolute', bottom: 0, top: Theme.spacing.xxl * 2, zIndex: 10}}>
-              <MaterialCommunityIcons name="upload" color={currentTheme.colors.tertiary} size={currentTheme.fontSize.l_l*1.5} />
+              <MaterialCommunityIcons name="upload" color={currentTheme.colors.tertiary} size={currentTheme.fontSize.l_l*1.2} />
             </View>
-            <MaterialCommunityIcons name="tshirt-crew" color={seasons[0] ? currentTheme.colors.quaternary : currentTheme.colors.quaternary} size={currentTheme.fontSize.l_l*4} />
+            <MaterialCommunityIcons name="tshirt-crew" color={seasons[0] ? currentTheme.colors.quaternary : currentTheme.colors.quaternary} size={currentTheme.fontSize.l_l*3} />
           </View>
         }
         {image && <Image source={{ uri: image }} style={{ flex: 1, margin: Theme.spacing.xl, borderRadius: Theme.spacing.s, aspectRatio: 1, width: null, height: null }} />}
@@ -142,18 +184,19 @@ const AddItemScreen = () => {
 
       <View style={styles.container_clothing_settings}>
         <View style={[styles.setting, dynamicStyle.setting]}>
-          <Text style={[styles.setting_title]}>Name</Text>
+          <Text style={[styles.setting_title, dynamicStyle.setting_title]}>Name</Text>
           <TextInput 
             style={[styles.setting_input, {fontSize: name != '' ? Theme.fontSize.m_s : Theme.fontSize.s_l}]}
             numberOfLines={1}
             multiline={false}
             placeholder="'Cozy', 'Red', 'Long'..."
+            placeholderTextColor={currentTheme.colors.background}
             onChangeText={(text) => onChangeName(text)}
             value={name}
           />
         </View>
         <View style={[styles.setting, dynamicStyle.setting]}>
-          <Text style={[styles.setting_title]}>Category</Text>
+          <Text style={[styles.setting_title, dynamicStyle.setting_title]}>Category</Text>
 
           <Dropdown
             // mode='modal'
@@ -195,7 +238,7 @@ const AddItemScreen = () => {
       </View>
       <View style={styles.container_clothing_settings}>
         <View style={[styles.setting, dynamicStyle.setting]}>
-          <Text style={[styles.setting_title]}>Seasons</Text>
+          <Text style={[styles.setting_title, dynamicStyle.setting_title]}>Seasons</Text>
           <View style={styles.container_seasons} key={seasons[0] ? 'update' : 'up'}>
             <TouchableOpacity 
               containerStyle={[styles.season, seasons[0] ? {backgroundColor: currentTheme.colors.tertiary} : {}]}
@@ -225,7 +268,7 @@ const AddItemScreen = () => {
         </View>
 
         <View style={[styles.setting, dynamicStyle.setting]}>
-          <Text style={[styles.setting_title]}>Weather</Text>
+          <Text style={[styles.setting_title, dynamicStyle.setting_title]}>Weather</Text>
           <View style={styles.container_seasons} key={weather[0] ? 'update' : 'up'}>
             <TouchableOpacity 
               containerStyle={[styles.season, weather[0] ? {backgroundColor: currentTheme.colors.tertiary} : {}]}
@@ -255,41 +298,99 @@ const AddItemScreen = () => {
         </View>
       </View>
       <View style={styles.container_clothing_settings}>
-
         <View style={[styles.setting, dynamicStyle.setting]}>
-          <Text style={[styles.setting_title]}>Colors</Text>
-          <View style={styles.container_seasons}>
+          <Text style={[styles.setting_title, dynamicStyle.setting_title]}>Colors</Text>
+          <View style={styles.container_colors}>
             <TouchableOpacity  
-              style={[{padding: Theme.spacing.m, borderRadius: Theme.spacing.s}, {backgroundColor: colors.average}, mainColor == colors.average ? {borderColor: mainColor, borderWidth: Theme.spacing.xxs} : {}]}
+              style={[{padding: Theme.spacing.l, borderRadius: Theme.spacing.s, borderWidth: Theme.spacing.xxs, borderColor: currentTheme.colors.primary}, {backgroundColor: colors.average}, mainColor == colors.average ? {borderColor: mainColor} : {}]}
               onPress={() => setMainColor(colors.average)}
             />
             <TouchableOpacity  
-              style={[{padding: Theme.spacing.m, borderRadius: Theme.spacing.s}, {backgroundColor: colors.dominant}, mainColor == colors.dominant ? {borderColor: mainColor, borderWidth: Theme.spacing.xxs} : {}]}
+              style={[{padding: Theme.spacing.l, borderRadius: Theme.spacing.s, borderWidth: Theme.spacing.xxs, borderColor: currentTheme.colors.primary}, {backgroundColor: colors.dominant}, mainColor == colors.dominant ? {borderColor: mainColor, borderWidth: Theme.spacing.xxs} : {}]}
               onPress={() => setMainColor(colors.dominant)}
             />
+          </View>
+          <View style={styles.container_colors}>
             <TouchableOpacity  
-              style={[{padding: Theme.spacing.m, borderRadius: Theme.spacing.s}, {backgroundColor: colors.muted}, mainColor == colors.muted ? {borderColor: mainColor, borderWidth: Theme.spacing.xxs} : {}]}
+              style={[{padding: Theme.spacing.l, borderRadius: Theme.spacing.s, borderWidth: Theme.spacing.xxs, borderColor: currentTheme.colors.primary}, {backgroundColor: colors.muted}, mainColor == colors.muted ? {borderColor: mainColor, borderWidth: Theme.spacing.xxs} : {}]}
               onPress={() => setMainColor(colors.muted)}
             />
             <TouchableOpacity  
-              style={[{padding: Theme.spacing.m, borderRadius: Theme.spacing.s}, {backgroundColor: colors.vibrant}, mainColor == colors.vibrant ? {borderColor: mainColor, borderWidth: Theme.spacing.xxs} : {}]}
+              style={[{padding: Theme.spacing.l, borderRadius: Theme.spacing.s, borderWidth: Theme.spacing.xxs, borderColor: currentTheme.colors.primary}, {backgroundColor: colors.vibrant}, mainColor == colors.vibrant ? {borderColor: mainColor, borderWidth: Theme.spacing.xxs} : {}]}
               onPress={() => setMainColor(colors.vibrant)}
             />
           </View>
         </View>
+        <View style={[styles.setting, {paddingBottom: 4, overflow: 'hidden'}, dynamicStyle.setting]}>
+          <Text style={[styles.setting_title, dynamicStyle.setting_title]}>Materials</Text>
 
+          <MultiSelect
+            mode='modal'
+            // renderItem={(item) => {return <CategoryItem item={item} theme={currentTheme}/>}}
+            data={fabrics}
+            labelField={'label'}
+            valueField={'value'}
+            value={valuesFabrics}
+            onChange={(item)=>{
+              setValuesFabrics(item)
+              setFocus(false)
+            }}
+            onBlur={() => setFocus(false)}
+            onFocus={() => setFocus(true)}
+            showsVerticalScrollIndicator={false}
+            search={true}
+            // visibleSelectedItem={false}
+            placeholder="Add fabrics..."
+            placeholderStyle={{textAlign: 'center', opacity: 0.5}}
+
+            renderRightIcon={() =>
+              <MaterialCommunityIcons name="menu-down" color={currentTheme.colors.quaternary} size={currentTheme.fontSize.m_l} />
+            }
+            backgroundColor={currentTheme.colors.tertiary + '80'}
+            style={{flex: 1, paddingHorizontal: 8}}
+            containerStyle={{borderRadius: currentTheme.spacing.m, backgroundColor: currentTheme.colors.primary}}
+            itemContainerStyle={{
+              // borderRadius: currentTheme.spacing.m, //     <-- for a more round style
+              // height: Theme.spacing.s + Theme.fontSize.l_m,
+              backgroundColor: currentTheme.colors.primary,
+            }}
+            maxSelect={6}
+            inside={true}
+            renderSelectedItem={(item, unselect) => {return <MultiSelectItem item={item} unselect={unselect} theme={currentTheme}/>}}
+            selectedStyle={{borderRadius: 16, backgroundColor: currentTheme.colors.tertiary}}
+            selectedTextStyle={{fontSize: Theme.fontSize.s_s, color: currentTheme.colors.quaternary, textAlign: 'center', textAlignVertical: 'center'}}
+            itemTextStyle={{fontSize: Theme.fontSize.s_l, textAlign: 'center', color: currentTheme.colors.quaternary}}
+            activeColor={currentTheme.colors.secondary}
+
+          />
+          
+        </View>
       </View>
+
+      <TouchableOpacity  
+        style={[styles.button, dynamicStyle.button]}
+        onPress={() => setMainColor(colors.vibrant)}
+        children={<Text style={[styles.button_text, dynamicStyle.button_text]}>Add to Collection</Text>}
+      />
       
     </SafeAreaView>
   )
 }
 
 const CategoryItem = ({item, theme}: {item: any, theme: any}) => {
-  console.log(item)
   return (
     
     <View style={[{paddingHorizontal: theme.spacing.s}, !item.parent ? {backgroundColor: theme.colors.tertiary, borderWidth: 1, borderColor: theme.colors.primary} : {}]}>
-      <Text style={[{color: theme.colors.quaternary, fontSize: theme.fontSize.s_l}, !item.parent ? {color: theme.colors.quaternary, fontWeight: '500', textAlign: 'center'} : {}]}>{item.label}</Text>
+      <Text style={[{color: theme.colors.quaternary, fontSize: theme.fontSize.s_l}, !item.parent ? {color: theme.colors.quaternary, fontWeight: '500', } : {paddingVertical: theme.spacing.xs, textAlign: 'center'}]}>{item.label}</Text>
+    </View>
+  )
+}
+
+const MultiSelectItem = ({item, theme}: {item: any, unselect: any, theme: any}) => {
+  return (
+    
+    <View style={[{paddingHorizontal: theme.spacing.xs, paddingVertical: theme.spacing.xxs, margin: theme.spacing.xs, backgroundColor: theme.colors.tertiary, borderWidth: 0.5, borderColor: theme.colors.quaternary, borderRadius: 8}]}>
+      <Text style={[{color: theme.colors.quaternary, fontSize: theme.fontSize.s_l}]}>{item.label}</Text>
     </View>
   )
 }
@@ -311,12 +412,10 @@ const styles = StyleSheet.create({
   container: {
     // aspectRatio: 1,
     
-    height: '45%',
+    height: '40%',
     borderRadius: Theme.spacing.m,
     alignItems: 'center',
     justifyContent: 'center',
-
-    shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.5,
     shadowRadius: 2,
@@ -339,12 +438,19 @@ const styles = StyleSheet.create({
     // flex: 1,
     flexDirection: 'row',
     marginTop: Theme.spacing.m,
-    gap: Theme.spacing.ms
+    gap: Theme.spacing.ms,
   },
 
   setting: {
     flex: 0.5,
     borderRadius: Theme.spacing.m,
+    
+    // Shadow to the setting containers
+                                                  
+    // shadowOffset: { width: 0, height: 2 },
+    // shadowOpacity: 0.5,
+    // shadowRadius: 2,
+    // elevation: 10,
   },
 
   setting_title: {
@@ -373,5 +479,33 @@ const styles = StyleSheet.create({
   season: {
     borderRadius: Theme.spacing.s,
     padding: Theme.spacing.xs,
+  },
+
+  container_colors: {
+    flexDirection: 'row',
+    justifyContent: 'space-evenly',
+    paddingHorizontal: Theme.spacing.s,
+    paddingVertical: Theme.spacing.xs,
+    paddingBottom: Theme.spacing.s,
+  },
+
+  button: {
+    position: 'relative',
+    bottom: 0,
+    paddingVertical: Theme.spacing.m,
+    borderRadius: Theme.spacing.l,
+    marginVertical: Theme.spacing.m,
+
+    borderWidth: Theme.spacing.xxs,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.5,
+    shadowRadius: 2,
+    elevation: 10,
+  },
+
+  button_text: {
+    fontSize: Theme.fontSize.m_m,
+    fontWeight: '500',
+    alignSelf: 'center',
   }
 })

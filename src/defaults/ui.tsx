@@ -101,6 +101,12 @@ export const DarkTheme = {
     // background: palette.almost_black,
     // foreground: palette.almost_white,
 
+    // primary: palette.pale_blue,
+    // secondary: palette.pale_blue,
+    // tertiary: palette.forest_green,
+    // quaternary: palette.dark_gray,
+    
+
     // tabActive: palette.almost_white,
     // tabAccent: palette.almost_white + '77',
     // tabBackgound: palette.starry_night_blue,
