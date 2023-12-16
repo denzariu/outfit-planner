@@ -6,10 +6,35 @@ import LinearGradient from 'react-native-linear-gradient';
 import { TouchableHighlight } from 'react-native-gesture-handler';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import AnimatedGradient from '../components/AnimatedGradient';
+import { getDBConnection } from '../assets/database/db-service';
+import { getClothingItems } from '../assets/database/db-operations/db-operations-clothingitem';
+import { ClothingItem } from '../assets/database/models';
 
 const HomeScreen = ({...props}) => {
   const isDarkMode = useColorScheme() == 'dark';
   const currentTheme = isDarkMode ? DarkTheme : Theme;
+  const animate = props.props;
+
+  // TEST: if the added image was correctly added to the DB and can be displayed
+  const [extra, setExtra] = useState<ClothingItem[]>([]);
+  const [top, setTop] = useState<ClothingItem[]>([]);
+  const [bottom, setBottom] = useState<ClothingItem[]>([]);
+  const [feet, setFeet] = useState<ClothingItem[]>([]);
+
+  const loadOutfit = async () => {
+    const db = await getDBConnection()
+    await getClothingItems(db, 'extra').then((res) => setExtra(res))
+    await getClothingItems(db, 'top').then((res) => setTop(res))
+    await getClothingItems(db, 'bottom').then((res) => setBottom(res))
+    await getClothingItems(db, 'feet').then((res) => setFeet(res))
+
+    console.log(extra)
+
+  }
+
+  useEffect(() => {
+    loadOutfit()
+  }, [])
 
   const dynamicStyle = StyleSheet.create({
     background_style: {backgroundColor: currentTheme.colors.background},
@@ -20,13 +45,6 @@ const HomeScreen = ({...props}) => {
     add_item: {backgroundColor: currentTheme.colors.background}
   })
 
-  // const 
-  
-  // // useEffect(() => {
-  // //   setAnimate(animate)
-  // // }, [props])
-  // console.log({animHome: props.props})
-  const animate = props.props;
 
   return (
     <SafeAreaView style={[styles.page, dynamicStyle.background_style]}>
@@ -38,6 +56,64 @@ const HomeScreen = ({...props}) => {
 
       <View style={styles.container}>
         <View style={[styles.container_clothing, dynamicStyle.container_clothing]}>
+
+          <View style={[styles.container_section, {gap: -2.5 * extra.length}]}>
+            {/* Show each image of the 'Extra' items */}
+            {extra?.map((item) => 
+              <View style={{flex: 0.8, aspectRatio: 1}}>
+                <Image source={{uri: item.image}} style={{flex: 1, 
+                  transform: [
+                  // { perspective: 850 },
+                  // { translateX: - Dimensions.get('window').width * 0.24 },
+                  // { rotateY: '45deg'} //TODO: Animate this 
+                ]}} 
+                />
+              </View>
+              )
+            }
+          </View>
+          <View style={[styles.container_section, {gap: -2.5 * top.length}]}>
+            {top?.map((item) => 
+              <View style={{flex: 0.8, aspectRatio: 1}}>
+                <Image source={{uri: item.image}} style={{flex: 1, 
+                  transform: [
+                  { perspective: 200 },
+                  // { translateX: - Dimensions.get('window').width * 0.24 },
+                  { rotateY: '45deg'} //TODO: Animate this 
+                ]}} 
+                />
+              </View>
+              )
+            }
+          </View>
+          <View style={[styles.container_section, {gap: -2.5 * bottom.length}]}>
+            {top?.map((item) => 
+              <View style={{flex: 0.8, aspectRatio: 1}}>
+                <Image source={{uri: item.image}} style={{flex: 1, 
+                  transform: [
+                  { perspective: 200 },
+                  // { translateX: - Dimensions.get('window').width * 0.24 },
+                  { rotateY: '45deg'} //TODO: Animate this 
+                ]}} 
+                />
+              </View>
+              )
+            }
+          </View>
+          <View style={[styles.container_section, {gap: -2.5 * feet.length}]}>
+            {top?.map((item) => 
+              <View style={{flex: 0.8, aspectRatio: 1}}>
+                <Image source={{uri: item.image}} style={{flex: 1, 
+                  transform: [
+                  { perspective: 200 },
+                  // { translateX: - Dimensions.get('window').width * 0.24 },
+                  { rotateY: '45deg'} //TODO: Animate this 
+                ]}} 
+                />
+              </View>
+              )
+            }
+          </View>
         </View>
         <View style={styles.container_items}>
           
@@ -48,9 +124,14 @@ const HomeScreen = ({...props}) => {
 
               <TouchableOpacity style={[styles.add_item, dynamicStyle.add_item]} onPress={()=>{Alert.alert('ok')}}>
                 <MaterialCommunityIcons name="plus" color={currentTheme.colors.tertiary} size={currentTheme.fontSize.m_m} />
-
               </TouchableOpacity>
+              
             </View>
+            {/* Show the title of each item in the 'Extra' category */}
+            {extra?.map((item) => 
+                <Text style={styles.item_name}>{item.adjective + ' ' + item.subtype[0].toUpperCase() + item.subtype.slice(1)}</Text>
+                )
+              }
           </View>
 
           <View style={[styles.container_items_category, dynamicStyle.container_items_category]}>
@@ -60,9 +141,14 @@ const HomeScreen = ({...props}) => {
 
               <TouchableOpacity style={[styles.add_item, dynamicStyle.add_item]} onPress={()=>{Alert.alert('ok')}}>
                 <MaterialCommunityIcons name="plus" color={currentTheme.colors.tertiary} size={currentTheme.fontSize.m_m} />
-
               </TouchableOpacity>
+
             </View>
+            {/* Show the title of each item in the 'Top' category */}
+            {top?.map((item) => 
+              <Text style={styles.item_name}>{item.adjective + ' ' + item.subtype[0].toUpperCase() + item.subtype.slice(1)}</Text>
+              )
+            }
           </View>
 
           <View style={[styles.container_items_category, dynamicStyle.container_items_category]}>
@@ -121,6 +207,14 @@ const styles = StyleSheet.create({
     borderRadius: Theme.spacing.m,
   },
 
+  container_section: {
+    flex: 1, 
+    flexDirection: 'row', 
+    alignItems: 'center', 
+    justifyContent: 'center'
+  },
+
+
   container_items: {
     flex: 0.48,
     display: 'flex',
@@ -155,6 +249,10 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
     padding: Theme.spacing.xs,
     borderRadius: Theme.spacing.m
+  },
+
+  item_name: {
+    
   }
 })
 

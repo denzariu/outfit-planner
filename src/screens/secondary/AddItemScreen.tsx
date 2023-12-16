@@ -8,6 +8,8 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import { Dropdown, MultiSelect } from 'react-native-element-dropdown'
 import { getColors } from 'react-native-image-colors'
 import { useNavigation } from '@react-navigation/native'
+import { createClothingTable, getClothingItems, saveClothingItems } from '../../assets/database/db-operations/db-operations-clothingitem'
+import { getDBConnection } from '../../assets/database/db-service'
 
 const AddItemScreen = () => {
 
@@ -34,7 +36,11 @@ const AddItemScreen = () => {
   })
 
   const [name, setName] = useState('')
-  const [value, setValue] = useState('jacket');
+  // const [value, setValue] = useState('jacket');
+  const [category, setCategory] = useState<{ parent: string; label: string; value: string; } |
+                                           { parent?: undefined; label: string; value: string; }>(
+    {parent: 'top', label: 'Jacket', value: 'jacket'},
+  )
   const [items, setItems] = useState([
     {label: 'Extras', value: 'extra'},
     {parent: 'extra', label: 'Hat', value: 'hat'},
@@ -157,6 +163,29 @@ const AddItemScreen = () => {
     ]})
   }
 
+  //WIP: add Item to the database
+  const addItem = async () => {
+    const db = await getDBConnection();
+    
+    try {
+      const item = {
+        id: null,
+        adjective: name,
+        type: category.parent ? category.parent : category.value,
+        subtype: category.value,
+        seasons: seasons.map((item) => Number(item)).join(''),        // [false, true] => '01'
+        image: image
+      }
+      console.log(item)
+
+      await createClothingTable(db)
+      await saveClothingItems(db, [item])
+      await getClothingItems(db).then((res) => {console.log(res)})
+    } catch (e) {
+      console.log(e)
+    }
+  }
+
   return (
     <SafeAreaView style={[styles.page, dynamicStyle.background_style]}>
       {/* <AnimatedGradient props={animate}/> */}
@@ -166,7 +195,7 @@ const AddItemScreen = () => {
           onPress={() => navigator.goBack()}
         />
         <Text style={[styles.header, dynamicStyle.textHeader]}>
-          {name == '' ? 'Add Item' : name + ' ' + value.charAt(0).toUpperCase() + value.slice(1)}
+          {name == '' ? 'Add Item' : name + ' ' + category.value.charAt(0).toUpperCase() + category.value.slice(1)}
         </Text>
       </View>
       <TouchableOpacity containerStyle={[styles.container, dynamicStyle.container]} onPress={addImage}>
@@ -204,9 +233,9 @@ const AddItemScreen = () => {
             data={items}
             labelField={'label'}
             valueField={'value'}
-            value={value}
+            value={category.value}
             onChange={(item)=>{
-              setValue(item.value)
+              setCategory(item)
               setFocus(false)
             }}
             onBlur={() => setFocus(false)}
@@ -218,20 +247,13 @@ const AddItemScreen = () => {
             renderRightIcon={() =>
               <MaterialCommunityIcons name="menu-down" color={currentTheme.colors.quaternary} size={currentTheme.fontSize.m_l} />
             }
-            // mode='modal'
-            // backgroundColor={currentTheme.colors.primary}
-            style={{borderRadius: currentTheme.spacing.m, marginHorizontal: 8}}
-            containerStyle={{borderRadius: currentTheme.spacing.m, backgroundColor: currentTheme.colors.primary}}
             itemContainerStyle={{
-              // borderRadius: currentTheme.spacing.m, //     <-- for a more round style
-              // height: Theme.spacing.s + Theme.fontSize.l_m,
-              backgroundColor: currentTheme.colors.primary
+              backgroundColor: currentTheme.colors.primary,
             }}
-            selectedTextStyle={{fontSize: Theme.fontSize.m_s, color: currentTheme.colors.quaternary, textAlign: 'center', textAlignVertical: 'center',}}
+            selectedTextStyle={{fontSize: Theme.fontSize.m_s, color: currentTheme.colors.quaternary, textAlign: 'center', textAlignVertical: 'center'}}
             itemTextStyle={{fontSize: Theme.fontSize.s_l, textAlign: 'center', color: currentTheme.colors.quaternary}}
             activeColor={currentTheme.colors.secondary}
             // placeholderStyle={{paddingHorizontal: 16}}
-
           />
           
         </View>
@@ -339,23 +361,26 @@ const AddItemScreen = () => {
             onFocus={() => setFocus(true)}
             showsVerticalScrollIndicator={false}
             search={true}
+            maxSelect={6}
+            inside={true}
+            searchPlaceholder='Search...'
             // visibleSelectedItem={false}
             placeholder="Add fabrics..."
             placeholderStyle={{textAlign: 'center', opacity: 0.5}}
+            alwaysRenderSelectedItem={true}
+            // renderItem={(item, selected) => {return <View style={{display: 'flex', flexWrap: 'wrap', alignSelf: 'flex-start'}}><Text>{item.label}</Text></View>}}
 
             renderRightIcon={() =>
               <MaterialCommunityIcons name="menu-down" color={currentTheme.colors.quaternary} size={currentTheme.fontSize.m_l} />
             }
             backgroundColor={currentTheme.colors.tertiary + '80'}
             style={{flex: 1, paddingHorizontal: 8}}
-            containerStyle={{borderRadius: currentTheme.spacing.m, backgroundColor: currentTheme.colors.primary}}
+            containerStyle={{borderRadius: currentTheme.spacing.m, backgroundColor: currentTheme.colors.primary, flex: 1}}
             itemContainerStyle={{
               // borderRadius: currentTheme.spacing.m, //     <-- for a more round style
               // height: Theme.spacing.s + Theme.fontSize.l_m,
               backgroundColor: currentTheme.colors.primary,
             }}
-            maxSelect={6}
-            inside={true}
             renderSelectedItem={(item, unselect) => {return <MultiSelectItem item={item} unselect={unselect} theme={currentTheme}/>}}
             selectedStyle={{borderRadius: 16, backgroundColor: currentTheme.colors.tertiary}}
             selectedTextStyle={{fontSize: Theme.fontSize.s_s, color: currentTheme.colors.quaternary, textAlign: 'center', textAlignVertical: 'center'}}
@@ -369,7 +394,7 @@ const AddItemScreen = () => {
 
       <TouchableOpacity  
         style={[styles.button, dynamicStyle.button]}
-        onPress={() => setMainColor(colors.vibrant)}
+        onPress={() => addItem()}
         children={<Text style={[styles.button_text, dynamicStyle.button_text]}>Add to Collection</Text>}
       />
       
