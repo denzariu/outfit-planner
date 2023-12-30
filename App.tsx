@@ -153,7 +153,7 @@ function Tabs(): JSX.Element {
       
       <Tab.Navigator
       
-        initialRouteName="Calendar"
+        // initialRouteName="Calendar"
         activeColor={currentTheme.colors.tabActive}
         inactiveColor={currentTheme.colors.tabAccent}
         style={{zIndex: 0}}
