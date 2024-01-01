@@ -56,6 +56,7 @@ import { TouchableOpacity } from 'react-native-gesture-handler';
 import AddItemScreen from './src/screens/secondary/AddItemScreen';
 
 import { Logs } from 'expo'
+import WardrobeScreen from './src/screens/WardrobeScreen';
 
 Logs.enableExpoCliLogging()
 
@@ -161,8 +162,6 @@ function Tabs(): JSX.Element {
       >
         <Tab.Screen 
           name="Home"
-          // component={HomeScreen}
-          // fade={({ fadePercent })}
           options={{
             tabBarLabel: '',
             tabBarIcon: ({ color, focused }) => (
@@ -175,10 +174,8 @@ function Tabs(): JSX.Element {
 
         <Tab.Screen
           name="Calendar"
-          // component={CalendarScreen}
           options={{
             tabBarLabel: '',
-            // tabBarBadge: true, //2 for instance
             tabBarIcon: ({ color, focused }) => (
               <MaterialCommunityIcons style={{top: 20}} name={focused ? "calendar-blank" : "calendar-blank-outline"} color={color} size={26} />
             ),
@@ -233,16 +230,20 @@ function Tabs(): JSX.Element {
             ),
           }}
         />
-        <Tab.Screen 
-          name='Wardrobe'
-          component={(HomeScreen)}
+
+        <Tab.Screen
+          name="Wardrobe"
           options={{
             tabBarLabel: '',
+            // tabBarBadge: 2,
             tabBarIcon: ({ color, focused }) => (
               <MaterialCommunityIcons style={{top: 20}} name={focused ? "wardrobe" : "wardrobe-outline"} color={color} size={26} />
             ),
-          }}  
-        />
+          }}
+        >
+          {(props) => <WardrobeScreen props={expanded}></WardrobeScreen>}
+        </Tab.Screen>
+
         <Tab.Screen 
           name="Settings"
           component={HomeScreen}

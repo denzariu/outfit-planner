@@ -152,7 +152,11 @@ const SectionElementName = (props: any) => {
       {/* Show the title of each item in the 'Extra' category */}
       { field?.map((item: ClothingItem, index: number) => 
           <View style={[styles.item_container, dynamicStyle.item_container]} key={'title_' + item.adjective + item.subtype + index}>
-            <Text style={[styles.item_name, dynamicStyle.item_name]}>{item.adjective + ' ' + item.subtype[0].toUpperCase() + item.subtype.slice(1)}</Text>
+            <Text 
+              numberOfLines={1}
+              style={[styles.item_name, dynamicStyle.item_name]}>
+                {item.adjective + ' ' + item.subtype[0].toUpperCase() + item.subtype.slice(1)}
+            </Text>
             <MaterialCommunityIcons name="minus" color={currentTheme.colors.primary} size={currentTheme.fontSize.m_m} 
               onPress={() => removeItem(item.type, item.id)}
             />
@@ -194,8 +198,8 @@ const SectionElement = (props: any) => {
       <View style={styles.container_carousel}>
         <Animated.FlatList 
           data={category}
-          style={{flex: 1}}
-          contentContainerStyle={{paddingHorizontal: 32, gap: 8}}
+          style={{flex: 1, alignSelf: 'center'}}
+          contentContainerStyle={{paddingHorizontal: Theme.spacing.m, columnGap: 8}}
           showsHorizontalScrollIndicator={false}
           horizontal
           pagingEnabled
@@ -265,8 +269,10 @@ const EachItem = (props: any) => {
       <Animated.View
         key={'image_container_' + index + imageUri}
         style={{
-          // flex: 1, 
+          flex: 1, 
           aspectRatio: 1,
+          // borderWidth: 1,
+          // borderColor: 'blue',
           // transform: 
           //   [{ scale: scaleInter }]
         }}>
@@ -274,7 +280,7 @@ const EachItem = (props: any) => {
             key={'image_' + index + imageUri}
             style={{
               flex: 1, 
-              // borderWidth: 2,
+              // borderWidth: 1,
               // borderColor: 'black',
               transform: [
               // { perspective: 850 },
@@ -368,13 +374,17 @@ const styles = StyleSheet.create({
   },
 
   item_name: {
-    
+    // textAlign: 'center',
+    verticalAlign: 'middle',
+    fontSize: Theme.fontSize.s_m,
+    flex: 1
   },
 
   container_carousel: {
     flex: 1,
     justifyContent: 'center',
-    paddingTop: Constants.statusBarHeight,
+    // Padding between the clothing images categories
+    paddingVertical: Theme.spacing.xxs,
     alignItems:'center'
   }
 })

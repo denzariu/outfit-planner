@@ -68,10 +68,15 @@ const CalendarScreen = ({...props}) => {
     // })
   }
   
- 
 
   const themeCalendar = {
     // backgroundColor: currentTheme.colors.tertiary,
+    // arrowColor: 'orange',
+    // disabledArrowColor: '#d9e1e8',
+    // indicatorColor: 'blue',
+    // textDayHeaderFontSize: 12,
+    // textMonthFontWeight: '200',
+    // textDayHeaderFontWeight: '200',
     calendarBackground: currentTheme.colors.background,
     textSectionTitleColor: currentTheme.colors.secondary,
     monthTextColor: currentTheme.colors.secondary,
@@ -87,21 +92,15 @@ const CalendarScreen = ({...props}) => {
     textDisabledColor: currentTheme.colors.quaternary,
     dotColor: currentTheme.colors.tertiary,
     selectedDotColor: currentTheme.colors.quaternary,
-    
+  
     backgroundColor: '#ffffff',
-    // arrowColor: 'orange',
-    // disabledArrowColor: '#d9e1e8',
-    // indicatorColor: 'blue',
     textDayFontFamily: 'monospace',
     textMonthFontFamily: 'monospace',
     textDayHeaderFontFamily: 'monospace',
     textDayFontWeight: '200',
-    // textMonthFontWeight: '200',
-    // textDayHeaderFontWeight: '200',
     weekVerticalMargin: 0,
     textDayFontSize: 16,
     textMonthFontSize: 16,
-    // textDayHeaderFontSize: 12
   }; 
   
   

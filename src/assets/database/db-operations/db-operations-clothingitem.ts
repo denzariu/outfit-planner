@@ -50,7 +50,9 @@ export const saveClothingItems = async (db: SQLiteDatabase, clothingItem: Clothi
 
 export const deleteClothingItem = async (db: SQLiteDatabase, id: number) => {
   const deleteQuery = `DELETE from ${tableName} where rowid = ${id}`;
-  await db.executeSql(deleteQuery);
+  
+  await db.executeSql(deleteQuery)
+    .catch((err) => Error(`Failed to delete item with id ${id}`))
 };
 
 

@@ -211,7 +211,7 @@ const AddItemScreen = () => {
     let result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
-      aspect: [1,1],
+      // aspect: [1,1],
       quality: 0.7,
       allowsMultipleSelection: false, 
     })
@@ -263,7 +263,10 @@ const AddItemScreen = () => {
       }
       console.log(item)
       await createClothingTable(db)
-      await saveClothingItems(db, [item])
+      // await saveClothingItems(db, [item])
+      
+      // Test only
+      await saveClothingItems(db, [item, item, item, item, item, item, item, item, item, item, item, item, item, item])
       await getClothingItems(db).then((res) => {console.log(res)})
     } catch (e) {
       console.log(e)

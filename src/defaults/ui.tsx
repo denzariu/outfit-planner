@@ -22,7 +22,9 @@ const palette = {
   starry_night_blue: '#334075',
   conch_shell: '#E6BCAC',
   raspberry_blush: '#D85F56',
-  north_sea_green: '#246D74'
+  north_sea_green: '#246D74',
+
+  danger_red: '#AA4A44'
 
 }
 
@@ -41,7 +43,8 @@ export const Theme = {
     tabBackgound: palette.almost_black,
     tabNotification: palette.almost_black,
     
-    loadingIndicator: palette.almost_black
+    loadingIndicator: palette.almost_black,
+    delete: palette.danger_red
   },
 
   spacing: {
