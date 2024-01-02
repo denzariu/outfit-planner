@@ -15,6 +15,13 @@ const WardrobeScreen = (...props: any) => {
   const currentTheme = isDarkMode ? DarkTheme : Theme;
   const animate = props.props;
 
+  // Associative object
+  const [filter] = useState<{[key: string]: number}>({
+    'extra': 0,
+    'top': 1,
+    'bottom': 2,
+    'feet': 3
+  })
   const [refreshing, setRefreshing] = useState(false);
   const [items, setItems] = useState<ClothingItem[]>([]);
   const [shownItems, setShownItems] = useState<ClothingItem[]>([]);
@@ -34,14 +41,20 @@ const WardrobeScreen = (...props: any) => {
 
   // Animation for item deletion
   const layoutAnimConfig = {
-    duration: 500,
+    duration: 250,
     update: {
-      type: LayoutAnimation.Types.linear, 
+      // type: LayoutAnimation.Types.spring,
+      // springDamping: 1
+      type: LayoutAnimation.Types.easeOut, 
+      property: LayoutAnimation.Properties.scaleY,
+
     },
     delete: {
-      duration: 200,
       type: LayoutAnimation.Types.linear,
-      property: LayoutAnimation.Properties.scaleXY,
+      property: LayoutAnimation.Properties.opacity,
+      duration: 100,
+      // type: LayoutAnimation.Types.easeOut,
+      // property: LayoutAnimation.Properties.scaleY,
     },
   };
 
@@ -51,7 +64,7 @@ const WardrobeScreen = (...props: any) => {
     await deleteClothingItem(db, id).then((res) => {
       const newItems = items.filter((item) => {return item.id != id})
       setItems(newItems)
-    })
+    })                                      
   }
 
   const filterItems = (type: string) => {
@@ -59,7 +72,8 @@ const WardrobeScreen = (...props: any) => {
 
     if (type == 'all') {
       LayoutAnimation.configureNext(layoutAnimConfig)
-      setShownItems(items)
+      // Group items by type: extra > top > bottom > feet
+      setShownItems(items.sort((a, b) => filter[a.type] < filter[b.type] ? -1 : (filter[a.type] > filter[b.type] ? 1 : 0)))
       return;
     }
     const newItems = items.filter((item) => {return item.type == type})
@@ -115,19 +129,21 @@ const WardrobeScreen = (...props: any) => {
         </View>
         
       </View>
-      
-      <FlatList
-        data={shownItems}
-        contentContainerStyle={[styles.container_content]}
-        columnWrapperStyle={[styles.container_wrapper]}
-        numColumns={3}
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[currentTheme.colors.tertiary, currentTheme.colors.secondary]}/>
-        }
-        renderItem={(info) => {return <ItemShowcase item={info.item} index={info.index} deleteItem={() => deleteFromDatabase(info.item.id)} currentTheme={currentTheme}/>}}
-        keyExtractor={(item) => item.id ? 'key_items_listed_' + item.id.toString() : 'key_items_listed_0'}
-      >
-      </FlatList>
+      <View style={{maxHeight: '80%', borderRadius: Theme.spacing.m, backgroundColor: currentTheme.colors.background, elevation: 4}}>
+        <FlatList
+          data={shownItems}
+          contentContainerStyle={[styles.container_content]}
+          columnWrapperStyle={[styles.container_wrapper]}
+          numColumns={3}
+          showsVerticalScrollIndicator={false}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[currentTheme.colors.tertiary, currentTheme.colors.secondary]}/>
+          }
+          renderItem={(info) => {return <ItemShowcase item={info.item} index={info.index} deleteItem={() => deleteFromDatabase(info.item.id)} currentTheme={currentTheme}/>}}
+          keyExtractor={(item) => item.id ? 'key_items_listed_' + item.id.toString() : 'key_items_listed_0'}
+        >
+        </FlatList>
+      </View>
       
     </SafeAreaView>
   )
@@ -158,30 +174,46 @@ const styles = StyleSheet.create({
 
   container_content: {
     gap: Theme.spacing.s, // Vertical gap
-    paddingHorizontal: Theme.spacing.m
+    paddingHorizontal: Theme.spacing.m,
+    paddingVertical: Theme.spacing.s
   },
 
   container_wrapper: {
     justifyContent: 'space-around',
-    gap: Theme.spacing.s, // Horizontal gap
+    gap: Theme.spacing.s, // Horizontal gap,
   },
 
   article_container: {
-    flex: 1/3, 
-    aspectRatio: 1,
-    padding: Theme.spacing.xs,
-    borderWidth: Theme.spacing.xxs,
+    flex: 0.33, 
+    // aspectRatio: 1,
+    // padding: Theme.spacing.xxs,
+    // borderWidth: Theme.spacing.xxs,
     borderRadius: Theme.spacing.s,
+    // borderWidth: Theme.spacing.xxs,
+    
   },
 
   article: {
     flex: 1, 
-    aspectRatio: 1,
+    // aspectRatio: 1,
+    elevation: Theme.spacing.xs,
+    borderRadius: Theme.spacing.s,
   },
 
   article_image: {
+    aspectRatio: 0.66,
+    resizeMode: 'contain'
+    // borderTopLeftRadius: Theme.spacing.xs,
+    // borderTopRightRadius: Theme.spacing.xs,
+  },
+
+  article_title: {
     flex: 1,
-    borderRadius: Theme.spacing.xs,
+    textAlignVertical: 'center',
+    textAlign: 'center',
+    padding: Theme.spacing.xxs,
+    borderBottomLeftRadius: Theme.spacing.s,
+    borderBottomRightRadius: Theme.spacing.s,
   },
 
   article_edit: {
@@ -189,21 +221,21 @@ const styles = StyleSheet.create({
     position: 'absolute',
     justifyContent: 'center',
     flexDirection: 'row',
-    left: -2, right: -2,
+    left: -Theme.spacing.xxs, right: -Theme.spacing.xxs,
     backgroundColor: 'transparent',
     paddingVertical: Theme.spacing.xs,
   },
 
   edit_top: {
-    top: -2,
-    borderTopLeftRadius: Theme.spacing.s,
-    borderTopRightRadius: Theme.spacing.s
+    top: -Theme.spacing.xxs,
+    borderTopLeftRadius: Theme.spacing.xs,
+    borderTopRightRadius: Theme.spacing.xs
   },
 
   edit_bottom: {
-    bottom: -2,
-    borderBottomLeftRadius: Theme.spacing.s,
-    borderBottomRightRadius: Theme.spacing.s
+    bottom: -Theme.spacing.xxs,
+    borderBottomLeftRadius: Theme.spacing.xs,
+    borderBottomRightRadius: Theme.spacing.xs
   },
 
   article_selected: {
@@ -234,7 +266,9 @@ const ItemShowcase = (props: ItemShowcaseProps) => {
   const [animatedValue] = useState(new Animated.Value(0));
 
   const dynamicStyle = StyleSheet.create({
-    article: {borderColor: selected ? currentTheme.colors.secondary : currentTheme.colors.tertiary, backgroundColor: currentTheme.colors.background},
+    article_container: selected ? {margin: 0, borderColor: currentTheme.colors.delete, backgroundColor: currentTheme.colors.quaternary, borderWidth: Theme.spacing.xxs}
+                                : {margin: Theme.spacing.xxs, backgroundColor: currentTheme.colors.quaternary},
+    article_title: {backgroundColor: currentTheme.colors.tertiary},
     article_edit: {backgroundColor: currentTheme.colors.secondary},
     article_delete: {backgroundColor: currentTheme.colors.delete}
   })
@@ -255,7 +289,7 @@ const ItemShowcase = (props: ItemShowcaseProps) => {
   return (
     <Animated.View 
       style={[
-        styles.article_container, dynamicStyle.article, 
+        styles.article_container, dynamicStyle.article_container, 
         {
           transform: [{ translateX: 
             animatedValue.interpolate({
@@ -265,7 +299,7 @@ const ItemShowcase = (props: ItemShowcaseProps) => {
         }
       ]}
     >
-      {selected &&
+      {/* {selected &&
         <TouchableHighlight style={[styles.article_edit, styles.edit_top, dynamicStyle.article_edit]}
           onPress={() => console.log('press')}
           underlayColor={currentTheme.colors.tertiary}
@@ -275,12 +309,14 @@ const ItemShowcase = (props: ItemShowcaseProps) => {
             <Text style={[]}>Edit</Text>
           </View>
         </TouchableHighlight>
-      }
+      } */}
+      
       <TouchableOpacity 
         onLongPress={() => {setSelected((prevValue) => !prevValue), startShake()}}
         onPress={() => console.log('hi')}
+        delayLongPress={200}
         key={'wardrobe_image_container_' + index + item.image}
-        style={[styles.article, dynamicStyle.article]}
+        style={[styles.article, dynamicStyle.article_container]}
         activeOpacity={0.7}
       >
         
@@ -288,7 +324,9 @@ const ItemShowcase = (props: ItemShowcaseProps) => {
           key={'wardrobe_image_' + index + item.image}
           style={styles.article_image}
         />
+        <Text style={[styles.article_title, dynamicStyle.article_title]}>{item.adjective + ' ' + item.subtype[0].toUpperCase() + item.subtype.slice(1)}</Text>
       </TouchableOpacity>
+      
       {selected &&
         <TouchableHighlight style={[styles.article_edit, styles.edit_bottom, dynamicStyle.article_delete]}
           onPress={() => deleteItem()}
@@ -300,6 +338,7 @@ const ItemShowcase = (props: ItemShowcaseProps) => {
           </View>
         </TouchableHighlight>
       }
+   
     </Animated.View>
 
   )
