@@ -31,7 +31,6 @@ const WardrobeScreen = (...props: any) => {
   const [shownItems, setShownItems] = useState<ClothingItem[]>([]);
   const [selectedType, setSelectedType] = useState<string>('all');
   const [itemsSelected, setItemsSelected] = useState<Array<number | null>>([]);
-  const [timeToSelect, setTimeToSelect] = useState<number>(200)
 
   const dynamicStyle = StyleSheet.create({
     background_style: {backgroundColor: currentTheme.colors.background},
@@ -65,23 +64,28 @@ const WardrobeScreen = (...props: any) => {
     },
   };
 
-  // TODO: Debug only
+  // TODO: Debug only! Duplicate selected elements (inefficiently)
   const duplicateSelected = () => {
     if (!itemsSelected) return;
     
     const newItems = items.filter((item) => {
       return itemsSelected.indexOf(item.id) != -1 ? true : false
     })
-    let lastId = items.reduce((acc, item) => item.id ? acc < item.id ? item.id : acc : acc, 0);
+    let lastId = [...items].reduce((acc, item) => item.id ? acc < item.id ? item.id : acc : acc, 0);
     
+    console.log({lastId: lastId})
+
+    console.log({items: items, newItems: newItems})
+
+    let newNewItems = new Array<any>;
     newItems.forEach((item) => {
-      if(item.id){
-        item.id = (lastId) + 1; 
-        lastId = lastId + 1;
-      }
+      lastId = lastId + 1
+      newNewItems.push({...item, id: lastId})
     })
 
-    setItems([...items, ...newItems])
+    console.log({items: items, newItems: newNewItems})
+
+    setItems([...items, ...newNewItems])
     setItemsSelected([])
   }
   
@@ -156,7 +160,6 @@ const WardrobeScreen = (...props: any) => {
   // Fast-select items if there is already a selected item
   useEffect (() => {
     console.log({selected: itemsSelected})
-    itemsSelected.length ? setTimeToSelect(1) : setTimeToSelect(200)
   }, [itemsSelected])
 
   return (
@@ -272,7 +275,6 @@ const WardrobeScreen = (...props: any) => {
               currentTheme={currentTheme} 
               aspectRatio={avgAspectRatio} 
               setSelectedItems={setItemsSelected}
-              longPressDelay={timeToSelect}
               selectedItems={itemsSelected}
             />
           }
@@ -295,13 +297,12 @@ type ItemShowcaseProps = {
   aspectRatio: number,
   showCategory?: boolean,
   setSelectedItems: React.Dispatch<React.SetStateAction<(number | null)[]>>
-  longPressDelay: number,
   selectedItems: Array<any>,
 }
 
 // Item Component
 const ItemShowcase = (props: ItemShowcaseProps) => {
-  const {item, index, currentTheme, aspectRatio, showCategory, setSelectedItems, longPressDelay, selectedItems} = props || {}
+  const {item, index, currentTheme, aspectRatio, showCategory, setSelectedItems, selectedItems} = props || {}
 
   const [selected, setSelected] = useState<boolean>(false);
   const [animatedValue] = useState(new Animated.Value(0));
@@ -363,8 +364,8 @@ const ItemShowcase = (props: ItemShowcaseProps) => {
     >
       <TouchableOpacity 
         onLongPress={() => selectItem()}
-        onPress={() => console.log('hi')}
-        delayLongPress={longPressDelay}
+        onPress={() => selectedItems.length ? selectItem() : console.log('hi')}
+        delayLongPress={200}
         key={'wardrobe_image_container_' + index + item.image}
         style={[styles.article, dynamicStyle.article_container]}
         activeOpacity={0.7}
