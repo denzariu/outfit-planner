@@ -251,8 +251,7 @@ const EachItem = (props: any) => {
       setTimeout(() => stopAnim(), 200)
     }
 
-  }, //[startAnimation, visible, visibleIndex, index, stopAnim])
-  [visible, index])
+  }, [visible, index])
 
   const scaleInter = animRef.interpolate({
     inputRange: [0,1], 
@@ -269,7 +268,7 @@ const EachItem = (props: any) => {
       <Animated.View
         key={'image_container_' + index + imageUri}
         style={{
-          flex: 1, 
+          // flex: 1, 
           aspectRatio: 1,
           // borderWidth: 1,
           // borderColor: 'blue',

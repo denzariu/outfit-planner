@@ -50,6 +50,9 @@ export const Theme = {
   spacing: {
     page: 20,
 
+    // one pixel
+    xxxs: 1,
+
     xxs: 2,
     xs: 4,
     s: 8,

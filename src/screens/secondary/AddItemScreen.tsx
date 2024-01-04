@@ -22,6 +22,7 @@ const AddItemScreen = () => {
   const [weather, setWeather] = useState<boolean[]>([false, false, false, false]);
 
   const [image, setImage] = useState<any>(null);
+  const [aspectRatio, setAspectRatio] = useState<number>(1.0);
   const [mainColor, setMainColor] = useState<string>(currentTheme.colors.tertiary);
   const [colors, setColors] = React.useState<any>({
     average: Theme.colors.primary,
@@ -219,6 +220,7 @@ const AddItemScreen = () => {
 
     if (!result.canceled) {
       setImage(result.assets[0].uri);
+      setAspectRatio(result.assets[0].width/result.assets[0].height)
     }
   }
 
@@ -259,14 +261,14 @@ const AddItemScreen = () => {
         type: category.parent ? category.parent : category.value,
         subtype: category.value,
         seasons: seasons.map((item) => Number(item)).join(''),        // [false, true] => '01'
-        image: image
+        image: image,
+        aspect_ratio: aspectRatio
       }
       console.log(item)
       await createClothingTable(db)
       // await saveClothingItems(db, [item])
       
-      // Test only
-      await saveClothingItems(db, [item, item, item, item, item, item, item, item, item, item, item, item, item, item])
+      await saveClothingItems(db, [item])
       await getClothingItems(db).then((res) => {console.log(res)})
     } catch (e) {
       console.log(e)

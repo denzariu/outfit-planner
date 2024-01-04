@@ -17,6 +17,7 @@ export type ClothingItem = {
   subtype: string;
   seasons: string;
   image: string;
+  aspect_ratio: number;
   // Separate tables, many-to-many relationship
   // colorsID: number;
   // weatherID: number;

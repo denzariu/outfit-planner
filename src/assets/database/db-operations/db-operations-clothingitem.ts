@@ -11,7 +11,8 @@ export const createClothingTable = async (db: SQLiteDatabase) => {
     type TEXT,
     subtype TEXT,
     seasons TEXT,
-    image TEXT
+    image TEXT,
+    aspect_ratio FLOAT
   )`;
 
   await db.executeSql(query);
@@ -23,7 +24,7 @@ export const getClothingItems = async (db: SQLiteDatabase, type?: string): Promi
   try {
     const clothingItems: ClothingItem[] = [];
     const results = await db.executeSql(
-      `SELECT rowid as id, adjective, type, subtype, seasons, image FROM ${tableName}
+      `SELECT rowid as id, adjective, type, subtype, seasons, image, aspect_ratio FROM ${tableName}
       ${type ? `WHERE type = '${type}'` : ``}
       `
     );
@@ -42,8 +43,8 @@ export const getClothingItems = async (db: SQLiteDatabase, type?: string): Promi
 export const saveClothingItems = async (db: SQLiteDatabase, clothingItem: ClothingItem[]) => {
 
   const insertQuery =
-    `INSERT OR REPLACE INTO ${tableName} (adjective, type, subtype, seasons, image) VALUES` +
-    clothingItem.map(i => `('${i.adjective}', '${i.type}', '${i.subtype}', '${i.seasons}', '${i.image}')`).join(',');
+    `INSERT OR REPLACE INTO ${tableName} (adjective, type, subtype, seasons, image, aspect_ratio) VALUES` +
+    clothingItem.map(i => `('${i.adjective}', '${i.type}', '${i.subtype}', '${i.seasons}', '${i.image}', '${i.aspect_ratio}')`).join(',');
 
   return db.executeSql(insertQuery);
 };
@@ -53,6 +54,22 @@ export const deleteClothingItem = async (db: SQLiteDatabase, id: number) => {
   
   await db.executeSql(deleteQuery)
     .catch((err) => Error(`Failed to delete item with id ${id}`))
+};
+
+export const deleteClothingItems = async (db: SQLiteDatabase, ids: Array<number | null>) => {
+  if (ids.length < 1) throw Error('No items selected for deletion.');
+
+  let ids_stringified = ids.reduce((acc, current, index) => {
+    if (!current) return acc
+    return index == 0 ? current.toString() : acc.concat(', ' + current.toString())
+  }, '');
+
+  console.log(ids_stringified);
+  
+  const deleteQuery = `DELETE from ${tableName} where rowid IN (${ids})`;
+  
+  await db.executeSql(deleteQuery)
+    .catch((err) => Error(`Failed to delete item with ids: ${ids}`))
 };
 
 

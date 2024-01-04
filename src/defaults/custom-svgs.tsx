@@ -11,7 +11,7 @@
 // </svg>
 // `
 
-export const svgPants = `
+const svgPants = `
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" id="_x32_" viewBox="0 0 512 512" xml:space="preserve">
   <style type="text/css">
     .st0{fill:#000000;}
@@ -24,6 +24,21 @@ export const svgPants = `
   </g>
 </svg>
 `
+
+export const icons = {
+  extra: 'hat-fedora',
+  top: 'tshirt-crew',
+  bottom: svgPants,
+  feet: 'shoe-heel',
+  all: 'all-inclusive',
+
+  delete: 'trash-can-outline',
+  create_outfit: 'plus-box-multiple-outline', //pencil-plus-outline?
+  favorite: 'heart-outline',
+  duplicate: 'content-duplicate',
+
+  missing: 'help-rhombus'
+}
 
 // export const svgPants = `
 // <svg xmlns="http://www.w3.org/2000/svg" fill="#000000" width="800px" height="800px" viewBox="0 0 24 24"><path d="M20,3V6H4V3A1,1,0,0,1,5,2H19A1,1,0,0,1,20,3ZM4,8H20V21a1,1,0,0,1-1,1H14a1,1,0,0,1-1-1V16a1,1,0,0,0-2,0v5a1,1,0,0,1-1,1H5a1,1,0,0,1-1-1Zm11,2.141A3.987,3.987,0,0,0,17.859,13V10.141ZM6.141,13A3.987,3.987,0,0,0,9,10.141H6.141Z"/></svg>
