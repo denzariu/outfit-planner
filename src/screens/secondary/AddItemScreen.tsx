@@ -1,4 +1,4 @@
-import { Button, Image, SafeAreaView, StyleSheet, Text, View, useColorScheme } from 'react-native'
+import { Button, Image, LayoutAnimation, SafeAreaView, StyleSheet, Text, View, useColorScheme } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import AnimatedGradient from '../../components/AnimatedGradient'
 import { DarkTheme, Theme } from '../../defaults/ui'
@@ -10,8 +10,41 @@ import { getColors } from 'react-native-image-colors'
 import { useNavigation } from '@react-navigation/native'
 import { createClothingTable, getClothingItems, saveClothingItems } from '../../assets/database/db-operations/db-operations-clothingitem'
 import { deleteTable, getDBConnection, tableName_ClothingItem } from '../../assets/database/db-service'
+import { icons } from '../../defaults/custom-svgs'
+import { ClothingItem } from '../../assets/database/models'
+import { CLOTHING_FABRICS, CLOTHING_TYPES } from '../../defaults/data'
 
-const AddItemScreen = () => {
+type AddItemScreen = {
+  navigation: any,
+  route: {params: {
+    item?: ClothingItem
+  }}
+}
+
+const AddItemScreen = ({navigation, route}: AddItemScreen) => {
+
+  const {item} = route.params || []
+
+  useEffect (() => {
+    if (item) {
+      setName(item.adjective)
+      setImage(item.image)  
+      setAspectRatio(item.aspect_ratio)
+      //TODO: colors & fabrics & weather in DB 
+      //setColors()
+      // setMainColor(item.)
+      // setFabrics
+      // setWeather(item.weather)
+       
+      setSeasons([
+        item.seasons[0] == '1' ? true : false,
+        item.seasons[1] == '1' ? true : false,
+        item.seasons[2] == '1' ? true : false,
+        item.seasons[3] == '1' ? true : false,
+      ])
+      setCategory({parent: item.type, label: item.subtype, value: item.subtype})
+    }
+  }, [item])
 
   const navigator = useNavigation();
   const isDarkMode = useColorScheme() == 'dark';
@@ -22,6 +55,7 @@ const AddItemScreen = () => {
   const [weather, setWeather] = useState<boolean[]>([false, false, false, false]);
 
   const [image, setImage] = useState<any>(null);
+  const [enlargedImage, setEnlargedImage] = useState<boolean>(false);
   const [aspectRatio, setAspectRatio] = useState<number>(1.0);
   const [mainColor, setMainColor] = useState<string>(currentTheme.colors.tertiary);
   const [colors, setColors] = React.useState<any>({
@@ -37,161 +71,13 @@ const AddItemScreen = () => {
   })
 
   const [name, setName] = useState('')
-  // const [value, setValue] = useState('jacket');
   const [category, setCategory] = useState<{ parent: string; label: string; value: string; } |
                                            { parent?: undefined; label: string; value: string; }>(
     {parent: 'top', label: 'Jacket', value: 'jacket'},
   )
-  const [items, setItems] = useState([
-    {label: 'Extras', value: 'extra'},
-    {"parent": "extra", "label": "Hat", "value": "hat"},
-    {"parent": "extra", "label": "Ring", "value": "ring"},
-    {"parent": "extra", "label": "Scarf", "value": "scarf"},
-    {"parent": "extra", "label": "Tie", "value": "tie"},
-    {"parent": "extra", "label": "Belt", "value": "belt"},
-    {"parent": "extra", "label": "Gloves", "value": "gloves"},
-    {"parent": "extra", "label": "Socks", "value": "socks"},
-    {"parent": "extra", "label": "Headband", "value": "headband"},
-    {"parent": "extra", "label": "Bracelet", "value": "bracelet"},
-    {"parent": "extra", "label": "Necklace", "value": "necklace"},
-    {"parent": "extra", "label": "Earrings", "value": "earrings"},
-    {"parent": "extra", "label": "Brooch", "value": "brooch"},
-    {"parent": "extra", "label": "Pocket Square", "value": "pocket-square"},
-    {"parent": "extra", "label": "Cufflinks", "value": "cufflinks"},
-    {"parent": "extra", "label": "Watch", "value": "watch"},
-    {"parent": "extra", "label": "Anklet", "value": "anklet"},
-    {"parent": "extra", "label": "Sunglasses", "value": "sunglasses"},
-    {"parent": "extra", "label": "Bowtie", "value": "bowtie"},
-    {"parent": "extra", "label": "Suspender", "value": "suspender"},
-    {"parent": "extra", "label": "Bandana", "value": "bandana"},
-    {"parent": "extra", "label": "Shawl", "value": "shawl"},
-    {"parent": "extra", "label": "Muffler", "value": "muffler"},
-    {"parent": "extra", "label": "Tights", "value": "tights"},
-    {"parent": "extra", "label": "Fascinator", "value": "fascinator"},
-    {"parent": "extra", "label": "Pashmina", "value": "pashmina"},
-    {"parent": "extra", "label": "Arm Warmers", "value": "arm-warmers"},
-
-    {label: 'Top', value: 'top'},
-    {"parent": "top", "label": "Sweater", "value": "sweater"},
-    {"parent": "top", "label": "Shirt", "value": "shirt"},
-    {"parent": "top", "label": "Blouse", "value": "blouse"},
-    {"parent": "top", "label": "T-shirt", "value": "t-shirt"},
-    {"parent": "top", "label": "Tank Top", "value": "tank-top"},
-    {"parent": "top", "label": "Hoodie", "value": "hoodie"},
-    {"parent": "top", "label": "Cardigan", "value": "cardigan"},
-    {"parent": "top", "label": "Jacket", "value": "jacket"},
-    {"parent": "top", "label": "Coat", "value": "coat"},
-    {"parent": "top", "label": "Vest", "value": "vest"},
-    {"parent": "top", "label": "Dress", "value": "dress"},
-    {"parent": "top", "label": "Tunic", "value": "tunic"},
-    {"parent": "top", "label": "Polo Shirt", "value": "polo-shirt"},
-    {"parent": "top", "label": "Kimono", "value": "kimono"},
-    {"parent": "top", "label": "Crop Top", "value": "crop-top"},
-    {"parent": "top", "label": "Bodysuit", "value": "bodysuit"},
-    {"parent": "top", "label": "Peplum Top", "value": "peplum-top"},
-    {"parent": "top", "label": "Wrap Top", "value": "wrap-top"},
-    {"parent": "top", "label": "Poncho", "value": "poncho"},
-    {"parent": "top", "label": "Sweatshirt", "value": "sweatshirt"},
-    {"parent": "top", "label": "Kaftan", "value": "kaftan"},
-    {"parent": "top", "label": "Tube Top", "value": "tube-top"},
-    {"parent": "top", "label": "Bustier", "value": "bustier"},
-    {"parent": "top", "label": "Off-shoulder Top", "value": "off-shoulder-top"},
-    {"parent": "top", "label": "Halter Top", "value": "halter-top"},
-    {"parent": "top", "label": "Camisole", "value": "camisole"},
-    {"parent": "top", "label": "Shrug", "value": "shrug"},
-
-    {label: 'Bottom', value: 'bottom'},
-    {"parent": "bottom", "label": "Jeans", "value": "jeans"},
-    {"parent": "bottom", "label": "Pants", "value": "pants"},
-    {"parent": "bottom", "label": "Skirt", "value": "skirt"},
-    {"parent": "bottom", "label": "Shorts", "value": "shorts"},
-    {"parent": "bottom", "label": "Leggings", "value": "leggings"},
-    {"parent": "bottom", "label": "Trousers", "value": "trousers"},
-    {"parent": "bottom", "label": "Jeggings", "value": "jeggings"},
-    {"parent": "bottom", "label": "Culottes", "value": "culottes"},
-    {"parent": "bottom", "label": "Dungarees", "value": "dungarees"},
-    {"parent": "bottom", "label": "Capri Pants", "value": "capri-pants"},
-    {"parent": "bottom", "label": "Palazzo Pants", "value": "palazzo-pants"},
-    {"parent": "bottom", "label": "Cargo Pants", "value": "cargo-pants"},
-    {"parent": "bottom", "label": "Harem Pants", "value": "harem-pants"},
-    {"parent": "bottom", "label": "Pencil Skirt", "value": "pencil-skirt"},
-    {"parent": "bottom", "label": "A-line Skirt", "value": "a-line-skirt"},
-    {"parent": "bottom", "label": "Maxi Skirt", "value": "maxi-skirt"},
-    {"parent": "bottom", "label": "Midi Skirt", "value": "midi-skirt"},
-    {"parent": "bottom", "label": "Mini Skirt", "value": "mini-skirt"},
-    {"parent": "bottom", "label": "Wrap Skirt", "value": "wrap-skirt"},
-    {"parent": "bottom", "label": "Flare Pants", "value": "flare-pants"},
-    {"parent": "bottom", "label": "Bootcut Jeans", "value": "bootcut-jeans"},
-    {"parent": "bottom", "label": "Straight Pants", "value": "straight-pants"},
-    {"parent": "bottom", "label": "Wide-leg Pants", "value": "wide-leg-pants"},
-    {"parent": "bottom", "label": "High-waisted Pants", "value": "high-waisted-pants"},
-    {"parent": "bottom", "label": "Cropped Pants", "value": "cropped-pants"},
-
-    {label: 'Feet', value: 'feet'},
-    {"parent": "feet", "label": "Sneakers", "value": "sneakers"},
-    {"parent": "feet", "label": "Boots", "value": "boots"},
-    {"parent": "feet", "label": "Flats", "value": "flats"},
-    {"parent": "feet", "label": "Heels", "value": "heels"},
-    {"parent": "feet", "label": "Oxfords", "value": "oxfords"},
-    {"parent": "feet", "label": "Loafers", "value": "loafers"},
-    {"parent": "feet", "label": "Sandals", "value": "sandals"},
-    {"parent": "feet", "label": "Espadrilles", "value": "espadrilles"},
-    {"parent": "feet", "label": "Mules", "value": "mules"},
-    {"parent": "feet", "label": "Slippers", "value": "slippers"},
-    {"parent": "feet", "label": "Flip-Flops", "value": "flip-flops"},
-    {"parent": "feet", "label": "Wedges", "value": "wedges"},
-    {"parent": "feet", "label": "Clogs", "value": "clogs"},
-    {"parent": "feet", "label": "Platform Shoes", "value": "platform-shoes"},
-    {"parent": "feet", "label": "Ankle Boots", "value": "ankle-boots"},
-    {"parent": "feet", "label": "Brogues", "value": "brogues"},
-    {"parent": "feet", "label": "Derby Shoes", "value": "derby-shoes"},
-    {"parent": "feet", "label": "Chelsea Boots", "value": "chelsea-boots"},
-    {"parent": "feet", "label": "Pumps", "value": "pumps"},
-    {"parent": "feet", "label": "Athletic Shoes", "value": "athletic-shoes"},
-    {"parent": "feet", "label": "Hiking Boots", "value": "hiking-boots"},
-    {"parent": "feet", "label": "Dress Shoes", "value": "dress-shoes"},
-    {"parent": "feet", "label": "Running Shoes", "value": "running-shoes"},
-    {"parent": "feet", "label": "Boat Shoes", "value": "boat-shoes"},
-    {"parent": "feet", "label": "Wingtip Shoes", "value": "wingtip-shoes"},
-    {"parent": "feet", "label": "Mary Janes", "value": "mary-janes"},
-    {"parent": "feet", "label": "Slingback Shoes", "value": "slingback-shoes"},
-    {"parent": "feet", "label": "Peep-Toe Shoes", "value": "peep-toe-shoes"}
-
-  ]);
-
+  const [items, setItems] = useState(CLOTHING_TYPES);
   const [valuesFabrics, setValuesFabrics] = useState(['cotton']);
-  const [fabrics, setFabrics] = useState([
-    {"label": "Cotton", "value": "cotton"},
-    {"label": "Polyester", "value": "polyester"},
-    {"label": "Silk", "value": "silk"},
-    {"label": "Wool", "value": "wool"},
-    {"label": "Linen", "value": "linen"},
-    {"label": "Rayon", "value": "rayon"},
-    {"label": "Nylon", "value": "nylon"},
-    {"label": "Spandex", "value": "spandex"},
-    {"label": "Acrylic", "value": "acrylic"},
-    {"label": "Velvet", "value": "velvet"},
-    {"label": "Satin", "value": "satin"},
-    {"label": "Chiffon", "value": "chiffon"},
-    {"label": "Denim", "value": "denim"},
-    {"label": "Flannel", "value": "flannel"},
-    {"label": "Tulle", "value": "tulle"},
-    {"label": "Cashmere", "value": "cashmere"},
-    {"label": "Leather", "value": "leather"},
-    {"label": "Suede", "value": "suede"},
-    {"label": "Corduroy", "value": "corduroy"},
-    {"label": "Organza", "value": "organza"},
-    {"label": "Tweed", "value": "tweed"},
-    {"label": "Chambray", "value": "chambray"},
-    {"label": "Taffeta", "value": "taffeta"},
-    {"label": "Georgette", "value": "georgette"},
-    {"label": "Jersey", "value": "jersey"},
-    {"label": "Fleece", "value": "fleece"},
-    {"label": "Brocade", "value": "brocade"},
-    {"label": "Tencel", "value": "tencel"},
-    {"label": "Hemp", "value": "hemp"},
-    {"label": "Bamboo", "value": "bamboo"}
-  ]);
+  const [fabrics, setFabrics] = useState(CLOTHING_FABRICS);
 
   const onChangeName = (value: string) => {
     setName(value)
@@ -203,12 +89,16 @@ const AddItemScreen = () => {
       cache: true,
       key: image,
     })
-    .then((colorz) => {setColors(() => {return colorz}), setMainColor(() => {return colorz.average})})
+    .then((imgPalette) => {
+      setColors(() => {return imgPalette}), 
+      setMainColor(() => {return imgPalette.average})
+    })
     .catch(e => {console.log("error")})
     
   }, [image])
 
   const addImage = async () => {
+    // Opens up the native image picker 
     let result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
@@ -218,6 +108,7 @@ const AddItemScreen = () => {
     })
     .then((res) => {return res})
 
+    LayoutAnimation.configureNext(LayoutAnimation.create(150, 'easeInEaseOut', 'opacity'));
     if (!result.canceled) {
       setImage(result.assets[0].uri);
       setAspectRatio(result.assets[0].width/result.assets[0].height)
@@ -231,7 +122,8 @@ const AddItemScreen = () => {
     setting: {backgroundColor: currentTheme.colors.primary},
     setting_title: {color: currentTheme.colors.quaternary + '88'},
     button: {backgroundColor: currentTheme.colors.secondary, shadowColor: currentTheme.colors.foreground, borderColor: currentTheme.colors.tertiary},
-    button_text: {color: currentTheme.colors.background}
+    button_text: {color: currentTheme.colors.background},
+    image_enlarge_icon: {backgroundColor: currentTheme.colors.tertiary}
   })
 
   function seasonPress (season: number) {
@@ -274,31 +166,47 @@ const AddItemScreen = () => {
       console.log(e)
     }
   }
-
+  console.log(aspectRatio, {zoom: enlargedImage})
   return (
     <SafeAreaView style={[styles.page, dynamicStyle.background_style]}>
-      {/* <AnimatedGradient props={animate}/> */}
       <View style={{flexDirection: 'row', alignItems: 'center', justifyContent:'flex-start', marginVertical: Theme.spacing.m, marginTop: Theme.spacing.l, gap: Theme.spacing.l}}>
         <TouchableOpacity 
-          children={<MaterialCommunityIcons name="arrow-left" color={currentTheme.colors.tertiary} size={currentTheme.fontSize.l_s} />}
+          children={<MaterialCommunityIcons name={icons.arrow_left} color={currentTheme.colors.tertiary} size={currentTheme.fontSize.l_s} />}
           onPress={() => navigator.goBack()}
         />
         <Text style={[styles.header, dynamicStyle.textHeader]}>
           {name == '' ? 'Add Item' : name + ' ' + category.value.charAt(0).toUpperCase() + category.value.slice(1)}
         </Text>
       </View>
-      <TouchableOpacity containerStyle={[styles.container, dynamicStyle.container]} onPress={addImage}>
-        {!image && 
+      
+      <View style={[styles.container, dynamicStyle.container]}>
+        <TouchableOpacity 
+          onPress={() => addImage()}
+          onLongPress={() => setEnlargedImage((prev) => !prev)}
+          style={{ height: '100%' }}>
           <View style={styles.container_upload}>
-            {/* <Text style={styles.no_item_text}>Upload</Text> */}
-            <View style={{position: 'absolute', bottom: 0, top: Theme.spacing.xxl * 2, zIndex: 10}}>
-              <MaterialCommunityIcons name="upload" color={currentTheme.colors.tertiary} size={currentTheme.fontSize.l_l*1.2} />
+          {image ? 
+            <Image 
+              source={{ uri: image }} 
+              style={[
+                {flex: 1, borderRadius: Theme.spacing.s},
+                enlargedImage ? 
+                  {aspectRatio: 1 }
+                  : {aspectRatio: aspectRatio, flex: 1/aspectRatio, maxWidth: '100%'}
+              ]}
+            />
+            :
+            <>
+            <View style={{position: 'absolute', zIndex: 10}}>
+              <MaterialCommunityIcons name={icons.upload} color={currentTheme.colors.tertiary} size={currentTheme.fontSize.l_l * 1.2} />
             </View>
-            <MaterialCommunityIcons name="tshirt-crew" color={seasons[0] ? currentTheme.colors.quaternary : currentTheme.colors.quaternary} size={currentTheme.fontSize.l_l*3} />
+            <MaterialCommunityIcons name={icons.tshirt} color={currentTheme.colors.quaternary} size={currentTheme.fontSize.l_l * 3} />
+            </>
+          }
           </View>
-        }
-        {image && <Image source={{ uri: image }} style={{ flex: 1, margin: Theme.spacing.xl, borderRadius: Theme.spacing.s, aspectRatio: 1, width: null, height: null }} />}
-      </TouchableOpacity>
+        </TouchableOpacity>
+      </View>
+      
 
       <View style={styles.container_clothing_settings}>
         <View style={[styles.setting, dynamicStyle.setting]}>
@@ -350,60 +258,60 @@ const AddItemScreen = () => {
       <View style={styles.container_clothing_settings}>
         <View style={[styles.setting, dynamicStyle.setting]}>
           <Text style={[styles.setting_title, dynamicStyle.setting_title]}>Seasons</Text>
-          <View style={styles.container_seasons} key={seasons[0] ? 'update' : 'up'}>
+          <View style={styles.container_seasons}>
             <TouchableOpacity 
               containerStyle={[styles.season, seasons[0] ? {backgroundColor: currentTheme.colors.tertiary} : {}]}
               onPress={() => seasonPress(0)}
             >
-              <MaterialCommunityIcons name="snowflake-variant" color={seasons[0] ? currentTheme.colors.quaternary : currentTheme.colors.quaternary} size={currentTheme.fontSize.m_l} />
+              <MaterialCommunityIcons name={icons.season1} color={seasons[0] ? currentTheme.colors.quaternary : currentTheme.colors.quaternary} size={currentTheme.fontSize.m_l} />
             </TouchableOpacity>
             <TouchableOpacity 
               containerStyle={[styles.season, seasons[1] ? {backgroundColor: currentTheme.colors.tertiary} : {}]}
               onPress={() => seasonPress(1)}
             >  
-              <MaterialCommunityIcons name="flower-poppy" color={seasons[1] ? currentTheme.colors.quaternary : currentTheme.colors.quaternary} size={currentTheme.fontSize.m_l} />
+              <MaterialCommunityIcons name={icons.season2}color={seasons[1] ? currentTheme.colors.quaternary : currentTheme.colors.quaternary} size={currentTheme.fontSize.m_l} />
             </TouchableOpacity>
             <TouchableOpacity 
               containerStyle={[styles.season, seasons[2] ? {backgroundColor: currentTheme.colors.tertiary} : {}]}
               onPress={() => seasonPress(2)}
             >
-              <MaterialCommunityIcons name="white-balance-sunny" color={seasons[2] ? currentTheme.colors.quaternary : currentTheme.colors.quaternary} size={currentTheme.fontSize.m_l} />
+              <MaterialCommunityIcons name={icons.season3} color={seasons[2] ? currentTheme.colors.quaternary : currentTheme.colors.quaternary} size={currentTheme.fontSize.m_l} />
             </TouchableOpacity>
             <TouchableOpacity 
               containerStyle={[styles.season, seasons[3] ? {backgroundColor: currentTheme.colors.tertiary} : {}]}
               onPress={() => seasonPress(3)}
             >
-              <MaterialCommunityIcons name="leaf" color={seasons[3] ? currentTheme.colors.quaternary : currentTheme.colors.quaternary} size={currentTheme.fontSize.m_l} />
+              <MaterialCommunityIcons name={icons.season4} color={seasons[3] ? currentTheme.colors.quaternary : currentTheme.colors.quaternary} size={currentTheme.fontSize.m_l} />
             </TouchableOpacity>
           </View>
         </View>
 
         <View style={[styles.setting, dynamicStyle.setting]}>
           <Text style={[styles.setting_title, dynamicStyle.setting_title]}>Weather</Text>
-          <View style={styles.container_seasons} key={weather[0] ? 'update' : 'up'}>
+          <View style={styles.container_seasons}>
             <TouchableOpacity 
               containerStyle={[styles.season, weather[0] ? {backgroundColor: currentTheme.colors.tertiary} : {}]}
               onPress={() => weatherPress(0)}
             >
-              <MaterialCommunityIcons name="weather-snowy-heavy" color={weather[0] ? currentTheme.colors.quaternary : currentTheme.colors.quaternary} size={currentTheme.fontSize.m_l} />
+              <MaterialCommunityIcons name={icons.weather1} color={weather[0] ? currentTheme.colors.quaternary : currentTheme.colors.quaternary} size={currentTheme.fontSize.m_l} />
             </TouchableOpacity>
             <TouchableOpacity 
               containerStyle={[styles.season, weather[1] ? {backgroundColor: currentTheme.colors.tertiary} : {}]}
               onPress={() => weatherPress(1)}
             >  
-              <MaterialCommunityIcons name="weather-partly-cloudy" color={weather[1] ? currentTheme.colors.quaternary : currentTheme.colors.quaternary} size={currentTheme.fontSize.m_l} />
+              <MaterialCommunityIcons name={icons.weather2} color={weather[1] ? currentTheme.colors.quaternary : currentTheme.colors.quaternary} size={currentTheme.fontSize.m_l} />
             </TouchableOpacity>
             <TouchableOpacity 
               containerStyle={[styles.season, weather[2] ? {backgroundColor: currentTheme.colors.tertiary} : {}]}
               onPress={() => weatherPress(2)}
             >
-              <MaterialCommunityIcons name="weather-pouring" color={weather[2] ? currentTheme.colors.quaternary : currentTheme.colors.quaternary} size={currentTheme.fontSize.m_l} />
+              <MaterialCommunityIcons name={icons.weather3} color={weather[2] ? currentTheme.colors.quaternary : currentTheme.colors.quaternary} size={currentTheme.fontSize.m_l} />
             </TouchableOpacity>
             <TouchableOpacity 
               containerStyle={[styles.season, weather[3] ? {backgroundColor: currentTheme.colors.tertiary} : {}]}
               onPress={() => weatherPress(3)}
             >
-              <MaterialCommunityIcons name="weather-windy" color={weather[3] ? currentTheme.colors.quaternary : currentTheme.colors.quaternary} size={currentTheme.fontSize.m_l} />
+              <MaterialCommunityIcons name={icons.weather4} color={weather[3] ? currentTheme.colors.quaternary : currentTheme.colors.quaternary} size={currentTheme.fontSize.m_l} />
             </TouchableOpacity>
           </View>
         </View>
@@ -428,7 +336,7 @@ const AddItemScreen = () => {
             />
             <TouchableOpacity  
               style={[{padding: Theme.spacing.l, borderRadius: Theme.spacing.s, borderWidth: Theme.spacing.xxs, borderColor: currentTheme.colors.primary}, {backgroundColor: colors.vibrant}, mainColor == colors.vibrant ? {borderColor: mainColor, borderWidth: Theme.spacing.xxs} : {}]}
-              onPress={() => setMainColor(colors.vibrant)}
+              onPress={() => setMainColor(colors.lightVibrant)}
             />
           </View>
         </View>
@@ -513,34 +421,28 @@ export default AddItemScreen
 
 const styles = StyleSheet.create({
   page: {
-    flex: 1,
     paddingHorizontal: Theme.spacing.page,
   },
   
   header: {
     alignSelf: 'flex-start',
     fontSize: Theme.fontSize.l_s,
-    fontWeight: '200'
+    fontWeight: '200',
   },
 
   container: {
-    // aspectRatio: 1,
-    
     height: '40%',
-    borderRadius: Theme.spacing.m,
-    alignItems: 'center',
     justifyContent: 'center',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.5,
-    shadowRadius: 2,
-    elevation: 10,
+    borderRadius: Theme.spacing.m,
+    elevation: Theme.spacing.elevation,
   },
 
   container_upload: {
-    flexDirection: 'column',
-    alignItems: 'center',
-    justifyContent: 'space-evenly',
-    gap: -Theme.spacing.s
+    flex: 1, 
+    margin: Theme.spacing.s, 
+    borderRadius: Theme.spacing.s, 
+    alignItems: 'center', 
+    justifyContent: 'center'
   },
 
   no_item_text: {
@@ -548,8 +450,17 @@ const styles = StyleSheet.create({
     fontWeight: '200'
   },
 
+  image_enlarge_icon: {
+    position: 'absolute',
+    zIndex: 20,
+    right: 0,
+    bottom: 0,
+    borderWidth: 1,
+    padding: Theme.spacing.xs,
+    borderRadius: Theme.spacing.s,
+  },
+
   container_clothing_settings: {
-    // flex: 1,
     flexDirection: 'row',
     marginTop: Theme.spacing.m,
     gap: Theme.spacing.ms,
@@ -614,7 +525,7 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.5,
     shadowRadius: 2,
-    elevation: 10,
+    elevation: Theme.spacing.elevation,
   },
 
   button_text: {

@@ -7,6 +7,7 @@ import dayjs from 'dayjs';
 import { Direction } from 'react-native-calendars/src/types';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import AnimatedGradient from '../components/AnimatedGradient';
+import { icons } from '../defaults/custom-svgs';
 
 const CalendarScreen = ({...props}) => {
 
@@ -133,7 +134,7 @@ const CalendarScreen = ({...props}) => {
         <Calendar
             // customHeaderTitle={<Text>Hi</Text>}
             renderArrow={(direction) => 
-              <MaterialCommunityIcons name= {direction === 'left' ? "chevron-left" : "chevron-right"} color={currentTheme.colors.secondary} size={currentTheme.fontSize.m_m} />
+              <MaterialCommunityIcons name= {direction === 'left' ? icons.chevron_left : icons.chevron_right} color={currentTheme.colors.secondary} size={currentTheme.fontSize.m_m} />
             }
             // disableArrowLeft={true}
             // disableArrowRight={true}

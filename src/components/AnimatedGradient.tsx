@@ -93,6 +93,7 @@ import {
   View,
   useWindowDimensions,
   useColorScheme,
+  LayoutAnimation,
 } from 'react-native';
 // import { FontAwesome } from '@expo/vector-icons';
 import { Canvas, LinearGradient, Rect, runTiming, vec } from '@shopify/react-native-skia';
@@ -103,7 +104,6 @@ import {
 } from 'react-native-reanimated';
 import { DarkTheme, Theme } from '../defaults/ui';
 import { useEffect, useState } from 'react';
-import { TimingConfig } from '@shopify/react-native-skia/lib/typescript/src/animation/types';
 
 
 const AnimatedGradient = ({...props}) => {
@@ -122,6 +122,8 @@ const AnimatedGradient = ({...props}) => {
   console.log('update')
 
   useEffect(() => {
+    LayoutAnimation.configureNext(LayoutAnimation.create(150, 'easeInEaseOut', 'opacity'));
+
     if (expanded == true)
       setSpread(biggerFade)
     else if (expanded == false)

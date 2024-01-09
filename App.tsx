@@ -1,30 +1,22 @@
 import React, { useRef, useState } from 'react';
-import type {PropsWithChildren} from 'react';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-// import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack'
 
 import HomeScreen from './src/screens/HomeScreen';
 
 import {
-  Alert,
   Animated,
   LayoutAnimation,
-  SafeAreaView,
-  ScrollView,
-  StatusBar,
-  StyleSheet,
   Text,
   useColorScheme,
-  View,
 } from 'react-native';
 
 import { 
   DarkTheme,
   Theme,
 } from './src/defaults/ui'
+
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-import { LinearGradient } from 'react-native-linear-gradient';
 import { DarkTheme as DarkThemeNav, DefaultTheme as DefaultThemeNav, NavigationContainer, useNavigation } from '@react-navigation/native';
 import { createMaterialBottomTabNavigator } from '@react-navigation/material-bottom-tabs';
 
@@ -57,6 +49,8 @@ import AddItemScreen from './src/screens/secondary/AddItemScreen';
 
 import { Logs } from 'expo'
 import WardrobeScreen from './src/screens/WardrobeScreen';
+import { icons } from './src/defaults/custom-svgs';
+import ItemInfoScreen from './src/screens/secondary/ItemInfoScreen';
 
 Logs.enableExpoCliLogging()
 
@@ -79,6 +73,7 @@ function App(): JSX.Element {
         >
           <Stack.Navigator 
             screenOptions={{
+              animation: 'slide_from_right',
               statusBarStyle: useColorScheme() == 'dark' ? 'dark' : 'light',
               statusBarColor: currentTheme.colors.background,
               headerShown: false
@@ -86,9 +81,9 @@ function App(): JSX.Element {
           >
             <Stack.Screen name="Tabs" component={Tabs} />
             <Stack.Screen name="AddItemScreen" component={AddItemScreen}
-              options={{
-                animation: 'slide_from_right'
-              }}
+              // options={{
+              //   animation: 'slide_from_right'
+              // }}
             />
           </Stack.Navigator>
         </NavigationContainer>
@@ -151,9 +146,7 @@ function Tabs(): JSX.Element {
 
   return (
       <>
-      
       <Tab.Navigator
-      
         // initialRouteName="Calendar"
         activeColor={currentTheme.colors.tabActive}
         inactiveColor={currentTheme.colors.tabAccent}
@@ -165,7 +158,7 @@ function Tabs(): JSX.Element {
           options={{
             tabBarLabel: '',
             tabBarIcon: ({ color, focused }) => (
-              <MaterialCommunityIcons style={{top: 20}} name={focused ? "home-variant" : "home-variant-outline"} color={color} size={26} />
+              <MaterialCommunityIcons style={{top: 20}} name={focused ? icons.home : icons.home_outline} color={color} size={26} />
             ),
           }}
         >
@@ -177,12 +170,11 @@ function Tabs(): JSX.Element {
           options={{
             tabBarLabel: '',
             tabBarIcon: ({ color, focused }) => (
-              <MaterialCommunityIcons style={{top: 20}} name={focused ? "calendar-blank" : "calendar-blank-outline"} color={color} size={26} />
+              <MaterialCommunityIcons style={{top: 20}} name={focused ? icons.calendar : icons.calendar_outline} color={color} size={26} />
             ),
           }}
         >
           {(props) => <CalendarScreen props={expanded}></CalendarScreen>}
-
         </Tab.Screen>
         
         <Tab.Screen
@@ -191,22 +183,16 @@ function Tabs(): JSX.Element {
           listeners={() => ({
             tabPress: (e) => {
               e.preventDefault(); // Prevents navigation
-              // onPress goes here
               
               !expanded ? fadeIn() : fadeOut()
-              // fadeIn()
-              // Alert.alert("hi")
             },
             blur: (e) => {fadeOut()},
-            focus: () => {
-
-            }
+            focus: () => {}
           })}
           options={{
             tabBarLabel: '',
             tabBarIcon: ({  }) => (
               <Animated.View
-
                 style={[{
                   position: 'absolute',
                   bottom: -20, // space from bottombar
@@ -223,7 +209,7 @@ function Tabs(): JSX.Element {
               >
                   <MaterialCommunityIcons 
                   style={{alignContent: 'center'}}
-                  name="plus" color={currentTheme.colors.background} size={48} 
+                  name={icons.plus} color={currentTheme.colors.background} size={48} 
                    />
               
               </Animated.View>
@@ -237,7 +223,7 @@ function Tabs(): JSX.Element {
             tabBarLabel: '',
             // tabBarBadge: 2,
             tabBarIcon: ({ color, focused }) => (
-              <MaterialCommunityIcons style={{top: 20}} name={focused ? "wardrobe" : "wardrobe-outline"} color={color} size={26} />
+              <MaterialCommunityIcons style={{top: 20}} name={focused ? icons.wardrobe : icons.wardrobe_outline} color={color} size={26} />
             ),
           }}
         >
@@ -250,7 +236,7 @@ function Tabs(): JSX.Element {
           options={{
             tabBarLabel: '',
             tabBarIcon: ({ color, focused }) => (
-              <MaterialCommunityIcons style={{top: 20}} name={focused ? "cog" : "cog-outline"} color={color} size={26} />
+              <MaterialCommunityIcons style={{top: 20}} name={focused ? icons.settings : icons.settings_outline} color={color} size={26} />
             ),
           }}
         />
@@ -258,12 +244,10 @@ function Tabs(): JSX.Element {
       
       {/* {expanded && */}
         <Animated.View style={[{position: 'absolute', bottom: 64 + 8, left: 16, right: 16, flexDirection: 'row', justifyContent: 'space-between'}, {opacity: fadeAnim}]}>
-          <TouchableOpacity style={{}}
-            onPress={() => {navigator.navigate(AddItemScreen)}}
-          >
+          <TouchableOpacity onPress={() => {navigator.navigate(AddItemScreen)}}>
             <Text style={{textAlign: 'center', textAlignVertical: 'center', color: currentTheme.colors.quaternary}}>Add item</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={{}}>
+          <TouchableOpacity>
             <Text style={{textAlign: 'center', textAlignVertical: 'center', color: currentTheme.colors.quaternary}}>Secret Feature</Text>
           </TouchableOpacity>
           

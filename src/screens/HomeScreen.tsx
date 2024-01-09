@@ -1,4 +1,4 @@
-import { ActivityIndicator, Alert, Animated, Dimensions, Easing, Pressable, SafeAreaView, StyleSheet, Text, TouchableOpacity, View, useColorScheme } from 'react-native'
+import { ActivityIndicator, Alert, Animated, Dimensions, Easing, LayoutAnimation, Pressable, SafeAreaView, StyleSheet, Text, TouchableOpacity, View, useColorScheme } from 'react-native'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { DarkTheme, Theme } from '../defaults/ui';
 import { Image } from 'react-native';
@@ -25,6 +25,8 @@ const HomeScreen = ({...props}) => {
 
   // Remove item, by tapping '-'
   const removeItem = (type: string, id: number | null) => {
+    LayoutAnimation.configureNext(LayoutAnimation.create(150, 'easeInEaseOut', 'opacity'));
+
     switch(type) {
       case 'extra':
         setExtra(extra.filter((item) => item.id != id))
@@ -43,6 +45,8 @@ const HomeScreen = ({...props}) => {
 
     // Add item, by tapping '+' (only dev)
   const addItem = (type: string, id: number | null) => {
+    LayoutAnimation.configureNext(LayoutAnimation.create(150, 'easeInEaseOut', 'opacity'));
+
     switch(type) {
       case 'extra':
         setExtra([...extra, extra[0]])
@@ -99,7 +103,7 @@ const HomeScreen = ({...props}) => {
   const dynamicStyle = StyleSheet.create({
     background_style: {backgroundColor: currentTheme.colors.background},
     textHeader: {color: currentTheme.colors.tertiary},
-    container_clothing: {backgroundColor: currentTheme.colors.tertiary},
+    container_clothing: {backgroundColor: 'transparent', borderColor: currentTheme.colors.tertiary},
     container_items_category: {backgroundColor: currentTheme.colors.secondary},
     category_text: {color: currentTheme.colors.quaternary},
     add_item: {backgroundColor: currentTheme.colors.quaternary},
@@ -316,6 +320,7 @@ const styles = StyleSheet.create({
   container_clothing: {
     flex: 0.52,
     borderRadius: Theme.spacing.m,
+    borderWidth: Theme.spacing.xxs,
     paddingVertical: Theme.spacing.xxs
   },
 

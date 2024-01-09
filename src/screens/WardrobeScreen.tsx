@@ -9,7 +9,8 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import { SvgXml } from 'react-native-svg';
 import { icons } from '../defaults/custom-svgs';
 import { ScrollView } from 'react-native-gesture-handler';
-import { useIsFocused } from '@react-navigation/native';
+import { useIsFocused, useNavigation } from '@react-navigation/native';
+import ItemInfoScreen from './secondary/ItemInfoScreen';
 
 const WardrobeScreen = (...props: any) => {
   const isDarkMode = useColorScheme() == 'dark';
@@ -86,7 +87,7 @@ const WardrobeScreen = (...props: any) => {
     console.log({items: items, newItems: newNewItems})
 
     setItems([...items, ...newNewItems])
-    setItemsSelected([])
+    // setItemsSelected([])
   }
   
   const deleteSelected = () => {
@@ -242,9 +243,10 @@ const WardrobeScreen = (...props: any) => {
           data={shownItems}
           // TODO: Move this to 'styles'
           style={{ 
+            paddingHorizontal: Theme.spacing.s,
             borderRadius: Theme.spacing.m, 
             backgroundColor: currentTheme.colors.background, 
-            elevation: 4
+            elevation: Theme.spacing.elevation
           }}
           contentContainerStyle={[styles.container_content]}
           columnWrapperStyle={[styles.container_wrapper]}
@@ -302,6 +304,8 @@ type ItemShowcaseProps = {
 
 // Item Component
 const ItemShowcase = (props: ItemShowcaseProps) => {
+  const navigator = useNavigation();
+
   const {item, index, currentTheme, aspectRatio, showCategory, setSelectedItems, selectedItems} = props || {}
 
   const [selected, setSelected] = useState<boolean>(false);
@@ -310,9 +314,9 @@ const ItemShowcase = (props: ItemShowcaseProps) => {
   const dynamicStyle = StyleSheet.create({
     article_container: selected ? {margin: 0, borderColor: currentTheme.colors.secondary, backgroundColor: currentTheme.colors.quaternary, borderWidth: Theme.spacing.xs}
                                 : {margin: Theme.spacing.xs, backgroundColor: currentTheme.colors.background},
-    article_image: {aspectRatio: aspectRatio},
     article_title: selected ? {backgroundColor: currentTheme.colors.secondary, color: currentTheme.colors.quaternary}
                             : {backgroundColor: currentTheme.colors.tertiary, color: currentTheme.colors.quaternary, borderBottomLeftRadius: Theme.spacing.s, borderBottomRightRadius: Theme.spacing.s},
+    article_image: {aspectRatio: aspectRatio},
     article_edit: {backgroundColor: currentTheme.colors.secondary}
   })
 
@@ -364,7 +368,7 @@ const ItemShowcase = (props: ItemShowcaseProps) => {
     >
       <TouchableOpacity 
         onLongPress={() => selectItem()}
-        onPress={() => selectedItems.length ? selectItem() : console.log('hi')}
+        onPress={() => selectedItems.length ? selectItem() : navigator.navigate('AddItemScreen', {item: item})}
         delayLongPress={200}
         key={'wardrobe_image_container_' + index + item.image}
         style={[styles.article, dynamicStyle.article_container]}
@@ -435,7 +439,7 @@ const styles = StyleSheet.create({
 
   article: {
     flex: 1,
-    elevation: Theme.spacing.xs,
+    elevation: Theme.spacing.elevation,
     borderRadius: Theme.spacing.s,
   },
 

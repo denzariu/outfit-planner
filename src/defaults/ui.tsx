@@ -48,6 +48,7 @@ export const Theme = {
   },
 
   spacing: {
+    elevation: 4,
     page: 20,
 
     // one pixel

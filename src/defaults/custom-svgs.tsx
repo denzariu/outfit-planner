@@ -37,7 +37,46 @@ export const icons = {
   favorite: 'heart-outline',
   duplicate: 'content-duplicate',
 
-  missing: 'help-rhombus'
+  missing: 'help-rhombus',
+
+  // Tab menu icons 
+  home: "home-variant",
+  calendar: "calendar-blank",
+  wardrobe: "wardrobe",
+  settings: "cog",
+
+  // Outline menu icons
+  home_outline: "home-variant-outline",
+  calendar_outline: "calendar-blank-outline",
+  wardrobe_outline: "wardrobe-outline",
+  settings_outline: "cog-outline",
+
+  plus: 'plus',
+
+  // Navigation
+  chevron_left: 'chevron-left',
+  chevron_right: 'chevron-right',
+  arrow_left: 'arrow-left',
+
+  // Image Icons
+  enlarge: "focus-field-horizontal",
+  reduce: "image-size-select-large",
+
+  // Seasons
+  season1: "snowflake-variant",
+  season2: "flower-poppy",
+  season3: "white-balance-sunny",
+  season4: "leaf",
+
+  // Weather
+  weather1: "weather-snowy-heavy",
+  weather2: "weather-partly-cloudy",
+  weather3: "weather-pouring",
+  weather4: "weather-windy",
+
+  // Upload icons (add item)
+  upload: "upload",
+  tshirt: "tshirt-crew"
 }
 
 // export const svgPants = `
