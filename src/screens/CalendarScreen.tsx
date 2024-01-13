@@ -11,6 +11,7 @@ import { icons } from '../defaults/custom-svgs';
 
 const CalendarScreen = ({...props}) => {
 
+  const fadeAnimation = props.fadeAnimation;
   const isDarkMode = useColorScheme() == 'dark';
   const currentTheme = isDarkMode ? DarkTheme : Theme;
   
@@ -20,8 +21,6 @@ const CalendarScreen = ({...props}) => {
     {date: '2023-12-18'},
     {date: '2023-12-19'},
   ])
-
-
 
   const [month, setMonth] = useState<number>();
   const [year, setYear] = useState<number>();
@@ -122,11 +121,11 @@ const CalendarScreen = ({...props}) => {
     add_item: {backgroundColor: currentTheme.colors.background}
   })
   
-  const animate = props.props;
+
 
   return (
     <SafeAreaView style={[styles.page, dynamicStyle.background_style]}>
-      <AnimatedGradient props={animate}/>
+      <AnimatedGradient props={fadeAnimation}/>
       <Text style={[styles.header, dynamicStyle.textHeader]}>
         Outfit Planner
       </Text>

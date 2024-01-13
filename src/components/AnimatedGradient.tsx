@@ -158,19 +158,4 @@ const AnimatedGradient = ({...props}) => {
   );
 };
 
-const styles = StyleSheet.create({
-  buttonContainer: {
-    position: 'absolute',
-    bottom: 52,
-    right: 32,
-    height: 64,
-    aspectRatio: 1,
-    borderRadius: 40,
-    backgroundColor: '#111',
-    zIndex: 10,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-});
-
 export default AnimatedGradient ;

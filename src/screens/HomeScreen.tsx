@@ -7,17 +7,18 @@ import AnimatedGradient from '../components/AnimatedGradient';
 import { deleteTable, getDBConnection, tableName_ClothingItem } from '../assets/database/db-service';
 import { deleteClothingItem, getClothingItems } from '../assets/database/db-operations/db-operations-clothingitem';
 import { ClothingItem } from '../assets/database/models';
-import ItemSelector from '../components/ItemSelector';
+import ItemSelector from '../components/ItemPicker';
+import { useNavigation } from '@react-navigation/native';
 
 const HomeScreen = ({...props}) => {
   const isDarkMode = useColorScheme() == 'dark';
   const currentTheme = isDarkMode ? DarkTheme : Theme;
-  const animate = props.props;
+  const fadeAnimation = props.fadeAnimation;
 
   // Display a custom-made menu where the user can select
   // the desired item(s) [ClothingItem | Outfit] to be added
 
-  const [itemSelection, setItemSelection] = useState<boolean>(false);
+  const [itemSelection, setItemSelection] = useState<'all' | 'extra' | 'top' | 'bottom' | 'feet' | ''>('');
   const [itemsToBeAdded, setItemsToBeAdded] = useState<Array<ClothingItem>>();
   
   // Outfit manager
@@ -51,34 +52,14 @@ const HomeScreen = ({...props}) => {
     }
   } 
 
-    // Add item, by tapping '+' (only dev)
-  const addItem = (type: string, id: number | null) => {
+  // Add item, by tapping '+'
+  const addItem = (type: typeof itemSelection) => {
     LayoutAnimation.configureNext(LayoutAnimation.create(150, 'easeInEaseOut', 'opacity'));
-    setItemSelection(true)
-
-    // Debug only
-
-    // switch(type) {
-    //   case 'extra':
-    //     setExtra([...extra, extra[0]])
-    //     break;
-    //   case 'top':
-    //     setTop([...top, top[0]])
-    //     break;
-    //   case 'bottom':
-    //     setBottom([...bottom, bottom[0]])
-    //     break;
-    //   case 'feet':
-    //     setFeet([...feet, feet[0]])
-    //     break;
-    // }
+    setItemSelection(type)
   } 
 
   const loadOutfit = async () => {
     const db = await getDBConnection()
-
-    // await deleteTable(db, tableName_ClothingItem)
-    // await deleteClothingItem(db, 1)
 
     await getClothingItems(db, 'extra').then((res) => setExtra(res))
     await getClothingItems(db, 'top').then((res) => setTop(res))
@@ -90,10 +71,7 @@ const HomeScreen = ({...props}) => {
   useEffect(() => {
     loadOutfit()
   }, [])
-
-  const [currentView, setCurrentView] = useState({visible:false, index:null})
   
-
   const dynamicStyle = StyleSheet.create({
     background_style: {backgroundColor: currentTheme.colors.background},
     textHeader: {color: currentTheme.colors.tertiary},
@@ -108,24 +86,24 @@ const HomeScreen = ({...props}) => {
 
   return (
     <SafeAreaView style={[styles.page, dynamicStyle.background_style]}>
-      {itemSelection && <ItemSelector handleItemSelection={setItemSelection} handleItemsToBeAdded={setItemsToBeAdded} />}
+      {itemSelection != '' && <ItemSelector handleItemSelection={setItemSelection} handleItemsToBeAdded={setItemsToBeAdded} categoryToChooseFrom={itemSelection}/>}
 
-      <AnimatedGradient props={animate}/>
+      <AnimatedGradient props={fadeAnimation}/>
       <Text style={[styles.header, dynamicStyle.textHeader]}>
         Today's Outfit
       </Text>
       <View style={styles.container}>
         <View style={[styles.container_clothing, dynamicStyle.container_clothing]}>
-          <SectionElement index={0} category={extra} currentView={currentView} />
-          <SectionElement index={1} category={top} currentView={currentView} />
-          <SectionElement index={2} category={bottom} currentView={currentView} />
-          <SectionElement index={3} category={feet} currentView={currentView} />
+          <SectionElement index={0} category={extra} />
+          <SectionElement index={1} category={top} />
+          <SectionElement index={2} category={bottom} />
+          <SectionElement index={3} category={feet} />
         </View>
         <View style={styles.container_items}>
-          <SectionElementName dynamicStyle={dynamicStyle} currentTheme={currentTheme} addItem={addItem} removeItem={removeItem} fieldName={'extra'} field={extra}/>
-          <SectionElementName dynamicStyle={dynamicStyle} currentTheme={currentTheme} addItem={addItem} removeItem={removeItem} fieldName={'top'} field={top}/>
-          <SectionElementName dynamicStyle={dynamicStyle} currentTheme={currentTheme} addItem={addItem} removeItem={removeItem} fieldName={'bottom'} field={bottom}/>
-          <SectionElementName dynamicStyle={dynamicStyle} currentTheme={currentTheme} addItem={addItem} removeItem={removeItem} fieldName={'feet'} field={feet}/>          
+          <SectionElementName dynamicStyle={dynamicStyle} currentTheme={currentTheme} addItem={() => addItem('extra')} removeItem={removeItem} fieldName={'extra'} field={extra}/>
+          <SectionElementName dynamicStyle={dynamicStyle} currentTheme={currentTheme} addItem={() => addItem('top')} removeItem={removeItem} fieldName={'top'} field={top}/>
+          <SectionElementName dynamicStyle={dynamicStyle} currentTheme={currentTheme} addItem={() => addItem('bottom')} removeItem={removeItem} fieldName={'bottom'} field={bottom}/>
+          <SectionElementName dynamicStyle={dynamicStyle} currentTheme={currentTheme} addItem={() => addItem('feet')} removeItem={removeItem} fieldName={'feet'} field={feet}/>          
         </View>
       </View>
     </SafeAreaView>
@@ -169,7 +147,7 @@ const SectionElementName = (props: any) => {
 
 const SectionElement = (props: any) => {
 
-  const {index, category, currentView, onViewRef, viewConfigRef} = props || {}
+  const {category, currentView} = props || {}
   const [view, setView] = useState<boolean>(false)
 
   const eachItem = ({item, index}: any) => {
@@ -186,13 +164,7 @@ const SectionElement = (props: any) => {
           onPress={() => setView(!view)}
           style={{flex: 0.8, aspectRatio: 1}}
         >
-          <Image source={{uri: item.image}} style={{flex: 1, 
-            transform: [
-            // { perspective: 850 },
-            // { translateX: - Dimensions.get('window').width * 0.24 },
-            // { rotateY: '45deg'} //TODO: Animate this 
-          ]}} 
-          />
+          <Image source={{uri: item.image}} style={{flex: 1}}/> 
         </Pressable>
         )
       :
@@ -205,8 +177,6 @@ const SectionElement = (props: any) => {
           horizontal
           pagingEnabled
           snapToAlignment={'center'}
-          // onViewableItemsChanged={onViewRef.current}
-          // viewabilityConfig={viewConfigRef.current}
           renderItem={eachItem}
           keyExtractor={(item, index) => 'carousel_' + index + item.image}
         />
@@ -218,12 +188,9 @@ const SectionElement = (props: any) => {
 const EachItem = (props: any) => {
   
   // Populate props with passed values
-  const {imageUri = "", index = 0, currentView = {}, idCategory = 0, setView} = props || {}
-
-  const {visible = false, index: visibleIndex = 0} = currentView;
+  const {imageUri = "", index = 0, setView} = props || {}
 
   const animRef = useRef(new Animated.Value(0)).current
-
   
   const startAnimation = useCallback(() => {
     Animated.timing(animRef, {
@@ -234,7 +201,7 @@ const EachItem = (props: any) => {
     }).start()
   }, [animRef])
 
-  const stopAnim = useCallback(() => {
+  const stopAnimation = useCallback(() => {
     Animated.timing(animRef, {
       toValue: 0,
       duration: 200,
@@ -243,50 +210,14 @@ const EachItem = (props: any) => {
     }).start()
   }, [animRef])
 
-  useEffect(() => {
-    if (visible === true && visibleIndex === index ){
-      startAnimation()
-    }
-
-    if (visible === false) {
-      setTimeout(() => stopAnim(), 200)
-    }
-
-  }, [visible, index])
-
-  const scaleInter = animRef.interpolate({
-    inputRange: [0,1], 
-    outputRange: [0.8,1]
-  })
-  const rotateInter = animRef.interpolate({
-    inputRange: [0,1], 
-    outputRange: ['0deg', '45deg']
-  })
-
-
   return (
     <Pressable onPress={() => setView((currentValue: any) => [!currentValue[0], !currentValue[1], !currentValue[2], !currentValue[3]])}>
       <Animated.View
         key={'image_container_' + index + imageUri}
-        style={{
-          // flex: 1, 
-          aspectRatio: 1,
-          // borderWidth: 1,
-          // borderColor: 'blue',
-          // transform: 
-          //   [{ scale: scaleInter }]
-        }}>
+        style={{ aspectRatio: 1 }}>
           <Animated.Image source={{uri: imageUri}} 
             key={'image_' + index + imageUri}
-            style={{
-              flex: 1, 
-              // borderWidth: 1,
-              // borderColor: 'black',
-              transform: [
-              // { perspective: 850 },
-              // { translateX: - Dimensions.get('window').width * 0.05 },
-              // { rotateY: rotateInter}  //TODO: Animate this 
-            ]}}/>
+            style={{ flex: 1 }}/>
       </Animated.View>
     </Pressable>
   )
@@ -311,7 +242,7 @@ const styles = StyleSheet.create({
     display: 'flex',
     flexDirection: 'row',
     gap: Theme.spacing.m,
-    height: '70%'
+    height: '80%'
   },
 
   container_clothing: {

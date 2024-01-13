@@ -1,3 +1,4 @@
+import { LayoutAnimation } from "react-native";
 
 const palette = {
   black: '#000000',
@@ -27,6 +28,7 @@ const palette = {
   danger_red: '#AA4A44'
 
 }
+export const mainAnimation = LayoutAnimation.create(2000, 'easeInEaseOut', 'opacity');
 
 export const Theme = {
   colors: {
