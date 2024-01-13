@@ -50,8 +50,6 @@ import AddItemScreen from './src/screens/secondary/AddItemScreen';
 import { Logs } from 'expo'
 import WardrobeScreen from './src/screens/WardrobeScreen';
 import { icons } from './src/defaults/custom-svgs';
-import ItemInfoScreen from './src/screens/secondary/ItemInfoScreen';
-
 Logs.enableExpoCliLogging()
 
 const Tab = createMaterialBottomTabNavigator();

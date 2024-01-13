@@ -1,5 +1,5 @@
-import { Animated, Easing, FlatList, Image, LayoutAnimation, RefreshControl, SafeAreaView, StyleSheet, Text, TouchableHighlight, TouchableOpacity, View, useColorScheme } from 'react-native'
-import React, { useEffect, useState } from 'react'
+import { Animated, BackHandler, Easing, FlatList, Image, LayoutAnimation, RefreshControl, SafeAreaView, StyleSheet, Text, TouchableHighlight, TouchableOpacity, View, useColorScheme } from 'react-native'
+import React, { useEffect, useRef, useState } from 'react'
 import AnimatedGradient from '../components/AnimatedGradient'
 import { DarkTheme, Theme } from '../defaults/ui';
 import { getDBConnection } from '../assets/database/db-service';
@@ -9,14 +9,14 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import { SvgXml } from 'react-native-svg';
 import { icons } from '../defaults/custom-svgs';
 import { ScrollView } from 'react-native-gesture-handler';
-import { useIsFocused, useNavigation } from '@react-navigation/native';
-import ItemInfoScreen from './secondary/ItemInfoScreen';
+import { useFocusEffect, useIsFocused, useNavigation } from '@react-navigation/native';
 
 const WardrobeScreen = (...props: any) => {
   const isDarkMode = useColorScheme() == 'dark';
   const currentTheme = isDarkMode ? DarkTheme : Theme;
   const animate = props.props;
 
+  const navigator = useNavigation();
   const isFocused = useIsFocused();
 
   // Associative object
@@ -102,7 +102,6 @@ const WardrobeScreen = (...props: any) => {
       const newItems = items.filter((item) => {
         return ids.indexOf(item.id) == -1 ? true : false
       })
-      console.log('newit ', newItems)
       setItems(newItems)
     })                                      
   }
@@ -122,7 +121,9 @@ const WardrobeScreen = (...props: any) => {
 
     // Group items by type: extra > top > bottom > feet
     if (type == 'all')
-      filteredItems = items.sort((a, b) => filter[a.type] < filter[b.type] ? -1 : (filter[a.type] > filter[b.type] ? 1 : 0));      
+      filteredItems = items.sort((a, b) => 
+        filter[a.type] < filter[b.type] ? -1 : (filter[a.type] > filter[b.type] ? 1 : 0)
+      )
     // Group items by given type
     else 
       filteredItems = items.filter((item) => {return item.type == type})
@@ -158,10 +159,30 @@ const WardrobeScreen = (...props: any) => {
     filterItems(selectedType)
   }, [items])
 
-  // Fast-select items if there is already a selected item
-  useEffect (() => {
-    console.log({selected: itemsSelected})
-  }, [itemsSelected])
+  // Unselect (selected items) handle for back button behavior 
+  useFocusEffect(
+    React.useCallback(() => {
+      console.log({selectedCallback: itemsSelected.length})
+
+      const onBackPress = () => {
+        if (itemsSelected.length > 0) {
+          console.log({selectedCallback: true})
+          setItemsSelected([]);
+          return true;
+        } else {
+          console.log({selectedCallback: false})
+          return false;
+        }
+      };
+
+      const subscription = BackHandler.addEventListener(
+        'hardwareBackPress',
+        onBackPress
+      );
+
+      return () => subscription.remove();
+    }, [itemsSelected.length])
+  );
 
   return (
     <SafeAreaView style={[styles.page, dynamicStyle.background_style]}>
@@ -310,6 +331,7 @@ const ItemShowcase = (props: ItemShowcaseProps) => {
 
   const [selected, setSelected] = useState<boolean>(false);
   const [animatedValue] = useState(new Animated.Value(0));
+  const [animatedValuePress] = useState(new Animated.Value(0));
 
   const dynamicStyle = StyleSheet.create({
     article_container: selected ? {margin: 0, borderColor: currentTheme.colors.secondary, backgroundColor: currentTheme.colors.quaternary, borderWidth: Theme.spacing.xs}
@@ -338,7 +360,6 @@ const ItemShowcase = (props: ItemShowcaseProps) => {
 
       return !prevValue
     })
-
     // startShake()
   }
 
@@ -347,26 +368,49 @@ const ItemShowcase = (props: ItemShowcaseProps) => {
     animatedValue.setValue(0);
     Animated.timing(animatedValue,
         {
-            toValue: 1, 
-            duration: 300,
-            easing: Easing.linear,
-            useNativeDriver: true
+          toValue: 1, 
+          duration: 200,
+          easing: Easing.linear,
+          useNativeDriver: true
         }
     ).start()
+  }
+
+  const animateIn = () => {
+    Animated.timing(animatedValuePress,
+      {
+        toValue: 1,
+        duration: 200,
+        easing: Easing.linear,
+        useNativeDriver: true
+      }).start()
+  }
+
+  const animateOut = () => {
+    Animated.timing(animatedValuePress,
+      {
+        toValue: 0,
+        duration: 200,
+        easing: Easing.linear,
+        useNativeDriver: true
+      }).start()
   }
 
   return (
     <Animated.View 
       style={[
         styles.article_container, {
-          transform: [{ translateX: 
-            animatedValue.interpolate({
-            inputRange: [0, 0.25, 0.50, 0.75, 1],
-            outputRange: [0, 10, 0, 10, 0]})
-          }]}
+          transform: [{ translateY: 
+            animatedValuePress.interpolate({
+            inputRange: [0, 1],
+            outputRange: [0, 4]})
+          }],
+        }
       ]}
     >
       <TouchableOpacity 
+        onPressIn={() => animateIn()}
+        onPressOut={() => animateOut()}
         onLongPress={() => selectItem()}
         onPress={() => selectedItems.length ? selectItem() : navigator.navigate('AddItemScreen', {item: item})}
         delayLongPress={200}
@@ -374,7 +418,6 @@ const ItemShowcase = (props: ItemShowcaseProps) => {
         style={[styles.article, dynamicStyle.article_container]}
         activeOpacity={0.7}
       >
-        
         <Image source={{uri: item.image}} 
           key={'wardrobe_image_' + index + item.image}
           style={[styles.article_image, dynamicStyle.article_image]}

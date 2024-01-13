@@ -2,21 +2,29 @@ import { ActivityIndicator, Alert, Animated, Dimensions, Easing, LayoutAnimation
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { DarkTheme, Theme } from '../defaults/ui';
 import { Image } from 'react-native';
-import LinearGradient from 'react-native-linear-gradient';
-import { TouchableHighlight } from 'react-native-gesture-handler';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import AnimatedGradient from '../components/AnimatedGradient';
 import { deleteTable, getDBConnection, tableName_ClothingItem } from '../assets/database/db-service';
 import { deleteClothingItem, getClothingItems } from '../assets/database/db-operations/db-operations-clothingitem';
 import { ClothingItem } from '../assets/database/models';
-import Constants from 'expo-constants';
+import ItemSelector from '../components/ItemSelector';
 
 const HomeScreen = ({...props}) => {
   const isDarkMode = useColorScheme() == 'dark';
   const currentTheme = isDarkMode ? DarkTheme : Theme;
   const animate = props.props;
 
-  // TEST: if the added image was correctly added to the DB and can be displayed
+  // Display a custom-made menu where the user can select
+  // the desired item(s) [ClothingItem | Outfit] to be added
+
+  const [itemSelection, setItemSelection] = useState<boolean>(false);
+  const [itemsToBeAdded, setItemsToBeAdded] = useState<Array<ClothingItem>>();
+  
+  // Outfit manager
+  const [currentOutfit, setCurrentOutfit] = useState<number>(0)
+  const [outfits, setOutfits] = useState<Array<ClothingItem[]>>([])
+
+  // Current items shown
   const [extra, setExtra] = useState<ClothingItem[]>([]);
   const [top, setTop] = useState<ClothingItem[]>([]);
   const [bottom, setBottom] = useState<ClothingItem[]>([]);
@@ -46,21 +54,24 @@ const HomeScreen = ({...props}) => {
     // Add item, by tapping '+' (only dev)
   const addItem = (type: string, id: number | null) => {
     LayoutAnimation.configureNext(LayoutAnimation.create(150, 'easeInEaseOut', 'opacity'));
+    setItemSelection(true)
 
-    switch(type) {
-      case 'extra':
-        setExtra([...extra, extra[0]])
-        break;
-      case 'top':
-        setTop([...top, top[0]])
-        break;
-      case 'bottom':
-        setBottom([...bottom, bottom[0]])
-        break;
-      case 'feet':
-        setFeet([...feet, feet[0]])
-        break;
-    }
+    // Debug only
+
+    // switch(type) {
+    //   case 'extra':
+    //     setExtra([...extra, extra[0]])
+    //     break;
+    //   case 'top':
+    //     setTop([...top, top[0]])
+    //     break;
+    //   case 'bottom':
+    //     setBottom([...bottom, bottom[0]])
+    //     break;
+    //   case 'feet':
+    //     setFeet([...feet, feet[0]])
+    //     break;
+    // }
   } 
 
   const loadOutfit = async () => {
@@ -83,23 +94,6 @@ const HomeScreen = ({...props}) => {
   const [currentView, setCurrentView] = useState({visible:false, index:null})
   
 
-  const onViewRef = React.useRef((viewableItems: any) => {
-    if (viewableItems?.viewableItems.length === 2){
-      setCurrentView({visible: false, index: null})
-    }
-
-    if (viewableItems?.viewableItems.length === 1){
-      const currentItemIndex = viewableItems?.viewableItems[0]?.index
-      setCurrentView({visible: true, index: currentItemIndex})
-    }
-
-  });
-
-  const viewConfigRef = React.useRef({ 
-    // viewAreaCoveragePercentThreshold: 25,
-    itemVisiblePercentThreshold: 1
-  });
-  
   const dynamicStyle = StyleSheet.create({
     background_style: {backgroundColor: currentTheme.colors.background},
     textHeader: {color: currentTheme.colors.tertiary},
@@ -114,16 +108,18 @@ const HomeScreen = ({...props}) => {
 
   return (
     <SafeAreaView style={[styles.page, dynamicStyle.background_style]}>
+      {itemSelection && <ItemSelector handleItemSelection={setItemSelection} handleItemsToBeAdded={setItemsToBeAdded} />}
+
       <AnimatedGradient props={animate}/>
       <Text style={[styles.header, dynamicStyle.textHeader]}>
         Today's Outfit
       </Text>
       <View style={styles.container}>
         <View style={[styles.container_clothing, dynamicStyle.container_clothing]}>
-          <SectionElement index={0} category={extra} currentView={currentView} onViewRef={onViewRef} viewConfigRef={viewConfigRef}/>
-          <SectionElement index={1} category={top} currentView={currentView} onViewRef={onViewRef} viewConfigRef={viewConfigRef}/>
-          <SectionElement index={2} category={bottom} currentView={currentView} onViewRef={onViewRef} viewConfigRef={viewConfigRef}/>
-          <SectionElement index={3} category={feet} currentView={currentView} onViewRef={onViewRef} viewConfigRef={viewConfigRef}/>
+          <SectionElement index={0} category={extra} currentView={currentView} />
+          <SectionElement index={1} category={top} currentView={currentView} />
+          <SectionElement index={2} category={bottom} currentView={currentView} />
+          <SectionElement index={3} category={feet} currentView={currentView} />
         </View>
         <View style={styles.container_items}>
           <SectionElementName dynamicStyle={dynamicStyle} currentTheme={currentTheme} addItem={addItem} removeItem={removeItem} fieldName={'extra'} field={extra}/>
@@ -143,6 +139,7 @@ const SectionElementName = (props: any) => {
   const category = fieldName[0].toUpperCase() + fieldName.slice(1)
 
   return (
+    
     <View style={[styles.container_items_category, dynamicStyle.container_items_category]}>
       <View style={styles.container_category}>
 
