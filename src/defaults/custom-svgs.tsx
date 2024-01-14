@@ -52,6 +52,7 @@ export const icons = {
   settings_outline: "cog-outline",
 
   plus: 'plus',
+  minus: 'minus',
 
   // Navigation
   chevron_left: 'chevron-left',

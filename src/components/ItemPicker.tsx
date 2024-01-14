@@ -2,7 +2,7 @@ import { Alert, FlatList, LayoutAnimation, RefreshControl, StyleSheet, Text, Tou
 import React, { useEffect, useState } from 'react'
 import { ClothingItem } from '../assets/database/models'
 import { useIsFocused } from '@react-navigation/native'
-import { DarkTheme, Theme } from '../defaults/ui'
+import { DarkTheme, Theme, mainAnimation } from '../defaults/ui'
 import { getDBConnection } from '../assets/database/db-service'
 import { getClothingItems } from '../assets/database/db-operations/db-operations-clothingitem'
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
@@ -11,13 +11,15 @@ import ItemShowcase from './ItemShowcase'
 
 
 type ItemSelectorProps = {
-  handleItemsToBeAdded: React.Dispatch<React.SetStateAction<ClothingItem[] | undefined>>
-  categoryToChooseFrom: 'extra' | 'top' | 'bottom' | 'feet' | 'all' | ''
-  handleItemSelection:  React.Dispatch<React.SetStateAction<'extra' | 'top' | 'bottom' | 'feet' | 'all' | ''>>
+  // These two are used to transfer data to the component's parent
+  handleItemsToBeAdded: React.Dispatch<React.SetStateAction<ClothingItem[]>>
+  handleCategoryToBeAddedTo: React.Dispatch<React.SetStateAction<'extra' | 'top' | 'bottom' | 'feet' | 'all' | ''>>,
 
+  categoryToChooseFrom: 'extra' | 'top' | 'bottom' | 'feet' | 'all' | '',
+  handleItemSelection:  React.Dispatch<React.SetStateAction<'extra' | 'top' | 'bottom' | 'feet' | 'all' | ''>>
 }
 
-const ItemPicker = ({handleItemSelection, handleItemsToBeAdded, categoryToChooseFrom}: ItemSelectorProps) => {
+const ItemPicker = ({handleItemsToBeAdded, handleCategoryToBeAddedTo, handleItemSelection, categoryToChooseFrom}: ItemSelectorProps) => {
 
   const isFocused = useIsFocused();
   const isDarkMode = useColorScheme() == 'dark';
@@ -60,10 +62,18 @@ const ItemPicker = ({handleItemSelection, handleItemsToBeAdded, categoryToChoose
       })
     }
   }
+  
+  const addItems = () => {
+    const selectedItems = items?.filter((item) => itemsSelected.includes(item.id)) || []
+    console.log(selectedItems)
+    handleCategoryToBeAddedTo(categoryToChooseFrom)
+    handleItemsToBeAdded(selectedItems)
+    close()
+  }
 
   const close = () => {
     console.log('closed')
-    LayoutAnimation.configureNext(LayoutAnimation.create(150, 'easeInEaseOut', 'opacity'));
+    LayoutAnimation.configureNext(mainAnimation);
     handleItemSelection('')
   }
 
@@ -117,7 +127,7 @@ const ItemPicker = ({handleItemSelection, handleItemsToBeAdded, categoryToChoose
         {itemsSelected.length > 0 &&
           <TouchableOpacity  
             style={[styles.button, dynamicStyle.button]}
-            onPress={() => Alert.alert('pressed')}
+            onPress={() => addItems()}
             children={<Text style={[styles.button_text, dynamicStyle.button_text]}>Add to Outfit</Text>}
           />
         }
@@ -138,6 +148,7 @@ const styles = StyleSheet.create({
     right: 0,
     backgroundColor: Theme.colors.background + '88',
     padding: Theme.spacing.page,
+    paddingBottom: Theme.spacing.xxl,
     justifyContent: 'flex-end',
   },
 
@@ -176,7 +187,7 @@ const styles = StyleSheet.create({
     bottom: 0,
     paddingVertical: Theme.spacing.m,
     borderRadius: Theme.spacing.l,
-    marginVertical: Theme.spacing.m,
+    marginTop: Theme.spacing.m,
 
     borderWidth: Theme.spacing.xxs,
     shadowOffset: { width: 0, height: 2 },

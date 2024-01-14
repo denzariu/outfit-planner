@@ -28,7 +28,7 @@ const palette = {
   danger_red: '#AA4A44'
 
 }
-export const mainAnimation = LayoutAnimation.create(2000, 'easeInEaseOut', 'opacity');
+export const mainAnimation = LayoutAnimation.create(200, 'easeInEaseOut', 'opacity');
 
 export const Theme = {
   colors: {

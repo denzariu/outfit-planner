@@ -99,6 +99,7 @@ const CustomTab = ({ state, descriptors, navigation, setExpanded, expanded }: Ta
 
         return (
           <TouchableOpacity
+            key={'route_' + route.name + index}
             accessibilityRole="button"
             // accessibilityState={isFocused ? ['selected'] : []}
             accessibilityLabel={options.tabBarAccessibilityLabel}

@@ -1,6 +1,6 @@
 import { ActivityIndicator, Alert, Animated, Dimensions, Easing, LayoutAnimation, Pressable, SafeAreaView, StyleSheet, Text, TouchableOpacity, View, useColorScheme } from 'react-native'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
-import { DarkTheme, Theme } from '../defaults/ui';
+import { DarkTheme, Theme, mainAnimation } from '../defaults/ui';
 import { Image } from 'react-native';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import AnimatedGradient from '../components/AnimatedGradient';
@@ -9,6 +9,8 @@ import { deleteClothingItem, getClothingItems } from '../assets/database/db-oper
 import { ClothingItem } from '../assets/database/models';
 import ItemSelector from '../components/ItemPicker';
 import { useNavigation } from '@react-navigation/native';
+import { icons } from '../defaults/custom-svgs';
+import { FlatList } from 'react-native-gesture-handler';
 
 const HomeScreen = ({...props}) => {
   const isDarkMode = useColorScheme() == 'dark';
@@ -19,7 +21,8 @@ const HomeScreen = ({...props}) => {
   // the desired item(s) [ClothingItem | Outfit] to be added
 
   const [itemSelection, setItemSelection] = useState<'all' | 'extra' | 'top' | 'bottom' | 'feet' | ''>('');
-  const [itemsToBeAdded, setItemsToBeAdded] = useState<Array<ClothingItem>>();
+  const [categoryToBeAddedTo, setCategoryToBeAddedTo] = useState<'all' | 'extra' | 'top' | 'bottom' | 'feet' | ''>('')
+  const [itemsToBeAdded, setItemsToBeAdded] = useState<ClothingItem[]>([]);
   
   // Outfit manager
   const [currentOutfit, setCurrentOutfit] = useState<number>(0)
@@ -34,7 +37,7 @@ const HomeScreen = ({...props}) => {
 
   // Remove item, by tapping '-'
   const removeItem = (type: string, id: number | null) => {
-    LayoutAnimation.configureNext(LayoutAnimation.create(150, 'easeInEaseOut', 'opacity'));
+    LayoutAnimation.configureNext(mainAnimation);
 
     switch(type) {
       case 'extra':
@@ -54,17 +57,17 @@ const HomeScreen = ({...props}) => {
 
   // Add item, by tapping '+'
   const addItem = (type: typeof itemSelection) => {
-    LayoutAnimation.configureNext(LayoutAnimation.create(150, 'easeInEaseOut', 'opacity'));
+    LayoutAnimation.configureNext(mainAnimation);
     setItemSelection(type)
   } 
 
   const loadOutfit = async () => {
-    const db = await getDBConnection()
+    // const db = await getDBConnection()
 
-    await getClothingItems(db, 'extra').then((res) => setExtra(res))
-    await getClothingItems(db, 'top').then((res) => setTop(res))
-    await getClothingItems(db, 'bottom').then((res) => setBottom(res))
-    await getClothingItems(db, 'feet').then((res) => setFeet(res))
+    // await getClothingItems(db, 'extra').then((res) => setExtra(res))
+    // await getClothingItems(db, 'top').then((res) => setTop(res))
+    // await getClothingItems(db, 'bottom').then((res) => setBottom(res))
+    // await getClothingItems(db, 'feet').then((res) => setFeet(res))
 
   }
 
@@ -72,6 +75,31 @@ const HomeScreen = ({...props}) => {
     loadOutfit()
   }, [])
   
+  // If there are items to be added, add them
+  useEffect(() => {
+    console.log('tobeadded', itemsToBeAdded)
+    if (itemsToBeAdded?.length) {
+      switch (categoryToBeAddedTo) {
+        case 'all':
+          //TODO: Filter based on clothing type
+          break;
+        case 'extra':
+          setExtra((prev) => {return prev.concat(itemsToBeAdded)})
+          break;
+        case 'top':
+          setTop((prev) => {return prev.concat(itemsToBeAdded)})
+          break;
+        case 'bottom':
+          setBottom((prev) => {return prev.concat(itemsToBeAdded)})
+          break;
+        case 'feet':
+          setFeet((prev) => {return prev.concat(itemsToBeAdded)})
+          break;
+      }
+      setItemsToBeAdded([])
+    }
+  }, [itemsToBeAdded?.length])
+
   const dynamicStyle = StyleSheet.create({
     background_style: {backgroundColor: currentTheme.colors.background},
     textHeader: {color: currentTheme.colors.tertiary},
@@ -86,8 +114,14 @@ const HomeScreen = ({...props}) => {
 
   return (
     <SafeAreaView style={[styles.page, dynamicStyle.background_style]}>
-      {itemSelection != '' && <ItemSelector handleItemSelection={setItemSelection} handleItemsToBeAdded={setItemsToBeAdded} categoryToChooseFrom={itemSelection}/>}
-
+      {itemSelection != '' 
+      && <ItemSelector 
+            handleItemsToBeAdded={setItemsToBeAdded} 
+            handleCategoryToBeAddedTo={setCategoryToBeAddedTo}
+            handleItemSelection={setItemSelection} 
+            categoryToChooseFrom={itemSelection}
+          />
+      }
       <AnimatedGradient props={fadeAnimation}/>
       <Text style={[styles.header, dynamicStyle.textHeader]}>
         Today's Outfit
@@ -112,57 +146,78 @@ const HomeScreen = ({...props}) => {
 
 export default HomeScreen
 
-const SectionElementName = (props: any) => {
-  const {dynamicStyle, currentTheme, addItem, removeItem, field, fieldName} = props || {}
+type SectionElementNameProps = {
+  dynamicStyle: any, 
+  currentTheme: any, 
+  addItem: (type: "" | "all" | "extra" | "top" | "bottom" | "feet") => void, 
+  removeItem: (type: string, id: number | null) => void, 
+  field: ClothingItem[], 
+  fieldName: "" | "all" | "extra" | "top" | "bottom" | "feet",
+}
+const SectionElementName = ({dynamicStyle, currentTheme, addItem, removeItem, field, fieldName}: SectionElementNameProps) => {
   const category = fieldName[0].toUpperCase() + fieldName.slice(1)
 
   return (
     
     <View style={[styles.container_items_category, dynamicStyle.container_items_category]}>
       <View style={styles.container_category}>
-
-        <Text style={[styles.category_text, dynamicStyle.category_text]}>{category}</Text>
-
-        <TouchableOpacity style={[styles.add_item, dynamicStyle.add_item]} onPress={() => addItem(fieldName, 0)}>
-          <MaterialCommunityIcons name="plus" color={currentTheme.colors.tertiary} size={currentTheme.fontSize.m_m} />
-        </TouchableOpacity>
-        
-      </View>
-      {/* Show the title of each item in the 'Extra' category */}
-      { field?.map((item: ClothingItem, index: number) => 
-          <View style={[styles.item_container, dynamicStyle.item_container]} key={'title_' + item.adjective + item.subtype + index}>
-            <Text 
-              numberOfLines={1}
-              style={[styles.item_name, dynamicStyle.item_name]}>
-                {item.adjective + ' ' + item.subtype[0].toUpperCase() + item.subtype.slice(1)}
-            </Text>
-            <MaterialCommunityIcons name="minus" color={currentTheme.colors.primary} size={currentTheme.fontSize.m_m} 
-              onPress={() => removeItem(item.type, item.id)}
+        <Text style={[styles.category_text, dynamicStyle.category_text]}>
+          {category}
+        </Text>
+        <TouchableOpacity 
+          style={[styles.add_item, dynamicStyle.add_item]} 
+          onPress={() => addItem(fieldName)}
+        >
+          <MaterialCommunityIcons 
+            name={icons.plus} 
+            color={currentTheme.colors.tertiary} 
+            size={currentTheme.fontSize.m_m} 
             />
+        </TouchableOpacity>
+      </View>
+      {/* Show the title of each item in the category */}
+      <FlatList
+        data={field}
+        keyExtractor={(item, index) => 'item_name_' + item.id + item.adjective + '_at_' + index}
+        renderItem={(item) => 
+           <View 
+              style={[styles.item_container, dynamicStyle.item_container]}
+            >
+              <Text 
+                numberOfLines={1}
+                style={[styles.item_name, dynamicStyle.item_name]}
+              >
+                {item.item.adjective + ' ' + item.item.subtype[0].toUpperCase() + item.item.subtype.slice(1)}
+              </Text>
+              <MaterialCommunityIcons 
+                name={icons.minus} 
+                color={currentTheme.colors.secondary} 
+                size={currentTheme.fontSize.m_m} 
+                onPress={() => removeItem(item.item.type, item.item.id)}
+              />
           </View>
-      )}
+        }
+      />
     </View>
   )
 }
 
-const SectionElement = (props: any) => {
+type SectionElementProps = {
+  index: number, 
+  category: ClothingItem[]
+}
 
-  const {category, currentView} = props || {}
+const SectionElement = ({index, category}: SectionElementProps) => {
+
   const [view, setView] = useState<boolean>(false)
-
-  const eachItem = ({item, index}: any) => {
-    const idCategory = item.type == 'extra' ? 0 : item.type == 'top' ? 1 : item.type == 'bottom' ? 2 : 3
-    return <EachItem imageUri={item.image} currentView={currentView} index={index} idCategory={idCategory} setView={setView}/>
-  }
 
   return (
     <View style={[styles.container_section]}>
     { view ? 
-
-      category?.map((item: any) => 
+      category?.map((item) => 
         <Pressable 
           onPress={() => setView(!view)}
-          style={{flex: 0.8, aspectRatio: 1}}
+          style={{flex: item.aspect_ratio - 0.08, aspectRatio: item.aspect_ratio}}
         >
           <Image source={{uri: item.image}} style={{flex: 1}}/> 
         </Pressable>
@@ -177,7 +232,7 @@ const SectionElement = (props: any) => {
           horizontal
           pagingEnabled
           snapToAlignment={'center'}
-          renderItem={eachItem}
+          renderItem={(item) => <EachItem imageUri={item.item.image} handldeView={setView} aspectRatio={item.item.aspect_ratio}/>}
           keyExtractor={(item, index) => 'carousel_' + index + item.image}
         />
       </View>
@@ -185,39 +240,22 @@ const SectionElement = (props: any) => {
     </View>
   )
 }
-const EachItem = (props: any) => {
-  
-  // Populate props with passed values
-  const {imageUri = "", index = 0, setView} = props || {}
 
-  const animRef = useRef(new Animated.Value(0)).current
-  
-  const startAnimation = useCallback(() => {
-    Animated.timing(animRef, {
-      toValue: 1,
-      duration: 200,
-      useNativeDriver: true,
-      easing: Easing.ease,
-    }).start()
-  }, [animRef])
-
-  const stopAnimation = useCallback(() => {
-    Animated.timing(animRef, {
-      toValue: 0,
-      duration: 200,
-      useNativeDriver: true,
-      easing: Easing.ease,
-    }).start()
-  }, [animRef])
+type EachItemProps = {
+  imageUri: string,
+  handldeView: React.Dispatch<React.SetStateAction<boolean>>,
+  aspectRatio: number
+}
+const EachItem = ({imageUri, handldeView, aspectRatio}: EachItemProps) => {
 
   return (
-    <Pressable onPress={() => setView((currentValue: any) => [!currentValue[0], !currentValue[1], !currentValue[2], !currentValue[3]])}>
-      <Animated.View
-        key={'image_container_' + index + imageUri}
-        style={{ aspectRatio: 1 }}>
-          <Animated.Image source={{uri: imageUri}} 
-            key={'image_' + index + imageUri}
-            style={{ flex: 1 }}/>
+    <Pressable onPress={() => handldeView((currentValue) => !currentValue)}>
+      {/* TODO: better formula */}
+      <Animated.View style={{ flex: 1/aspectRatio, aspectRatio: aspectRatio }}>
+          <Animated.Image 
+            source={{uri: imageUri}} 
+            style={{ flex: 1 }}
+          />
       </Animated.View>
     </Pressable>
   )
