@@ -55,7 +55,7 @@ const CustomTab = ({ state, descriptors, navigation, setExpanded, expanded }: Ta
         // bottom: 0,
         // left: 0,
         // right: 0,
-        zIndex: 100,
+        zIndex: 1,
         flexDirection: 'row',
         height: 50,
         alignItems: 'center',
@@ -109,13 +109,13 @@ const CustomTab = ({ state, descriptors, navigation, setExpanded, expanded }: Ta
             activeOpacity={route.name === 'Add' ? 1 : 0.2}
           >
             {route.name === 'Home' ? (
-              <MaterialCommunityIcons style={styles.logo_tiny} name={isFocused ? icons.home : icons.home_outline} color={currentTheme.colors.tabActive} size={26} />
+              <MaterialCommunityIcons style={styles.logo_tiny} name={isFocused ? icons.home : icons.home_outline} color={currentTheme.colors.tabActive} size={styles.logo_tiny.height - styles.logo_tiny.padding*2} />
             ) : route.name === 'Calendar' ? (
-              <MaterialCommunityIcons style={styles.logo_tiny} name={isFocused ? icons.calendar : icons.calendar_outline} color={currentTheme.colors.tabActive} size={26} />
+              <MaterialCommunityIcons style={styles.logo_tiny} name={isFocused ? icons.calendar : icons.calendar_outline} color={currentTheme.colors.tabActive} size={styles.logo_tiny.height - styles.logo_tiny.padding*2} />
             ) : route.name === 'Wardrobe' ? (
-              <MaterialCommunityIcons style={styles.logo_tiny} name={isFocused ? icons.wardrobe : icons.wardrobe_outline} color={currentTheme.colors.tabActive} size={26} />
+              <MaterialCommunityIcons style={styles.logo_tiny} name={isFocused ? icons.wardrobe : icons.wardrobe_outline} color={currentTheme.colors.tabActive} size={styles.logo_tiny.height - styles.logo_tiny.padding*2} />
             ) : route.name === 'Settings' ? (
-              <MaterialCommunityIcons style={styles.logo_tiny} name={isFocused ? icons.settings : icons.settings_outline} color={currentTheme.colors.tabActive} size={26} />
+              <MaterialCommunityIcons style={styles.logo_tiny} name={isFocused ? icons.settings : icons.settings_outline} color={currentTheme.colors.tabActive} size={styles.logo_tiny.height - styles.logo_tiny.padding*2} />
             ) : (
               <Animated.View
                   style={[{
@@ -129,7 +129,7 @@ const CustomTab = ({ state, descriptors, navigation, setExpanded, expanded }: Ta
                     alignItems: 'center',
                     zIndex: 15
                   },
-                  // { transform: [{rotate: spin}] }
+                  { transform: [{rotate: spin}] }
                 ]}
                 >
                     <MaterialCommunityIcons 
@@ -167,8 +167,11 @@ const styles = StyleSheet.create({
     bottom: 0,
   },
   logo_tiny: {
-    width: 30,
-    height: 30,
+    width: 54,
+    height: 42,
+    padding: 6,
+    paddingHorizontal: 12,
+    // borderWidth: 1,
   },
 });
 

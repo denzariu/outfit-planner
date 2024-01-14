@@ -1,4 +1,4 @@
-import { Alert, FlatList, LayoutAnimation, RefreshControl, StyleSheet, Text, TouchableOpacity, TouchableWithoutFeedback, View, useColorScheme } from 'react-native'
+import { Alert, FlatList, LayoutAnimation, Modal, RefreshControl, StyleSheet, Text, TouchableOpacity, TouchableWithoutFeedback, View, useColorScheme } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import { ClothingItem } from '../assets/database/models'
 import { useIsFocused } from '@react-navigation/native'
@@ -64,6 +64,7 @@ const ItemPicker = ({handleItemsToBeAdded, handleCategoryToBeAddedTo, handleItem
   }
   
   const addItems = () => {
+    console.log('adding')
     const selectedItems = items?.filter((item) => itemsSelected.includes(item.id)) || []
     console.log(selectedItems)
     handleCategoryToBeAddedTo(categoryToChooseFrom)
@@ -78,61 +79,90 @@ const ItemPicker = ({handleItemsToBeAdded, handleCategoryToBeAddedTo, handleItem
   }
 
   return (
-    <TouchableWithoutFeedback
-      onPress={() => close()}
-    >
-      <View style={styles.absoluteView}>
-        <View style={styles.list_container}>
+    <Modal 
+      // visible='' // TODO: implement closing and oppening by this field
+      transparent
+      // pointerEvents='box-none'
+      style={{
+    }}>
+      <TouchableWithoutFeedback
+        onPress={() => close()}
+      >
+        <View style={styles.absoluteView}>
+          <View style={styles.list_container}>
 
-          <FlatList
-              data={items}
-              // TODO: Move this to 'styles'
-              style={[styles.list_style, dynamicStyle.list_style]}
-              contentContainerStyle={[styles.container_content]}
-              columnWrapperStyle={[styles.container_wrapper]}
-              numColumns={3}
-              showsVerticalScrollIndicator={false}
-              refreshControl={
-                <RefreshControl 
-                  refreshing={refreshing} 
-                  onRefresh={onRefresh} 
-                  colors={[currentTheme.colors.tertiary, currentTheme.colors.secondary]}
-                />
-              }
-              keyExtractor={(item) => item.id ? 'key_items_listed_' + item.id.toString() : 'key_items_listed_0'}
-              ListEmptyComponent={
-                <View style={[styles.list_empty, {opacity: 0.7}]}>
-                  <MaterialCommunityIcons 
-                    name={icons.missing} 
-                    color={currentTheme.colors.tertiary} 
-                    size={currentTheme.fontSize.l_l * 2} 
+            <FlatList
+                data={items}
+                // TODO: Move this to 'styles'
+                style={[styles.list_style, dynamicStyle.list_style]}
+                contentContainerStyle={[styles.container_content]}
+                columnWrapperStyle={[styles.container_wrapper]}
+                numColumns={3}
+                showsVerticalScrollIndicator={false}
+                refreshControl={
+                  <RefreshControl 
+                    refreshing={refreshing} 
+                    onRefresh={onRefresh} 
+                    colors={[currentTheme.colors.tertiary, currentTheme.colors.secondary]}
                   />
-                  <Text style={[styles.list_empty_text, dynamicStyle.list_empty_text]}>No items</Text>
-                </View>
-              }
-              renderItem={(info) => 
-                <ItemShowcase 
-                  item={info.item} 
-                  index={info.index} 
-                  currentTheme={currentTheme} 
-                  aspectRatio={1} 
-                  selectOnly={true}
-                  setSelectedItems={setItemsSelected}
-                  selectedItems={itemsSelected}
-                />
-              }
+                }
+                keyExtractor={(item) => item.id ? 'key_items_listed_' + item.id.toString() : 'key_items_listed_0'}
+                ListEmptyComponent={
+                  <View style={[styles.list_empty, {opacity: 0.7}]}>
+                    <MaterialCommunityIcons 
+                      name={icons.missing} 
+                      color={currentTheme.colors.tertiary} 
+                      size={currentTheme.fontSize.l_l * 2} 
+                    />
+                    <Text style={[styles.list_empty_text, dynamicStyle.list_empty_text]}>No items</Text>
+                  </View>
+                }
+                renderItem={(info) => 
+                  <ItemShowcase 
+                    item={info.item} 
+                    index={info.index} 
+                    currentTheme={currentTheme} 
+                    aspectRatio={1} 
+                    selectOnly={true}
+                    setSelectedItems={setItemsSelected}
+                    selectedItems={itemsSelected}
+                  />
+                }
+              >
+              </FlatList>
+          </View>
+          {itemsSelected.length > 0 &&
+            // <TouchableOpacity  
+            //   style={[styles.button, dynamicStyle.button]}
+            //   onPress={() => addItems}
+            //   children={<Text style={[styles.button_text, dynamicStyle.button_text]}>Add to Outfit</Text>}
+            // />
+            
+            <TouchableOpacity
+              onPress={() => addItems()}
+              style={[{
+                position: 'absolute',
+                bottom: 13, // space from bottombar, TODO: why 13? 
+                alignSelf: 'center',
+                height: 64,
+                width: 64,
+                borderRadius: 64,
+                backgroundColor: currentTheme.colors.secondary,
+                justifyContent: 'center',
+                alignItems: 'center',
+              },
+              // { transform: [{rotate: spin}] }
+            ]}
             >
-            </FlatList>
+                <MaterialCommunityIcons 
+                  style={{alignContent: 'center'}}
+                  name={icons.plus} color={currentTheme.colors.tabActive} size={48} 
+                />
+            </TouchableOpacity>
+          }
         </View>
-        {itemsSelected.length > 0 &&
-          <TouchableOpacity  
-            style={[styles.button, dynamicStyle.button]}
-            onPress={() => addItems()}
-            children={<Text style={[styles.button_text, dynamicStyle.button_text]}>Add to Outfit</Text>}
-          />
-        }
-      </View>
-    </TouchableWithoutFeedback>
+      </TouchableWithoutFeedback>
+    </Modal>
   )
 }
 
@@ -140,20 +170,21 @@ export default ItemPicker
 
 const styles = StyleSheet.create({
   absoluteView: {
-    zIndex: 25,
+    zIndex: 100,
     position: 'absolute',
     top: 0,
     bottom: 0,
     left: 0,
     right: 0,
     backgroundColor: Theme.colors.background + '88',
-    padding: Theme.spacing.page,
+    paddingHorizontal: Theme.spacing.page,
     paddingBottom: Theme.spacing.xxl,
     justifyContent: 'flex-end',
   },
 
   list_container: {
     maxHeight: '80%',
+    paddingBottom: Theme.spacing.xl*2
   },
 
   list_style: { 
@@ -187,7 +218,7 @@ const styles = StyleSheet.create({
     bottom: 0,
     paddingVertical: Theme.spacing.m,
     borderRadius: Theme.spacing.l,
-    marginTop: Theme.spacing.m,
+    // marginTop: Theme.spacing.m,
 
     borderWidth: Theme.spacing.xxs,
     shadowOffset: { width: 0, height: 2 },

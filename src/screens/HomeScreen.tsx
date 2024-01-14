@@ -7,7 +7,7 @@ import AnimatedGradient from '../components/AnimatedGradient';
 import { deleteTable, getDBConnection, tableName_ClothingItem } from '../assets/database/db-service';
 import { deleteClothingItem, getClothingItems } from '../assets/database/db-operations/db-operations-clothingitem';
 import { ClothingItem } from '../assets/database/models';
-import ItemSelector from '../components/ItemPicker';
+import ItemPicker from '../components/ItemPicker';
 import { useNavigation } from '@react-navigation/native';
 import { icons } from '../defaults/custom-svgs';
 import { FlatList } from 'react-native-gesture-handler';
@@ -115,7 +115,7 @@ const HomeScreen = ({...props}) => {
   return (
     <SafeAreaView style={[styles.page, dynamicStyle.background_style]}>
       {itemSelection != '' 
-      && <ItemSelector 
+      && <ItemPicker 
             handleItemsToBeAdded={setItemsToBeAdded} 
             handleCategoryToBeAddedTo={setCategoryToBeAddedTo}
             handleItemSelection={setItemSelection} 

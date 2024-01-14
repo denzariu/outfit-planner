@@ -108,7 +108,7 @@ const ItemShowcase = (props: ItemShowcaseProps) => {
         onPressOut={() => animateOut()}
         onLongPress={() => selectItem()}
         onPress={() => (selectOnly || selectedItems.length) ? selectItem() : navigator.navigate('AddItemScreen', {item: item})}
-        delayLongPress={200}
+        delayLongPress={150}
         key={'wardrobe_image_container_' + index + item.image}
         style={[styles.article, dynamicStyle.article_container]}
         activeOpacity={0.7}
