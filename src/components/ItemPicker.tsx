@@ -178,7 +178,7 @@ const styles = StyleSheet.create({
     right: 0,
     backgroundColor: Theme.colors.background + '88',
     paddingHorizontal: Theme.spacing.page,
-    paddingBottom: Theme.spacing.xxl,
+    paddingBottom: Theme.spacing.l,
     justifyContent: 'flex-end',
   },
 

@@ -11,6 +11,7 @@ import ItemPicker from '../components/ItemPicker';
 import { useNavigation } from '@react-navigation/native';
 import { icons } from '../defaults/custom-svgs';
 import { FlatList } from 'react-native-gesture-handler';
+import { getCategoryName } from '../defaults/data';
 
 const HomeScreen = ({...props}) => {
   const isDarkMode = useColorScheme() == 'dark';
@@ -155,7 +156,11 @@ type SectionElementNameProps = {
   fieldName: "" | "all" | "extra" | "top" | "bottom" | "feet",
 }
 const SectionElementName = ({dynamicStyle, currentTheme, addItem, removeItem, field, fieldName}: SectionElementNameProps) => {
-  const category = fieldName[0].toUpperCase() + fieldName.slice(1)
+  const [category, setCategory] = useState('')
+
+  useEffect(() => {
+    setCategory(getCategoryName(fieldName)) 
+  }, [fieldName])
 
   return (
     
@@ -216,6 +221,7 @@ const SectionElement = ({index, category}: SectionElementProps) => {
     { view ? 
       category?.map((item) => 
         <Pressable 
+          key={'all_items_' + index + '_id_' + item.id}
           onPress={() => setView(!view)}
           style={{flex: item.aspect_ratio - 0.08, aspectRatio: item.aspect_ratio}}
         >
@@ -232,8 +238,8 @@ const SectionElement = ({index, category}: SectionElementProps) => {
           horizontal
           pagingEnabled
           snapToAlignment={'center'}
-          renderItem={(item) => <EachItem imageUri={item.item.image} handldeView={setView} aspectRatio={item.item.aspect_ratio}/>}
-          keyExtractor={(item, index) => 'carousel_' + index + item.image}
+          renderItem={(item) => <EachItem imageUri={item.item.image} handleView={setView} aspectRatio={item.item.aspect_ratio}/>}
+          keyExtractor={(item, index) => 'carousel_' + index + '_id_' + item.id}
         />
       </View>
     }
@@ -243,13 +249,13 @@ const SectionElement = ({index, category}: SectionElementProps) => {
 
 type EachItemProps = {
   imageUri: string,
-  handldeView: React.Dispatch<React.SetStateAction<boolean>>,
+  handleView: React.Dispatch<React.SetStateAction<boolean>>,
   aspectRatio: number
 }
-const EachItem = ({imageUri, handldeView, aspectRatio}: EachItemProps) => {
+const EachItem = ({imageUri, handleView, aspectRatio}: EachItemProps) => {
 
   return (
-    <Pressable onPress={() => handldeView((currentValue) => !currentValue)}>
+    <Pressable onPress={() => handleView((currentValue) => !currentValue)}>
       {/* TODO: better formula */}
       <Animated.View style={{ flex: 1/aspectRatio, aspectRatio: aspectRatio }}>
           <Animated.Image 
@@ -279,12 +285,12 @@ const styles = StyleSheet.create({
   container: {
     display: 'flex',
     flexDirection: 'row',
-    gap: Theme.spacing.m,
+    gap: Theme.spacing.s,
     height: '80%'
   },
 
   container_clothing: {
-    flex: 0.52,
+    flex: 0.5,
     borderRadius: Theme.spacing.m,
     borderWidth: Theme.spacing.xxs,
     paddingVertical: Theme.spacing.xxs
@@ -298,7 +304,7 @@ const styles = StyleSheet.create({
   },
 
   container_items: {
-    flex: 0.48,
+    flex: 0.5,
     display: 'flex',
     flexDirection: 'column',
     rowGap: Theme.spacing.s,
@@ -306,6 +312,7 @@ const styles = StyleSheet.create({
   },
 
   container_items_category: {
+    // maxHeight: '25%', //variable height
     flex: 0.25,
     display: 'flex',
     flexDirection: 'column',

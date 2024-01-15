@@ -1,7 +1,7 @@
-import { Animated, Image, LayoutAnimation, StyleSheet, TouchableOpacity, View, useColorScheme } from "react-native";
+import { Animated, Image, LayoutAnimation, StyleSheet, Text, TouchableOpacity, View, useColorScheme } from "react-native";
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
 import { icons } from "../defaults/custom-svgs";
-import { DarkTheme, Theme, mainAnimation } from "../defaults/ui";
+import { DarkTheme, Theme, mainAnimation, swipeAnimation } from "../defaults/ui";
 import { useRef, useState } from "react";
 import AnimatedGradient from "./AnimatedGradient";
 
@@ -31,7 +31,7 @@ const CustomTab = ({ state, descriptors, navigation, setExpanded, expanded }: Ta
       duration: 250,
       useNativeDriver: true
     }).start();
-    LayoutAnimation.configureNext(mainAnimation);
+    LayoutAnimation.configureNext(swipeAnimation);
     setExpanded(true);
   };
 
@@ -42,13 +42,69 @@ const CustomTab = ({ state, descriptors, navigation, setExpanded, expanded }: Ta
       duration: 250,
       useNativeDriver: true
     }).start();
-    LayoutAnimation.configureNext(mainAnimation);
+    LayoutAnimation.configureNext(swipeAnimation);
     setExpanded(false);
   }
   
   return (
     <>
-    
+    {expanded &&
+      <View 
+        pointerEvents='box-none' 
+        style={{
+          zIndex: 30,
+          position: 'absolute',
+          bottom: 56, // 56 above menu, or 8/10 to overlap menu 
+          left: 20,
+          right: 20,
+          flexDirection: 'row',
+          justifyContent: 'space-between',
+        }}
+      >
+        <TouchableOpacity
+          activeOpacity={0.75}
+          onPress={() => navigation.navigate('AddItemScreen')}
+          style={{
+            width: 120,
+            alignItems: 'center',
+            padding: Theme.spacing.m,
+            backgroundColor: Theme.colors.primary,
+            borderRadius: Theme.spacing.m,
+          }}
+        >
+          <Text
+            style={{
+              fontWeight: '500',
+              color: Theme.colors.background,
+              fontSize: Theme.fontSize.s_l
+            }}
+          >
+            Add Item
+          </Text>  
+        </TouchableOpacity>
+        <TouchableOpacity
+          onPress={() => navigation.navigate('AddItemScreen')}
+          activeOpacity={0.75}
+          style={{
+            width: 120,
+            alignItems: 'center',
+            padding: Theme.spacing.m,
+            backgroundColor: Theme.colors.primary,
+            borderRadius: Theme.spacing.m,
+          }}
+        >
+          <Text
+            style={{
+              fontWeight: '500',
+              color: Theme.colors.background,
+              fontSize: Theme.fontSize.s_l,
+            }}
+          >
+            Create Outfit
+          </Text>  
+        </TouchableOpacity>
+      </View>
+    }
     <View
       style={{
         // position: 'absolute',

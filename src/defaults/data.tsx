@@ -83,7 +83,7 @@ export const CLOTHING_TYPES = [
   {"parent": "bottom", "label": "High-waisted Pants", "value": "high-waisted-pants"},
   {"parent": "bottom", "label": "Cropped Pants", "value": "cropped-pants"},
 
-  {label: 'Feet', value: 'feet'},
+  {label: 'Footwear', value: 'feet'},
   {"parent": "feet", "label": "Sneakers", "value": "sneakers"},
   {"parent": "feet", "label": "Boots", "value": "boots"},
   {"parent": "feet", "label": "Flats", "value": "flats"},
@@ -145,3 +145,17 @@ export const CLOTHING_FABRICS = [
   {"label": "Hemp", "value": "hemp"},
   {"label": "Bamboo", "value": "bamboo"}
 ]
+
+export const getCategoryName = (fieldName: string) => {
+  switch (fieldName) {
+    case 'extra': 
+      return 'Extra'
+    case 'top':
+      return 'Top'
+    case 'bottom':
+      return 'Bottom'
+    case 'feet':
+      return 'Footwear'
+  }
+  return 'All'
+} 

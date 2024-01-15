@@ -1,7 +1,7 @@
 import { Button, Image, LayoutAnimation, SafeAreaView, StyleSheet, Text, View, useColorScheme } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import AnimatedGradient from '../../components/AnimatedGradient'
-import { DarkTheme, Theme } from '../../defaults/ui'
+import { DarkTheme, Theme, mainAnimation } from '../../defaults/ui'
 import { TextInput, TouchableOpacity } from 'react-native-gesture-handler'
 import * as ImagePicker from 'expo-image-picker'
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
@@ -12,7 +12,8 @@ import { createClothingTable, getClothingItems, saveClothingItems } from '../../
 import { deleteTable, getDBConnection, tableName_ClothingItem } from '../../assets/database/db-service'
 import { icons } from '../../defaults/custom-svgs'
 import { ClothingItem } from '../../assets/database/models'
-import { CLOTHING_FABRICS, CLOTHING_TYPES } from '../../defaults/data'
+import { CLOTHING_FABRICS, CLOTHING_TYPES, getCategoryName } from '../../defaults/data'
+import { simplifiedColor512, simplifiedColorID } from '../../defaults/data-processing'
 
 type AddItemScreen = {
   navigation: any,
@@ -108,7 +109,7 @@ const AddItemScreen = ({navigation, route}: AddItemScreen) => {
     })
     .then((res) => {return res})
 
-    LayoutAnimation.configureNext(LayoutAnimation.create(150, 'easeInEaseOut', 'opacity'));
+    LayoutAnimation.configureNext(mainAnimation);
     if (!result.canceled) {
       setImage(result.assets[0].uri);
       setAspectRatio(result.assets[0].width/result.assets[0].height)
@@ -116,7 +117,7 @@ const AddItemScreen = ({navigation, route}: AddItemScreen) => {
   }
 
   const dynamicStyle = StyleSheet.create({
-    background_style: {backgroundColor: currentTheme.colors.background},
+    background: {backgroundColor: currentTheme.colors.background},
     textHeader: {color: currentTheme.colors.tertiary},
     container: {backgroundColor: mainColor, shadowColor: currentTheme.colors.foreground},
     setting: {backgroundColor: currentTheme.colors.primary},
@@ -126,6 +127,7 @@ const AddItemScreen = ({navigation, route}: AddItemScreen) => {
     image_enlarge_icon: {backgroundColor: currentTheme.colors.tertiary}
   })
 
+  // Handles state change for item's wearability in 'seasons'
   function seasonPress (season: number) {
     setSeasons(() => { return [
       ...seasons.slice(0,season),
@@ -134,6 +136,7 @@ const AddItemScreen = ({navigation, route}: AddItemScreen) => {
     ]})
   }
 
+  // Handles state change for item's wearability in 'weather'
   function weatherPress (w: number) {
     setWeather(() => { return [
       ...weather.slice(0,w),
@@ -156,57 +159,66 @@ const AddItemScreen = ({navigation, route}: AddItemScreen) => {
         image: image,
         aspect_ratio: aspectRatio
       }
-      console.log(item)
+
       await createClothingTable(db)
-      // await saveClothingItems(db, [item])
-      
       await saveClothingItems(db, [item])
-      await getClothingItems(db).then((res) => {console.log(res)})
+
     } catch (e) {
-      console.log(e)
+      console.error(e)
     }
   }
-  console.log(aspectRatio, {zoom: enlargedImage})
+
+  
+  
   return (
-    <SafeAreaView style={[styles.page, dynamicStyle.background_style]}>
+    <SafeAreaView style={[styles.page, dynamicStyle.background]}>
       <View style={{flexDirection: 'row', alignItems: 'center', justifyContent:'flex-start', marginVertical: Theme.spacing.m, marginTop: Theme.spacing.l, gap: Theme.spacing.l}}>
         <TouchableOpacity 
           children={<MaterialCommunityIcons name={icons.arrow_left} color={currentTheme.colors.tertiary} size={currentTheme.fontSize.l_s} />}
           onPress={() => navigator.goBack()}
         />
         <Text style={[styles.header, dynamicStyle.textHeader]}>
-          {name == '' ? 'Add Item' : name + ' ' + category.value.charAt(0).toUpperCase() + category.value.slice(1)}
+          {name == '' ? 'Add Item' : name + ' ' + category.label}
         </Text>
       </View>
       
       <View style={[styles.container, dynamicStyle.container]}>
         <TouchableOpacity 
-          onPress={() => addImage()}
           onLongPress={() => setEnlargedImage((prev) => !prev)}
-          style={{ height: '100%' }}>
+          onPress={() => addImage()}
+          style={{ height: '100%' }}
+        >
           <View style={styles.container_upload}>
-          {image ? 
-            <Image 
-              source={{ uri: image }} 
-              style={[
-                {flex: 1, borderRadius: Theme.spacing.s},
-                enlargedImage ? 
-                  {aspectRatio: 1 }
-                  : {aspectRatio: aspectRatio, flex: 1/aspectRatio, maxWidth: '100%'}
-              ]}
-            />
-            :
-            <>
-            <View style={{position: 'absolute', zIndex: 10}}>
-              <MaterialCommunityIcons name={icons.upload} color={currentTheme.colors.tertiary} size={currentTheme.fontSize.l_l * 1.2} />
-            </View>
-            <MaterialCommunityIcons name={icons.tshirt} color={currentTheme.colors.quaternary} size={currentTheme.fontSize.l_l * 3} />
-            </>
-          }
+            {image ? 
+              <Image 
+                source={{ uri: image }} 
+                style={[
+                  {flex: 1, borderRadius: Theme.spacing.s},
+                  // Long pressing the image will zoom it in/out, based on its aspect ratio
+                  enlargedImage ? 
+                    {aspectRatio: 1 }
+                    : {aspectRatio: aspectRatio, flex: 1/aspectRatio, maxWidth: '100%'}
+                ]}
+              />
+              :
+              <>
+                <View style={{position: 'absolute', zIndex: 10}}>
+                  <MaterialCommunityIcons 
+                    name={icons.upload} 
+                    color={currentTheme.colors.tertiary} 
+                    size={currentTheme.fontSize.l_l * 1.2} 
+                  />
+                </View>
+                <MaterialCommunityIcons 
+                  name={icons.tshirt} 
+                  color={currentTheme.colors.quaternary} 
+                  size={currentTheme.fontSize.l_l * 3} 
+                />
+              </>
+            }
           </View>
         </TouchableOpacity>
       </View>
-      
 
       <View style={styles.container_clothing_settings}>
         <View style={[styles.setting, dynamicStyle.setting]}>
@@ -225,7 +237,6 @@ const AddItemScreen = ({navigation, route}: AddItemScreen) => {
           <Text style={[styles.setting_title, dynamicStyle.setting_title]}>Category</Text>
 
           <Dropdown
-            // mode='modal'
             renderItem={(item) => {return <CategoryItem item={item} theme={currentTheme}/>}}
             data={items}
             labelField={'label'}
@@ -239,7 +250,6 @@ const AddItemScreen = ({navigation, route}: AddItemScreen) => {
             onFocus={() => setFocus(true)}
             showsVerticalScrollIndicator={false}
             autoScroll={true}
-            // dropdownPosition='top'
             placeholder='Type of clothing'
             renderRightIcon={() =>
               <MaterialCommunityIcons name="menu-down" color={currentTheme.colors.quaternary} size={currentTheme.fontSize.m_l} />
@@ -251,71 +261,40 @@ const AddItemScreen = ({navigation, route}: AddItemScreen) => {
             itemTextStyle={{fontSize: Theme.fontSize.s_l, textAlign: 'center', color: currentTheme.colors.quaternary}}
             activeColor={currentTheme.colors.secondary}
             // placeholderStyle={{paddingHorizontal: 16}}
+            // dropdownPosition='top'
+            // mode='modal'
           />
           
         </View>
       </View>
+      
       <View style={styles.container_clothing_settings}>
+        
+        {/* Seasons Buttons */}
+
         <View style={[styles.setting, dynamicStyle.setting]}>
           <Text style={[styles.setting_title, dynamicStyle.setting_title]}>Seasons</Text>
           <View style={styles.container_seasons}>
-            <TouchableOpacity 
-              containerStyle={[styles.season, seasons[0] ? {backgroundColor: currentTheme.colors.tertiary} : {}]}
-              onPress={() => seasonPress(0)}
-            >
-              <MaterialCommunityIcons name={icons.season1} color={seasons[0] ? currentTheme.colors.quaternary : currentTheme.colors.quaternary} size={currentTheme.fontSize.m_l} />
-            </TouchableOpacity>
-            <TouchableOpacity 
-              containerStyle={[styles.season, seasons[1] ? {backgroundColor: currentTheme.colors.tertiary} : {}]}
-              onPress={() => seasonPress(1)}
-            >  
-              <MaterialCommunityIcons name={icons.season2}color={seasons[1] ? currentTheme.colors.quaternary : currentTheme.colors.quaternary} size={currentTheme.fontSize.m_l} />
-            </TouchableOpacity>
-            <TouchableOpacity 
-              containerStyle={[styles.season, seasons[2] ? {backgroundColor: currentTheme.colors.tertiary} : {}]}
-              onPress={() => seasonPress(2)}
-            >
-              <MaterialCommunityIcons name={icons.season3} color={seasons[2] ? currentTheme.colors.quaternary : currentTheme.colors.quaternary} size={currentTheme.fontSize.m_l} />
-            </TouchableOpacity>
-            <TouchableOpacity 
-              containerStyle={[styles.season, seasons[3] ? {backgroundColor: currentTheme.colors.tertiary} : {}]}
-              onPress={() => seasonPress(3)}
-            >
-              <MaterialCommunityIcons name={icons.season4} color={seasons[3] ? currentTheme.colors.quaternary : currentTheme.colors.quaternary} size={currentTheme.fontSize.m_l} />
-            </TouchableOpacity>
+            <ButtonPress value={seasons[0]} handler={() => seasonPress(0)} icon={icons.season1} color_background={currentTheme.colors.tertiary} color_icon={currentTheme.colors.quaternary}/>
+            <ButtonPress value={seasons[1]} handler={() => seasonPress(1)} icon={icons.season2} color_background={currentTheme.colors.tertiary} color_icon={currentTheme.colors.quaternary}/>
+            <ButtonPress value={seasons[2]} handler={() => seasonPress(2)} icon={icons.season3} color_background={currentTheme.colors.tertiary} color_icon={currentTheme.colors.quaternary}/>
+            <ButtonPress value={seasons[3]} handler={() => seasonPress(3)} icon={icons.season4} color_background={currentTheme.colors.tertiary} color_icon={currentTheme.colors.quaternary}/>
           </View>
         </View>
+
+        {/* Weather Buttons */}
 
         <View style={[styles.setting, dynamicStyle.setting]}>
           <Text style={[styles.setting_title, dynamicStyle.setting_title]}>Weather</Text>
           <View style={styles.container_seasons}>
-            <TouchableOpacity 
-              containerStyle={[styles.season, weather[0] ? {backgroundColor: currentTheme.colors.tertiary} : {}]}
-              onPress={() => weatherPress(0)}
-            >
-              <MaterialCommunityIcons name={icons.weather1} color={weather[0] ? currentTheme.colors.quaternary : currentTheme.colors.quaternary} size={currentTheme.fontSize.m_l} />
-            </TouchableOpacity>
-            <TouchableOpacity 
-              containerStyle={[styles.season, weather[1] ? {backgroundColor: currentTheme.colors.tertiary} : {}]}
-              onPress={() => weatherPress(1)}
-            >  
-              <MaterialCommunityIcons name={icons.weather2} color={weather[1] ? currentTheme.colors.quaternary : currentTheme.colors.quaternary} size={currentTheme.fontSize.m_l} />
-            </TouchableOpacity>
-            <TouchableOpacity 
-              containerStyle={[styles.season, weather[2] ? {backgroundColor: currentTheme.colors.tertiary} : {}]}
-              onPress={() => weatherPress(2)}
-            >
-              <MaterialCommunityIcons name={icons.weather3} color={weather[2] ? currentTheme.colors.quaternary : currentTheme.colors.quaternary} size={currentTheme.fontSize.m_l} />
-            </TouchableOpacity>
-            <TouchableOpacity 
-              containerStyle={[styles.season, weather[3] ? {backgroundColor: currentTheme.colors.tertiary} : {}]}
-              onPress={() => weatherPress(3)}
-            >
-              <MaterialCommunityIcons name={icons.weather4} color={weather[3] ? currentTheme.colors.quaternary : currentTheme.colors.quaternary} size={currentTheme.fontSize.m_l} />
-            </TouchableOpacity>
+            <ButtonPress value={weather[0]} handler={() => weatherPress(0)} icon={icons.weather1} color_background={currentTheme.colors.tertiary} color_icon={currentTheme.colors.quaternary}/>
+            <ButtonPress value={weather[1]} handler={() => weatherPress(1)} icon={icons.weather2} color_background={currentTheme.colors.tertiary} color_icon={currentTheme.colors.quaternary}/>
+            <ButtonPress value={weather[2]} handler={() => weatherPress(2)} icon={icons.weather3} color_background={currentTheme.colors.tertiary} color_icon={currentTheme.colors.quaternary}/>
+            <ButtonPress value={weather[3]} handler={() => weatherPress(3)} icon={icons.weather4} color_background={currentTheme.colors.tertiary} color_icon={currentTheme.colors.quaternary}/>
           </View>
         </View>
       </View>
+
       <View style={styles.container_clothing_settings}>
         <View style={[styles.setting, dynamicStyle.setting]}>
           <Text style={[styles.setting_title, dynamicStyle.setting_title]}>Colors</Text>
@@ -335,7 +314,7 @@ const AddItemScreen = ({navigation, route}: AddItemScreen) => {
               onPress={() => setMainColor(colors.muted)}
             />
             <TouchableOpacity  
-              style={[{padding: Theme.spacing.l, borderRadius: Theme.spacing.s, borderWidth: Theme.spacing.xxs, borderColor: currentTheme.colors.primary}, {backgroundColor: colors.vibrant}, mainColor == colors.vibrant ? {borderColor: mainColor, borderWidth: Theme.spacing.xxs} : {}]}
+              style={[{padding: Theme.spacing.l, borderRadius: Theme.spacing.s, borderWidth: Theme.spacing.xxs, borderColor: currentTheme.colors.primary}, {backgroundColor: colors.lightVibrant}, mainColor == colors.vibrant ? {borderColor: mainColor, borderWidth: Theme.spacing.xxs} : {}]}
               onPress={() => setMainColor(colors.lightVibrant)}
             />
           </View>
@@ -402,8 +381,22 @@ const AddItemScreen = ({navigation, route}: AddItemScreen) => {
 const CategoryItem = ({item, theme}: {item: any, theme: any}) => {
   return (
     
-    <View style={[{paddingHorizontal: theme.spacing.s}, !item.parent ? {backgroundColor: theme.colors.tertiary, borderWidth: 1, borderColor: theme.colors.primary} : {}]}>
-      <Text style={[{color: theme.colors.quaternary, fontSize: theme.fontSize.s_l}, !item.parent ? {color: theme.colors.quaternary, fontWeight: '500', } : {paddingVertical: theme.spacing.xs, textAlign: 'center'}]}>{item.label}</Text>
+    <View 
+      style={[
+        {paddingHorizontal: theme.spacing.s}, 
+        !item.parent ? {backgroundColor: theme.colors.tertiary, borderWidth: 1, borderColor: theme.colors.primary} 
+                     : {}
+      ]}
+    >
+      <Text 
+        style={[
+          {color: theme.colors.quaternary, fontSize: theme.fontSize.s_l}, 
+          !item.parent ? {color: theme.colors.quaternary, fontWeight: '500', } 
+                      : {paddingVertical: theme.spacing.xs, textAlign: 'center'}
+        ]}
+      >
+        {item.label}
+        </Text>
     </View>
   )
 }
@@ -412,12 +405,34 @@ const MultiSelectItem = ({item, theme}: {item: any, unselect: any, theme: any}) 
   return (
     
     <View style={[{paddingHorizontal: theme.spacing.xs, paddingVertical: theme.spacing.xxs, margin: theme.spacing.xs, backgroundColor: theme.colors.tertiary, borderWidth: 0.5, borderColor: theme.colors.quaternary, borderRadius: 8}]}>
-      <Text style={[{color: theme.colors.quaternary, fontSize: theme.fontSize.s_l}]}>{item.label}</Text>
+      <Text style={[{color: theme.colors.quaternary, fontSize: theme.fontSize.s_l}]}>
+        {item.label}
+      </Text>
     </View>
   )
 }
 
 export default AddItemScreen
+
+// Component for the 'weather' & 'conditions' buttons
+type ButtonPressType = {
+  value: boolean,
+  handler: () => void,
+  icon: string,
+  color_background: string,
+  color_icon: string
+}
+const ButtonPress = ({value, handler, icon, color_background, color_icon}: ButtonPressType) => {
+
+  return (
+    <TouchableOpacity 
+      containerStyle={[styles.season, value ? {backgroundColor: color_background} : {}]}
+      onPress={handler}
+    >
+      <MaterialCommunityIcons name={icon} color={color_icon} size={Theme.fontSize.m_l} />
+    </TouchableOpacity>
+  )
+}
 
 const styles = StyleSheet.create({
   page: {
