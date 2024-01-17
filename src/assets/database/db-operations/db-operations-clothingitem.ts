@@ -4,7 +4,7 @@ import { tableName_ClothingItem as tableName } from "../db-service";
 
 
 export const createClothingTable = async (db: SQLiteDatabase) => {
-  // create table if not exists
+  // Create table if it does not exist
   const query = `CREATE TABLE IF NOT EXISTS ${tableName} (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     adjective TEXT,
@@ -18,8 +18,8 @@ export const createClothingTable = async (db: SQLiteDatabase) => {
   await db.executeSql(query);
 };
 
-
 // ++ Gets & Sets ++
+// Get items from DB
 export const getClothingItems = async (db: SQLiteDatabase, type?: string): Promise<ClothingItem[]> => {
   try {
     const clothingItems: ClothingItem[] = [];
@@ -40,15 +40,17 @@ export const getClothingItems = async (db: SQLiteDatabase, type?: string): Promi
   }
 };
 
-export const saveClothingItems = async (db: SQLiteDatabase, clothingItem: ClothingItem[]) => {
+// Save items to DB
+export const saveClothingItems = async (db: SQLiteDatabase, clothingItems: ClothingItem[]) => {
 
   const insertQuery =
     `INSERT OR REPLACE INTO ${tableName} (adjective, type, subtype, seasons, image, aspect_ratio) VALUES` +
-    clothingItem.map(i => `('${i.adjective}', '${i.type}', '${i.subtype}', '${i.seasons}', '${i.image}', '${i.aspect_ratio}')`).join(',');
+    clothingItems.map(i => `('${i.adjective}', '${i.type}', '${i.subtype}', '${i.seasons}', '${i.image}', '${i.aspect_ratio}')`).join(',');
 
   return db.executeSql(insertQuery);
 };
 
+// Delete from DB - single item
 export const deleteClothingItem = async (db: SQLiteDatabase, id: number) => {
   const deleteQuery = `DELETE from ${tableName} where rowid = ${id}`;
   
@@ -56,6 +58,7 @@ export const deleteClothingItem = async (db: SQLiteDatabase, id: number) => {
     .catch((err) => Error(`Failed to delete item with id ${id}`))
 };
 
+// Delete from DB - multiple items
 export const deleteClothingItems = async (db: SQLiteDatabase, ids: Array<number | null>) => {
   if (ids.length < 1) throw Error('No items selected for deletion.');
 

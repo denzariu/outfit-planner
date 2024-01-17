@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { createNativeStackNavigator } from '@react-navigation/native-stack'
 import HomeScreen from './src/screens/HomeScreen';
@@ -49,13 +49,33 @@ import { icons } from './src/defaults/custom-svgs';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import CustomTab from './src/components/CustomTab';
 import AnimatedGradient from './src/components/AnimatedGradient';
+import { getDBConnection } from './src/assets/database/db-service';
+import { createClothingTable } from './src/assets/database/db-operations/db-operations-clothingitem';
+import { createItemOutfitTable, createOutfitTable } from './src/assets/database/db-operations/db-operations-outfit';
 Logs.enableExpoCliLogging()
 
 // const Tab = createMaterialBottomTabNavigator();
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
 
+
 function App(): JSX.Element {
+
+  // Init app: declare sql tables and whatnot 
+  const INIT = async () => {
+    const db = await getDBConnection();
+
+    console.log('Tables set up...')
+    await createClothingTable(db)
+    await createOutfitTable(db)
+    await createItemOutfitTable(db)
+  }
+
+  useEffect (() => {
+    console.log('\n\n\nAPP INIT...')
+    INIT()
+  }, [])
+
   const theme = useTheme();
   theme.colors.secondaryContainer = 'transparent'
   const currentTheme = useColorScheme() == 'dark' ? DarkTheme : Theme

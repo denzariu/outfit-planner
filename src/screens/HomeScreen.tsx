@@ -6,12 +6,13 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import AnimatedGradient from '../components/AnimatedGradient';
 import { deleteTable, getDBConnection, tableName_ClothingItem } from '../assets/database/db-service';
 import { deleteClothingItem, getClothingItems } from '../assets/database/db-operations/db-operations-clothingitem';
-import { ClothingItem } from '../assets/database/models';
+import { ClothingItem, Outfit } from '../assets/database/models';
 import ItemPicker from '../components/ItemPicker';
 import { useNavigation } from '@react-navigation/native';
 import { icons } from '../defaults/custom-svgs';
 import { FlatList } from 'react-native-gesture-handler';
 import { getCategoryName } from '../defaults/data';
+import { addItemsToOutfit, createOutfit, deleteOutfit, getOutfitItems, getOutfitItemsTable, getOutfits } from '../assets/database/db-operations/db-operations-outfit';
 
 const HomeScreen = ({...props}) => {
   const isDarkMode = useColorScheme() == 'dark';
@@ -26,8 +27,7 @@ const HomeScreen = ({...props}) => {
   const [itemsToBeAdded, setItemsToBeAdded] = useState<ClothingItem[]>([]);
   
   // Outfit manager
-  const [currentOutfit, setCurrentOutfit] = useState<number>(0)
-  const [outfits, setOutfits] = useState<Array<ClothingItem[]>>([])
+  const [currentOutfit, setCurrentOutfit] = useState<Outfit>({name: 'Default'})
 
   // Current items shown
   const [extra, setExtra] = useState<ClothingItem[]>([]);
@@ -62,27 +62,64 @@ const HomeScreen = ({...props}) => {
     setItemSelection(type)
   } 
 
-  const loadOutfit = async () => {
-    // const db = await getDBConnection()
+  // TODO: Feature in testing, default / favourite outfits + outfit selector coming soon
+  const saveOutfit = async () => {
+    const db = await getDBConnection()
+    
+    if (!currentOutfit.id)
+      await createOutfit(db, currentOutfit.name)
+      .then(res => {
+        const allClothes = extra.concat(top, bottom, feet)
+        addItemsToOutfit(db, allClothes, {id: res, name: currentOutfit.name})
+        setCurrentOutfit((prev) => {return {id: res, name: prev.name}})
+      })
 
-    // await getClothingItems(db, 'extra').then((res) => setExtra(res))
-    // await getClothingItems(db, 'top').then((res) => setTop(res))
-    // await getClothingItems(db, 'bottom').then((res) => setBottom(res))
-    // await getClothingItems(db, 'feet').then((res) => setFeet(res))
+    else {
+      const allClothes = extra.concat(top, bottom, feet)
+      addItemsToOutfit(db, allClothes, currentOutfit)
+    }
+    console.log('Added Items to Outfit')
 
   }
+  
+  // TODO: Feature in testing
+  const loadOutfit = async () => {
+    const db = await getDBConnection()
 
+    // await getOutfitItemsTable(db, currentOutfit.id).then(res => console.log({responseK: res}))
+    if (currentOutfit.id) 
+      await getOutfitItems(db, currentOutfit.id)
+            .then(res => {
+              setCategoryToBeAddedTo('all'),
+              console.log(res)
+              setItemsToBeAdded(res)
+            }) 
+    else {
+      //TODO: replace 29 with id of selected outfit
+      await getOutfitItems(db, 29)
+            .then(res => {
+              setCategoryToBeAddedTo('all');
+              setItemsToBeAdded(res);
+            }) 
+    }
+  }
+
+  // Whenever the outfit changes, update the items
   useEffect(() => {
     loadOutfit()
-  }, [])
+  }, [currentOutfit])
   
   // If there are items to be added, add them
   useEffect(() => {
-    console.log('tobeadded', itemsToBeAdded)
-    if (itemsToBeAdded?.length) {
+    console.log({toAdd: itemsToBeAdded})
+    if (itemsToBeAdded.length) {
       switch (categoryToBeAddedTo) {
         case 'all':
-          //TODO: Filter based on clothing type
+          setExtra(() => itemsToBeAdded.filter(item => item.type == 'extra'))
+          setTop(() => itemsToBeAdded.filter(item => item.type == 'top'))
+          setBottom(() => itemsToBeAdded.filter(item => item.type == 'bottom'))
+          setFeet(() => itemsToBeAdded.filter(item => item.type == 'feet'))
+
           break;
         case 'extra':
           setExtra((prev) => {return prev.concat(itemsToBeAdded)})
@@ -99,11 +136,11 @@ const HomeScreen = ({...props}) => {
       }
       setItemsToBeAdded([])
     }
-  }, [itemsToBeAdded?.length])
+  }, [itemsToBeAdded.length])
 
   const dynamicStyle = StyleSheet.create({
     background_style: {backgroundColor: currentTheme.colors.background},
-    textHeader: {color: currentTheme.colors.tertiary},
+    text_header: {color: currentTheme.colors.tertiary},
     container_clothing: {backgroundColor: 'transparent', borderColor: currentTheme.colors.tertiary},
     container_items_category: {backgroundColor: currentTheme.colors.secondary},
     category_text: {color: currentTheme.colors.quaternary},
@@ -124,9 +161,49 @@ const HomeScreen = ({...props}) => {
           />
       }
       <AnimatedGradient props={fadeAnimation}/>
-      <Text style={[styles.header, dynamicStyle.textHeader]}>
-        Today's Outfit
-      </Text>
+
+      <View style={styles.header_container}>
+        <Text style={[styles.header, dynamicStyle.text_header]}>
+          Today's Outfit
+        </Text>
+        
+        <View style={{
+          // TODO: move these to 'styles'
+          flex: 0.7, 
+          flexDirection: 'row', 
+          justifyContent: 'flex-end', 
+          alignItems: 'center'
+        }}>
+          {(extra.length || top.length || bottom.length || feet.length) ?
+            // Buttons
+            <>
+              <TouchableOpacity 
+                onPress={() => saveOutfit()} 
+                style={{paddingHorizontal: Theme.spacing.xs}}
+              >
+                <MaterialCommunityIcons 
+                  name={icons.upload} 
+                  color={currentTheme.colors.primary} 
+                  size={currentTheme.fontSize.m_l} 
+                />
+              </TouchableOpacity>
+            </>
+            :
+            <>
+              <TouchableOpacity 
+                onPress={() => loadOutfit()} 
+                style={{paddingHorizontal: Theme.spacing.xs}}
+              >
+                <MaterialCommunityIcons 
+                  name={icons.calendar} 
+                  color={currentTheme.colors.primary} 
+                  size={currentTheme.fontSize.m_l} 
+                />
+              </TouchableOpacity>
+            </>
+          }
+        </View>
+      </View>
       <View style={styles.container}>
         <View style={[styles.container_clothing, dynamicStyle.container_clothing]}>
           <SectionElement index={0} category={extra} />
@@ -185,9 +262,7 @@ const SectionElementName = ({dynamicStyle, currentTheme, addItem, removeItem, fi
         data={field}
         keyExtractor={(item, index) => 'item_name_' + item.id + item.adjective + '_at_' + index}
         renderItem={(item) => 
-           <View 
-              style={[styles.item_container, dynamicStyle.item_container]}
-            >
+           <View style={[styles.item_container, dynamicStyle.item_container]}>
               <Text 
                 numberOfLines={1}
                 style={[styles.item_name, dynamicStyle.item_name]}
@@ -273,12 +348,18 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingHorizontal: Theme.spacing.page,
   },
+
+  header_container: {
+    marginVertical: Theme.spacing.m,
+    marginTop: Theme.spacing.l,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+
+  },
   
   header: {
     alignSelf: 'flex-start',
     fontSize: Theme.fontSize.l_s,
-    marginVertical: Theme.spacing.m,
-    marginTop: Theme.spacing.l,
     fontWeight: '200'
   },
 

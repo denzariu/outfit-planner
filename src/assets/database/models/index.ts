@@ -1,8 +1,9 @@
 // WIP
 // Outfit --- OutfitClothing --- ClothingItem
 export type Outfit = {
-  id: number;
-
+  id?: number;
+  name: string;
+  date_added?: string;
 }
 
 export type OutfitClothing = {

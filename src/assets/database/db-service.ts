@@ -17,9 +17,11 @@ export const deleteTable = async (db: SQLiteDatabase, tableName: string) => {
 
 // ++ Table names ++
 export const tableName_ClothingItem = 'clothing_item';
-export const tableName_Item_Condition = 'clothing_item_condition';
+export const tableName_Item_Condition = 'item_condition';
 export const tableName_Condition = 'condition';
-export const tableName_ClothingItem_Color = 'clothing_item_color';
+export const tableName_Item_Color = 'item_color';
 export const tableName_Color = 'color';
+export const tableName_Item_Outfit = 'item_outfit';
+export const tableName_Outfit = 'outfit';
 
 

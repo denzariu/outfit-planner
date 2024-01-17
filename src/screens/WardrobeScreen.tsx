@@ -164,11 +164,9 @@ const WardrobeScreen = ({...props}) => {
 
       const onBackPress = () => {
         if (itemsSelected.length > 0) {
-          console.log({selectedCallback: true})
           setItemsSelected([]);
           return true;
         } else {
-          console.log({selectedCallback: false})
           return false;
         }
       };

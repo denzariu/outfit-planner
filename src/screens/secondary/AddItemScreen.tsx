@@ -160,15 +160,12 @@ const AddItemScreen = ({navigation, route}: AddItemScreen) => {
         aspect_ratio: aspectRatio
       }
 
-      await createClothingTable(db)
       await saveClothingItems(db, [item])
 
     } catch (e) {
       console.error(e)
     }
   }
-
-  
   
   return (
     <SafeAreaView style={[styles.page, dynamicStyle.background]}>
