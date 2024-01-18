@@ -14,19 +14,20 @@ type ItemSelectorProps = {
   // These two are used to transfer data to the component's parent
   handleItemsToBeAdded: React.Dispatch<React.SetStateAction<ClothingItem[]>>
   handleCategoryToBeAddedTo: React.Dispatch<React.SetStateAction<'extra' | 'top' | 'bottom' | 'feet' | 'all' | ''>>,
+  alreadySelectedItems: Array<number | null>,
 
   categoryToChooseFrom: 'extra' | 'top' | 'bottom' | 'feet' | 'all' | '',
   handleItemSelection:  React.Dispatch<React.SetStateAction<'extra' | 'top' | 'bottom' | 'feet' | 'all' | ''>>
 }
 
-const ItemPicker = ({handleItemsToBeAdded, handleCategoryToBeAddedTo, handleItemSelection, categoryToChooseFrom}: ItemSelectorProps) => {
+const ItemPicker = ({handleItemsToBeAdded, handleCategoryToBeAddedTo, alreadySelectedItems,  handleItemSelection, categoryToChooseFrom}: ItemSelectorProps) => {
 
   const isFocused = useIsFocused();
   const isDarkMode = useColorScheme() == 'dark';
   const currentTheme = isDarkMode ? DarkTheme : Theme;
   
   const [selectedType, setSelectedType] = useState<typeof categoryToChooseFrom>()
-  const [itemsSelected, setItemsSelected] = useState<Array<number | null>>([]);
+  const [itemsSelected, setItemsSelected] = useState<Array<number | null>>(alreadySelectedItems);
   const [items, setItems] = useState<ClothingItem[] | undefined>()
   
   const [refreshing, setRefreshing] = useState(false);
@@ -40,10 +41,13 @@ const ItemPicker = ({handleItemsToBeAdded, handleCategoryToBeAddedTo, handleItem
 
   useEffect(() => {
     if (isFocused) {
-      // Gather data
       loadItems()
     }
   }, [isFocused])
+
+  useEffect(() => {
+    setItemsSelected((prev) => prev.sort())
+  }, [itemsSelected.length])
 
   const onRefresh = React.useCallback(() => {
     setRefreshing(true);
@@ -58,7 +62,8 @@ const ItemPicker = ({handleItemsToBeAdded, handleCategoryToBeAddedTo, handleItem
     if (categoryToChooseFrom != '') {
       const db = await getDBConnection()
       await getClothingItems(db, categoryToChooseFrom).then((res) => {
-        setSelectedType(categoryToChooseFrom), setItems(res), console.log(res)
+        setItems(res);
+        console.log(res);
       })
     }
   }
@@ -106,7 +111,7 @@ const ItemPicker = ({handleItemsToBeAdded, handleCategoryToBeAddedTo, handleItem
                     colors={[currentTheme.colors.tertiary, currentTheme.colors.secondary]}
                   />
                 }
-                keyExtractor={(item) => item.id ? 'key_items_listed_' + item.id.toString() : 'key_items_listed_0'}
+                keyExtractor={(item, index) => 'key_items_listed_' + (item.id ?  item.id.toString() : '0') + '_i_' + index}
                 ListEmptyComponent={
                   <View style={[styles.list_empty, {opacity: 0.7}]}>
                     <MaterialCommunityIcons 
@@ -131,13 +136,7 @@ const ItemPicker = ({handleItemsToBeAdded, handleCategoryToBeAddedTo, handleItem
               >
               </FlatList>
           </View>
-          {itemsSelected.length > 0 &&
-            // <TouchableOpacity  
-            //   style={[styles.button, dynamicStyle.button]}
-            //   onPress={() => addItems}
-            //   children={<Text style={[styles.button_text, dynamicStyle.button_text]}>Add to Outfit</Text>}
-            // />
-            
+          {!(itemsSelected.every(item => alreadySelectedItems.includes(item)) && alreadySelectedItems.every(item => itemsSelected.includes(item))) &&          
             <TouchableOpacity
               onPress={() => addItems()}
               style={[{

@@ -34,7 +34,7 @@ const HomeScreen = ({...props}) => {
   const [top, setTop] = useState<ClothingItem[]>([]);
   const [bottom, setBottom] = useState<ClothingItem[]>([]);
   const [feet, setFeet] = useState<ClothingItem[]>([]);
-
+  const [allItemsIds, setAllItemsIds] = useState<Array<number | null>>([])
 
   // Remove item, by tapping '-'
   const removeItem = (type: string, id: number | null) => {
@@ -69,7 +69,7 @@ const HomeScreen = ({...props}) => {
     if (!currentOutfit.id)
       await createOutfit(db, currentOutfit.name)
       .then(res => {
-        const allClothes = extra.concat(top, bottom, feet)
+        const allClothes = extra.concat( top, bottom, feet)
         addItemsToOutfit(db, allClothes, {id: res, name: currentOutfit.name})
         setCurrentOutfit((prev) => {return {id: res, name: prev.name}})
       })
@@ -86,12 +86,13 @@ const HomeScreen = ({...props}) => {
   const loadOutfit = async () => {
     const db = await getDBConnection()
 
+    LayoutAnimation.configureNext(mainAnimation);
+
     // await getOutfitItemsTable(db, currentOutfit.id).then(res => console.log({responseK: res}))
     if (currentOutfit.id) 
       await getOutfitItems(db, currentOutfit.id)
             .then(res => {
-              setCategoryToBeAddedTo('all'),
-              console.log(res)
+              setCategoryToBeAddedTo('all')
               setItemsToBeAdded(res)
             }) 
     else {
@@ -108,35 +109,41 @@ const HomeScreen = ({...props}) => {
   useEffect(() => {
     loadOutfit()
   }, [currentOutfit])
-  
-  // If there are items to be added, add them
+
+  // Whenever items are added to a category, add their IDs to the list
   useEffect(() => {
-    console.log({toAdd: itemsToBeAdded})
-    if (itemsToBeAdded.length) {
+    setAllItemsIds(extra.concat(top, bottom, feet).map((item: ClothingItem) => item.id))
+  }, [extra, top, bottom, feet])
+  
+  // Item array updater
+  useEffect(() => {
+    if (categoryToBeAddedTo != '') {
+
       switch (categoryToBeAddedTo) {
         case 'all':
           setExtra(() => itemsToBeAdded.filter(item => item.type == 'extra'))
           setTop(() => itemsToBeAdded.filter(item => item.type == 'top'))
           setBottom(() => itemsToBeAdded.filter(item => item.type == 'bottom'))
           setFeet(() => itemsToBeAdded.filter(item => item.type == 'feet'))
-
           break;
         case 'extra':
-          setExtra((prev) => {return prev.concat(itemsToBeAdded)})
+          // Array is now replaced, so unselected items will also be removed
+          setExtra(itemsToBeAdded)
           break;
         case 'top':
-          setTop((prev) => {return prev.concat(itemsToBeAdded)})
+          setTop(itemsToBeAdded)
           break;
         case 'bottom':
-          setBottom((prev) => {return prev.concat(itemsToBeAdded)})
+          setBottom(itemsToBeAdded)
           break;
         case 'feet':
-          setFeet((prev) => {return prev.concat(itemsToBeAdded)})
+          setFeet(itemsToBeAdded)
           break;
       }
+      setCategoryToBeAddedTo('')
       setItemsToBeAdded([])
     }
-  }, [itemsToBeAdded.length])
+  }, [itemsToBeAdded])
 
   const dynamicStyle = StyleSheet.create({
     background_style: {backgroundColor: currentTheme.colors.background},
@@ -156,6 +163,7 @@ const HomeScreen = ({...props}) => {
       && <ItemPicker 
             handleItemsToBeAdded={setItemsToBeAdded} 
             handleCategoryToBeAddedTo={setCategoryToBeAddedTo}
+            alreadySelectedItems={allItemsIds}
             handleItemSelection={setItemSelection} 
             categoryToChooseFrom={itemSelection}
           />
