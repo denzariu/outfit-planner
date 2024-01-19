@@ -12,7 +12,9 @@ import { useNavigation } from '@react-navigation/native';
 import { icons } from '../defaults/custom-svgs';
 import { FlatList } from 'react-native-gesture-handler';
 import { getCategoryName } from '../defaults/data';
-import { addItemsToOutfit, createOutfit, deleteOutfit, getOutfitItems, getOutfitItemsTable, getOutfits } from '../assets/database/db-operations/db-operations-outfit';
+import { addItemsToOutfit, addOutfitsOnDate, createOutfit, deleteAllItemsFromOutfit, deleteOutfit, getOutfitItems, getOutfitItemsTable, getOutfitPlannerTable, getOutfits, getOutfitsOnDate } from '../assets/database/db-operations/db-operations-outfit';
+import moment, { Moment } from 'moment'
+import DatePicker from 'react-native-date-picker';
 
 const HomeScreen = ({...props}) => {
   const isDarkMode = useColorScheme() == 'dark';
@@ -25,6 +27,12 @@ const HomeScreen = ({...props}) => {
   const [itemSelection, setItemSelection] = useState<'all' | 'extra' | 'top' | 'bottom' | 'feet' | ''>('');
   const [categoryToBeAddedTo, setCategoryToBeAddedTo] = useState<'all' | 'extra' | 'top' | 'bottom' | 'feet' | ''>('')
   const [itemsToBeAdded, setItemsToBeAdded] = useState<ClothingItem[]>([]);
+
+  // Date picker
+  const [openDatePicker, setOpenDatePicker] = useState<boolean>(false);
+  const [date, setDate] = useState<Date>(new Date);
+  const [intDate, setIntDate] = useState<string>('1970-01-01');
+  const [headerTitle, setHeaderTitle] = useState<string>("Today's Outfit")
   
   // Outfit manager
   const [currentOutfit, setCurrentOutfit] = useState<Outfit>({name: 'Default'})
@@ -34,7 +42,7 @@ const HomeScreen = ({...props}) => {
   const [top, setTop] = useState<ClothingItem[]>([]);
   const [bottom, setBottom] = useState<ClothingItem[]>([]);
   const [feet, setFeet] = useState<ClothingItem[]>([]);
-  const [allItemsIds, setAllItemsIds] = useState<Array<number | null>>([])
+  const [allItemsIds, setAllItemsIds] = useState<Array<number>>([])
 
   // Remove item, by tapping '-'
   const removeItem = (type: string, id: number | null) => {
@@ -66,17 +74,15 @@ const HomeScreen = ({...props}) => {
   const saveOutfit = async () => {
     const db = await getDBConnection()
     
-    if (!currentOutfit.id)
-      await createOutfit(db, currentOutfit.name)
-      .then(res => {
-        const allClothes = extra.concat( top, bottom, feet)
-        addItemsToOutfit(db, allClothes, {id: res, name: currentOutfit.name})
-        setCurrentOutfit((prev) => {return {id: res, name: prev.name}})
-      })
-
+    if (!currentOutfit || !currentOutfit.id) {
+      const insertId = await createOutfit(db, 'NameNotSetYet')
+      await addItemsToOutfit(db, allItemsIds, {id: insertId, name: 'NameNotSetYet'})
+      await addOutfitsOnDate(db, [insertId], intDate)
+    }
     else {
-      const allClothes = extra.concat(top, bottom, feet)
-      addItemsToOutfit(db, allClothes, currentOutfit)
+      await deleteAllItemsFromOutfit(db, currentOutfit.id)
+      await addItemsToOutfit(db, allItemsIds, currentOutfit)
+
     }
     console.log('Added Items to Outfit')
 
@@ -87,22 +93,34 @@ const HomeScreen = ({...props}) => {
     const db = await getDBConnection()
 
     LayoutAnimation.configureNext(mainAnimation);
-
-    // await getOutfitItemsTable(db, currentOutfit.id).then(res => console.log({responseK: res}))
-    if (currentOutfit.id) 
+  
+    if (currentOutfit?.id) 
       await getOutfitItems(db, currentOutfit.id)
-            .then(res => {
-              setCategoryToBeAddedTo('all')
-              setItemsToBeAdded(res)
-            }) 
+        .then(res => {
+          console.log({outfit_items: res})
+          
+          setCategoryToBeAddedTo('all')
+          setItemsToBeAdded(res)
+        }) 
+
     else {
-      //TODO: replace 29 with id of selected outfit
-      await getOutfitItems(db, 29)
-            .then(res => {
-              setCategoryToBeAddedTo('all');
-              setItemsToBeAdded(res);
-            }) 
+      console.log('LOADING NO OUTFIT ID')
+      setCategoryToBeAddedTo('all')
+      setItemsToBeAdded([])
     }
+  }
+
+  const updateOutfit = async (intFullDate: string) => {
+    const db = await getDBConnection()
+
+    console.log(intFullDate)
+
+    await getOutfitsOnDate(db, intFullDate)
+    .then( results => {
+      // Not necessary to check if outfit exists yet
+      // TODO: add all outfit options for the day
+      setCurrentOutfit(results[0])
+    })
   }
 
   // Whenever the outfit changes, update the items
@@ -110,9 +128,33 @@ const HomeScreen = ({...props}) => {
     loadOutfit()
   }, [currentOutfit])
 
+  // Whenever the date changes, update the outfit
+  useEffect(() => {
+    const year = date.getFullYear().toString();
+    const month = (date.getMonth() + 1) < 10 ? '0' + (date.getMonth() + 1) : (date.getMonth() + 1) ;
+    const day = date.getDate() < 10 ? '0' + date.getDate() : date.getDate();
+    
+    setIntDate(year + '-' + month + '-' + day)
+    updateOutfit(year + '-' + month + '-' + day)
+
+    const today = new Date()
+
+    //TODO
+    setHeaderTitle(  
+      date.setHours(0,0,0,0) == today.setHours(0,0,0,0) ? 
+        "Today's Outfit"
+      : date.setHours(0,0,0,0) == today.setHours(0,0,0,0) ? 
+        "Tomorrow's Outfit"
+      : date.setHours(0,0,0,0) == today.setHours(0,0,0,0)? 
+        "Yesterday's Outfit"
+      : 'Outfit of ' + date.toLocaleDateString() 
+      
+    )
+  }, [date])
+
   // Whenever items are added to a category, add their IDs to the list
   useEffect(() => {
-    setAllItemsIds(extra.concat(top, bottom, feet).map((item: ClothingItem) => item.id))
+    setAllItemsIds(extra.concat(top, bottom, feet).map((item: ClothingItem) => item.id ? item.id : -1))
   }, [extra, top, bottom, feet])
   
   // Item array updater
@@ -172,7 +214,7 @@ const HomeScreen = ({...props}) => {
 
       <View style={styles.header_container}>
         <Text style={[styles.header, dynamicStyle.text_header]}>
-          Today's Outfit
+          {headerTitle}
         </Text>
         
         <View style={{
@@ -182,36 +224,42 @@ const HomeScreen = ({...props}) => {
           justifyContent: 'flex-end', 
           alignItems: 'center'
         }}>
-          {(extra.length || top.length || bottom.length || feet.length) ?
-            // Buttons
-            <>
-              <TouchableOpacity 
-                onPress={() => saveOutfit()} 
-                style={{paddingHorizontal: Theme.spacing.xs}}
-              >
-                <MaterialCommunityIcons 
-                  name={icons.upload} 
-                  color={currentTheme.colors.primary} 
-                  size={currentTheme.fontSize.m_l} 
-                />
-              </TouchableOpacity>
-            </>
-            :
-            <>
-              <TouchableOpacity 
-                onPress={() => loadOutfit()} 
-                style={{paddingHorizontal: Theme.spacing.xs}}
-              >
-                <MaterialCommunityIcons 
-                  name={icons.calendar} 
-                  color={currentTheme.colors.primary} 
-                  size={currentTheme.fontSize.m_l} 
-                />
-              </TouchableOpacity>
-            </>
-          }
+          {/* {(extra.length || top.length || bottom.length || feet.length) && */}
+            <TouchableOpacity 
+              onPress={() => saveOutfit()} 
+              style={{paddingHorizontal: Theme.spacing.xs}}
+            >
+              <MaterialCommunityIcons 
+                name={icons.upload} 
+                color={currentTheme.colors.primary} 
+                size={currentTheme.fontSize.m_l} 
+              />
+            </TouchableOpacity>
+          {/* } */}
+          <TouchableOpacity 
+            onPress={() => setOpenDatePicker(true)} 
+            style={{paddingHorizontal: Theme.spacing.xs}}
+          >
+            <MaterialCommunityIcons 
+              name={icons.calendar} 
+              color={currentTheme.colors.primary} 
+              size={currentTheme.fontSize.m_l} 
+            />
+          </TouchableOpacity>
         </View>
       </View>
+      <DatePicker 
+        modal
+        open={openDatePicker}
+        date={date}
+        mode='date'
+        title={'View your outfit on...'}
+        onCancel={() => setOpenDatePicker(false)}
+        onConfirm={(date) => {
+          setOpenDatePicker(false)
+          setDate(date)
+        }}
+      />
       <View style={styles.container}>
         <View style={[styles.container_clothing, dynamicStyle.container_clothing]}>
           <SectionElement index={0} category={extra} />
@@ -301,7 +349,7 @@ const SectionElement = ({index, category}: SectionElementProps) => {
 
   return (
     <View style={[styles.container_section]}>
-    { view ? 
+    {( view  || category.length == 1 ) ? 
       category?.map((item) => 
         <Pressable 
           key={'all_items_' + index + '_id_' + item.id}

@@ -23,5 +23,6 @@ export const tableName_Item_Color = 'item_color';
 export const tableName_Color = 'color';
 export const tableName_Item_Outfit = 'item_outfit';
 export const tableName_Outfit = 'outfit';
+export const tablename_OutfitPlanner = 'outfit_planner';
 
 

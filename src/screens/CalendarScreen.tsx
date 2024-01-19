@@ -8,6 +8,7 @@ import { Direction } from 'react-native-calendars/src/types';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import AnimatedGradient from '../components/AnimatedGradient';
 import { icons } from '../defaults/custom-svgs';
+import { Theme as CalendarTheme } from 'react-native-calendars/src/types'  
 
 const CalendarScreen = ({...props}) => {
 
@@ -69,14 +70,7 @@ const CalendarScreen = ({...props}) => {
   }
   
 
-  const themeCalendar = {
-    // backgroundColor: currentTheme.colors.tertiary,
-    // arrowColor: 'orange',
-    // disabledArrowColor: '#d9e1e8',
-    // indicatorColor: 'blue',
-    // textDayHeaderFontSize: 12,
-    // textMonthFontWeight: '200',
-    // textDayHeaderFontWeight: '200',
+  const themeCalendar: CalendarTheme = {
     calendarBackground: currentTheme.colors.background,
     textSectionTitleColor: currentTheme.colors.secondary,
     monthTextColor: currentTheme.colors.secondary,
@@ -133,7 +127,10 @@ const CalendarScreen = ({...props}) => {
         <Calendar
             // customHeaderTitle={<Text>Hi</Text>}
             renderArrow={(direction) => 
-              <MaterialCommunityIcons name= {direction === 'left' ? icons.chevron_left : icons.chevron_right} color={currentTheme.colors.secondary} size={currentTheme.fontSize.m_m} />
+              <MaterialCommunityIcons 
+                name= {direction === 'left' ? icons.chevron_left : icons.chevron_right} 
+                color={currentTheme.colors.secondary} 
+                size={currentTheme.fontSize.m_m} />
             }
             // disableArrowLeft={true}
             // disableArrowRight={true}

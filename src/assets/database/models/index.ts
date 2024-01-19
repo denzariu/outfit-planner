@@ -53,7 +53,14 @@ export type ItemMaterial = {
 }
 
 export type Material = {
-  id: number,
+  id: number;
   name: string;
   icon: string;
+}
+
+// Outfit --- Date
+export type OutfitPlanner = {
+  id: number;
+  id_outfit: number;
+  date: string;
 }

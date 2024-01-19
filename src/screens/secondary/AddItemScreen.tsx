@@ -174,7 +174,10 @@ const AddItemScreen = ({navigation, route}: AddItemScreen) => {
           children={<MaterialCommunityIcons name={icons.arrow_left} color={currentTheme.colors.tertiary} size={currentTheme.fontSize.l_s} />}
           onPress={() => navigator.goBack()}
         />
-        <Text style={[styles.header, dynamicStyle.textHeader]}>
+        <Text 
+          numberOfLines={1}
+          style={[styles.header, dynamicStyle.textHeader]}
+        >
           {name == '' ? 'Add Item' : name + ' ' + category.label}
         </Text>
       </View>

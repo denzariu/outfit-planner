@@ -51,7 +51,7 @@ import CustomTab from './src/components/CustomTab';
 import AnimatedGradient from './src/components/AnimatedGradient';
 import { getDBConnection } from './src/assets/database/db-service';
 import { createClothingTable } from './src/assets/database/db-operations/db-operations-clothingitem';
-import { createItemOutfitTable, createOutfitTable } from './src/assets/database/db-operations/db-operations-outfit';
+import { createItemOutfitTable, createOutfitPlannerTable, createOutfitTable } from './src/assets/database/db-operations/db-operations-outfit';
 Logs.enableExpoCliLogging()
 
 // const Tab = createMaterialBottomTabNavigator();
@@ -69,6 +69,7 @@ function App(): JSX.Element {
     await createClothingTable(db)
     await createOutfitTable(db)
     await createItemOutfitTable(db)
+    await createOutfitPlannerTable(db)
   }
 
   useEffect (() => {
