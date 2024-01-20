@@ -68,14 +68,14 @@ const CustomTab = ({ state, descriptors, navigation, setExpanded, expanded }: Ta
             width: 120,
             alignItems: 'center',
             padding: Theme.spacing.m,
-            backgroundColor: Theme.colors.primary,
+            backgroundColor: currentTheme.colors.primary,
             borderRadius: Theme.spacing.m,
           }}
         >
           <Text
             style={{
               fontWeight: '500',
-              color: Theme.colors.background,
+              color: currentTheme.colors.background,
               fontSize: Theme.fontSize.s_l
             }}
           >
@@ -89,14 +89,14 @@ const CustomTab = ({ state, descriptors, navigation, setExpanded, expanded }: Ta
             width: 120,
             alignItems: 'center',
             padding: Theme.spacing.m,
-            backgroundColor: Theme.colors.primary,
+            backgroundColor: currentTheme.colors.primary,
             borderRadius: Theme.spacing.m,
           }}
         >
           <Text
             style={{
               fontWeight: '500',
-              color: Theme.colors.background,
+              color: currentTheme.colors.background,
               fontSize: Theme.fontSize.s_l,
             }}
           >
@@ -116,7 +116,7 @@ const CustomTab = ({ state, descriptors, navigation, setExpanded, expanded }: Ta
         height: 50,
         alignItems: 'center',
         justifyContent: 'space-around',
-        backgroundColor: expanded ?   currentTheme.colors.tertiary + 'FF' : currentTheme.colors.tertiary + 'BA'
+        backgroundColor: expanded ?   currentTheme.colors.tertiary + 'FF' : currentTheme.colors.tertiary + 'BF'
       }}>
       {state.routes.map((route: any, index: number) => {
         const { options } = descriptors[route.key];

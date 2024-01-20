@@ -25,8 +25,16 @@ const palette = {
   raspberry_blush: '#D85F56',
   north_sea_green: '#246D74',
 
-  danger_red: '#AA4A44'
+  danger_red: '#AA4A44',
 
+
+  // Complementaries and mods
+  c_forest_green: "#795B68",
+  c_pale_blue: '#95756E',
+  c_ivory: '#f5efe8',
+  background_var1: '#EFE1D1',
+  conch_shell_var: '#F0D6CD',
+  purple_var: '#393053',
 }
 
 export const Theme = {
@@ -106,20 +114,19 @@ export const DarkTheme = {
     ...Theme.colors,
 
     
-    // background: palette.almost_black,
-    // foreground: palette.almost_white,
+    background: palette.background_var1,
+    foreground: palette.almost_white,
 
-    // primary: palette.pale_blue,
-    // secondary: palette.pale_blue,
-    // tertiary: palette.forest_green,
-    // quaternary: palette.dark_gray,
+    primary: palette.almost_black,
+    secondary: palette.purple_var,
+    tertiary: palette.purple_var,
+    quaternary: palette.conch_shell,
     
+    tabActive: palette.background_var1,
+    tabAccent: palette.background_var1 + '77',
+    tabBackgound: palette.almost_black,
+    tabNotification: palette.almost_black,
 
-    // tabActive: palette.almost_white,
-    // tabAccent: palette.almost_white + '77',
-    // tabBackgound: palette.starry_night_blue,
-    // tabNotification: palette.new_age,
-    
     // loadingIndicator: palette.new_age
   },
   

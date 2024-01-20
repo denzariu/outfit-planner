@@ -15,6 +15,7 @@ import { getCategoryName } from '../defaults/data';
 import { addItemsToOutfit, addOutfitsOnDate, createOutfit, deleteAllItemsFromOutfit, deleteOutfit, getOutfitItems, getOutfitItemsTable, getOutfitPlannerTable, getOutfits, getOutfitsOnDate } from '../assets/database/db-operations/db-operations-outfit';
 import moment, { Moment } from 'moment'
 import DatePicker from 'react-native-date-picker';
+import { SvgXml } from 'react-native-svg';
 
 const HomeScreen = ({...props}) => {
   const isDarkMode = useColorScheme() == 'dark';
@@ -137,15 +138,20 @@ const HomeScreen = ({...props}) => {
     setIntDate(year + '-' + month + '-' + day)
     updateOutfit(year + '-' + month + '-' + day)
 
+    
+    const yesterday = new Date()
+    yesterday.setDate(yesterday.getDate() - 1)
     const today = new Date()
+    const tomorrow = new Date()
+    tomorrow.setDate(tomorrow.getDate() + 1)
 
     //TODO
     setHeaderTitle(  
       date.setHours(0,0,0,0) == today.setHours(0,0,0,0) ? 
         "Today's Outfit"
-      : date.setHours(0,0,0,0) == today.setHours(0,0,0,0) ? 
+      : date.setHours(0,0,0,0) == tomorrow.setHours(0,0,0,0) ? 
         "Tomorrow's Outfit"
-      : date.setHours(0,0,0,0) == today.setHours(0,0,0,0)? 
+      : date.setHours(0,0,0,0) == yesterday.setHours(0,0,0,0) ? 
         "Yesterday's Outfit"
       : 'Outfit of ' + date.toLocaleDateString() 
       
@@ -222,17 +228,17 @@ const HomeScreen = ({...props}) => {
           flex: 0.7, 
           flexDirection: 'row', 
           justifyContent: 'flex-end', 
-          alignItems: 'center'
+          alignItems: 'center',
         }}>
           {/* {(extra.length || top.length || bottom.length || feet.length) && */}
             <TouchableOpacity 
               onPress={() => saveOutfit()} 
-              style={{paddingHorizontal: Theme.spacing.xs}}
+              style={{padding: Theme.spacing.xs}}
             >
               <MaterialCommunityIcons 
-                name={icons.upload} 
-                color={currentTheme.colors.primary} 
-                size={currentTheme.fontSize.m_l} 
+                name={icons.save} 
+                color={currentTheme.colors.tertiary} 
+                size={currentTheme.fontSize.l_s} 
               />
             </TouchableOpacity>
           {/* } */}
@@ -241,9 +247,9 @@ const HomeScreen = ({...props}) => {
             style={{paddingHorizontal: Theme.spacing.xs}}
           >
             <MaterialCommunityIcons 
-              name={icons.calendar} 
-              color={currentTheme.colors.primary} 
-              size={currentTheme.fontSize.m_l} 
+              name={icons.date_pick} 
+              color={currentTheme.colors.tertiary} 
+              size={currentTheme.fontSize.l_s} 
             />
           </TouchableOpacity>
         </View>
@@ -262,16 +268,16 @@ const HomeScreen = ({...props}) => {
       />
       <View style={styles.container}>
         <View style={[styles.container_clothing, dynamicStyle.container_clothing]}>
-          <SectionElement index={0} category={extra} />
-          <SectionElement index={1} category={top} />
-          <SectionElement index={2} category={bottom} />
-          <SectionElement index={3} category={feet} />
+          <SectionElement index={0} colorDisabled={currentTheme.colors.tertiary} addItem={addItem} category={extra} categoryName={'extra'} />
+          <SectionElement index={1} colorDisabled={currentTheme.colors.tertiary} addItem={addItem} category={top} categoryName={'top'} />
+          <SectionElement index={2} colorDisabled={currentTheme.colors.tertiary} addItem={addItem} category={bottom} categoryName={'bottom'} />
+          <SectionElement index={3} colorDisabled={currentTheme.colors.tertiary} addItem={addItem} category={feet} categoryName={'feet'} />
         </View>
         <View style={styles.container_items}>
-          <SectionElementName dynamicStyle={dynamicStyle} currentTheme={currentTheme} addItem={() => addItem('extra')} removeItem={removeItem} fieldName={'extra'} field={extra}/>
-          <SectionElementName dynamicStyle={dynamicStyle} currentTheme={currentTheme} addItem={() => addItem('top')} removeItem={removeItem} fieldName={'top'} field={top}/>
-          <SectionElementName dynamicStyle={dynamicStyle} currentTheme={currentTheme} addItem={() => addItem('bottom')} removeItem={removeItem} fieldName={'bottom'} field={bottom}/>
-          <SectionElementName dynamicStyle={dynamicStyle} currentTheme={currentTheme} addItem={() => addItem('feet')} removeItem={removeItem} fieldName={'feet'} field={feet}/>          
+          <SectionElementName dynamicStyle={dynamicStyle} currentTheme={currentTheme} addItem={addItem} removeItem={removeItem} fieldName={'extra'} field={extra}/>
+          <SectionElementName dynamicStyle={dynamicStyle} currentTheme={currentTheme} addItem={addItem} removeItem={removeItem} fieldName={'top'} field={top}/>
+          <SectionElementName dynamicStyle={dynamicStyle} currentTheme={currentTheme} addItem={addItem} removeItem={removeItem} fieldName={'bottom'} field={bottom}/>
+          <SectionElementName dynamicStyle={dynamicStyle} currentTheme={currentTheme} addItem={addItem} removeItem={removeItem} fieldName={'feet'} field={feet}/>          
         </View>
       </View>
     </SafeAreaView>
@@ -317,7 +323,7 @@ const SectionElementName = ({dynamicStyle, currentTheme, addItem, removeItem, fi
       <FlatList
         data={field}
         keyExtractor={(item, index) => 'item_name_' + item.id + item.adjective + '_at_' + index}
-        renderItem={(item) => 
+        renderItem={ item => 
            <View style={[styles.item_container, dynamicStyle.item_container]}>
               <Text 
                 numberOfLines={1}
@@ -340,13 +346,15 @@ const SectionElementName = ({dynamicStyle, currentTheme, addItem, removeItem, fi
 
 type SectionElementProps = {
   index: number, 
-  category: ClothingItem[]
+  category: ClothingItem[],
+  categoryName: "extra" | "top" | "bottom" | "feet",
+  colorDisabled: string,
+  addItem: (type: "" | "all" | "extra" | "top" | "bottom" | "feet") => void, 
 }
 
-const SectionElement = ({index, category}: SectionElementProps) => {
+const SectionElement = ({index, category, categoryName, colorDisabled, addItem}: SectionElementProps) => {
 
   const [view, setView] = useState<boolean>(false)
-
   return (
     <View style={[styles.container_section]}>
     {( view  || category.length == 1 ) ? 
@@ -369,8 +377,39 @@ const SectionElement = ({index, category}: SectionElementProps) => {
           horizontal
           pagingEnabled
           snapToAlignment={'center'}
-          renderItem={(item) => <EachItem imageUri={item.item.image} handleView={setView} aspectRatio={item.item.aspect_ratio}/>}
+          renderItem={ item => 
+            <EachItem 
+              imageUri={item.item.image} 
+              handleView={setView} 
+              aspectRatio={item.item.aspect_ratio}
+            />
+          }
           keyExtractor={(item, index) => 'carousel_' + index + '_id_' + item.id}
+          ListEmptyComponent={
+            <TouchableOpacity
+              onPress={() => addItem(categoryName)}
+              style={{
+                flex: 1, 
+                justifyContent: 'center', 
+                opacity: 0.4
+              }}
+            >
+              <>
+            {categoryName == 'bottom' ? 
+                <SvgXml xml={icons.bottom} 
+                  fill={colorDisabled} 
+                  height={Theme.fontSize.l_m * 2} 
+                  width={Theme.fontSize.l_m * 2}
+                />
+              : <MaterialCommunityIcons name={categoryName == 'extra' ? icons.extra : categoryName == 'top' ? icons.top : icons.feet} 
+                  color={colorDisabled} 
+                  size={Theme.fontSize.l_m * 2} 
+                />
+            }
+              <Text>Hiii</Text>
+              </>
+            </TouchableOpacity>
+          }
         />
       </View>
     }
@@ -388,10 +427,10 @@ const EachItem = ({imageUri, handleView, aspectRatio}: EachItemProps) => {
   return (
     <Pressable onPress={() => handleView((currentValue) => !currentValue)}>
       {/* TODO: better formula */}
-      <Animated.View style={{ flex: 1/aspectRatio, aspectRatio: aspectRatio }}>
+      <Animated.View style={{ flex: 1}}>
           <Animated.Image 
             source={{uri: imageUri}} 
-            style={{ flex: 1 }}
+            style={{ flex: 0.9/aspectRatio, aspectRatio: aspectRatio  }}
           />
       </Animated.View>
     </Pressable>
@@ -430,7 +469,7 @@ const styles = StyleSheet.create({
     flex: 0.5,
     borderRadius: Theme.spacing.m,
     borderWidth: Theme.spacing.xxs,
-    paddingVertical: Theme.spacing.xxs
+    paddingVertical: Theme.spacing.xs
   },
 
   container_section: {
@@ -454,7 +493,7 @@ const styles = StyleSheet.create({
     display: 'flex',
     flexDirection: 'column',
     borderRadius: Theme.spacing.m,
-    paddingHorizontal: Theme.spacing.s,
+    paddingHorizontal: Theme.spacing.xs,
     paddingVertical: Theme.spacing.xxs 
   },
 
@@ -469,6 +508,7 @@ const styles = StyleSheet.create({
   category_text: {
     flex: 0.75,
     fontSize: Theme.fontSize.m_l,
+    paddingLeft: Theme.spacing.xxs,
     fontWeight: '200' 
   },
 

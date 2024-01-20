@@ -198,23 +198,23 @@ const WardrobeScreen = ({...props}) => {
         { !itemsSelected.length ?
           // Filter categories
           <>
-            <TouchableOpacity onPress={() => filterItems('extra')} style={{paddingHorizontal: Theme.spacing.xs}}>
+            <TouchableOpacity onPress={() => filterItems('extra')} style={{padding: Theme.spacing.xs}}>
               <MaterialCommunityIcons name={icons.extra} color={selectedType == 'extra' ? currentTheme.colors.primary : currentTheme.colors.tertiary} size={currentTheme.fontSize.m_l} />
             </TouchableOpacity>
 
-            <TouchableOpacity onPress={() => filterItems('top')} style={{paddingHorizontal: Theme.spacing.xs}}>
+            <TouchableOpacity onPress={() => filterItems('top')} style={{padding: Theme.spacing.xs}}>
               <MaterialCommunityIcons name={icons.top} color={selectedType == 'top' ? currentTheme.colors.primary : currentTheme.colors.tertiary} size={currentTheme.fontSize.m_l} />
             </TouchableOpacity>
 
-            <TouchableOpacity onPress={() => filterItems('bottom')} style={{paddingHorizontal: Theme.spacing.xs}}>
+            <TouchableOpacity onPress={() => filterItems('bottom')} style={{padding: Theme.spacing.xs}}>
               <SvgXml xml={icons.bottom} fill={selectedType == 'bottom' ? currentTheme.colors.primary : currentTheme.colors.tertiary} height={currentTheme.fontSize.m_l} width={currentTheme.fontSize.m_l}/>
             </TouchableOpacity>
             
-            <TouchableOpacity onPress={() => filterItems('feet')} style={{paddingHorizontal: Theme.spacing.xs}}>
+            <TouchableOpacity onPress={() => filterItems('feet')} style={{padding: Theme.spacing.xs}}>
               <MaterialCommunityIcons name={icons.feet} color={selectedType == 'feet' ? currentTheme.colors.primary : currentTheme.colors.tertiary} size={currentTheme.fontSize.m_l} />
             </TouchableOpacity>
 
-            <TouchableOpacity onPress={() => filterItems('all')} style={{paddingHorizontal: Theme.spacing.xs}}>
+            <TouchableOpacity onPress={() => filterItems('all')} style={{padding: Theme.spacing.xs}}>
               <MaterialCommunityIcons name={icons.all} color={selectedType == 'all' ? currentTheme.colors.primary : currentTheme.colors.tertiary} size={currentTheme.fontSize.m_l} />
             </TouchableOpacity>
           </>
@@ -222,32 +222,32 @@ const WardrobeScreen = ({...props}) => {
           :
           // Selected items actions (TODO)
           <>
-            <TouchableOpacity onPress={() => duplicateSelected()} style={{paddingHorizontal: Theme.spacing.xs}}>
+            <TouchableOpacity onPress={() => duplicateSelected()} style={{padding: Theme.spacing.xs}}>
               <MaterialCommunityIcons 
                 name={icons.duplicate} 
                 color={currentTheme.colors.tertiary} 
-                size={currentTheme.fontSize.m_l} 
+                size={Theme.fontSize.m_l} 
               />
             </TouchableOpacity>
-            <TouchableOpacity onPress={() => filterItems('all')} style={{paddingHorizontal: Theme.spacing.xs}}>
+            <TouchableOpacity onPress={() => filterItems('all')} style={{padding: Theme.spacing.xs}}>
               <MaterialCommunityIcons 
                 name={icons.favorite} 
                 color={currentTheme.colors.tertiary} 
-                size={currentTheme.fontSize.m_l} 
+                size={Theme.fontSize.m_l} 
               />
             </TouchableOpacity>
-            <TouchableOpacity onPress={() => filterItems('all')} style={{paddingHorizontal: Theme.spacing.xs}}>
+            <TouchableOpacity onPress={() => filterItems('all')} style={{padding: Theme.spacing.xs}}>
               <MaterialCommunityIcons 
                 name={icons.create_outfit} 
                 color={currentTheme.colors.tertiary} 
-                size={currentTheme.fontSize.m_l} 
+                size={Theme.fontSize.m_l} 
               />
             </TouchableOpacity>
-            <TouchableOpacity onPress={() => deleteSelected()} style={{paddingHorizontal: Theme.spacing.xs}}>
+            <TouchableOpacity onPress={() => deleteSelected()} style={{padding: Theme.spacing.xs}}>
               <MaterialCommunityIcons 
                 name={icons.delete} 
                 color={currentTheme.colors.delete} 
-                size={currentTheme.fontSize.m_l} 
+                size={Theme.fontSize.m_l} 
               />
             </TouchableOpacity>
           </>

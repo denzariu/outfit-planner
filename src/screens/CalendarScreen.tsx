@@ -130,7 +130,8 @@ const CalendarScreen = ({...props}) => {
               <MaterialCommunityIcons 
                 name= {direction === 'left' ? icons.chevron_left : icons.chevron_right} 
                 color={currentTheme.colors.secondary} 
-                size={currentTheme.fontSize.m_m} />
+                size={currentTheme.fontSize.m_m} 
+              />
             }
             // disableArrowLeft={true}
             // disableArrowRight={true}

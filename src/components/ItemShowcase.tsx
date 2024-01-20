@@ -2,7 +2,7 @@ import { useNavigation } from "@react-navigation/native";
 import { useState, useEffect } from "react";
 import { Animated, StyleSheet, LayoutAnimation, Easing, TouchableOpacity, Image, Text } from "react-native";
 import { ClothingItem } from "../assets/database/models";
-import { Theme } from "../defaults/ui";
+import { Theme, mainAnimation } from "../defaults/ui";
 import ItemSelector from "./ItemPicker";
 
 // Responsible for each shown item on the Wardrobe page
@@ -25,7 +25,6 @@ const ItemShowcase = (props: ItemShowcaseProps) => {
   const {item, index, currentTheme, aspectRatio, showCategory, selectOnly, setSelectedItems, selectedItems} = props || {}
 
   const [selected, setSelected] = useState<boolean>(false);
-  const [animatedValue] = useState(new Animated.Value(0));
   const [animatedValuePress] = useState(new Animated.Value(0));
 
   const dynamicStyle = StyleSheet.create({
@@ -43,7 +42,7 @@ const ItemShowcase = (props: ItemShowcaseProps) => {
 
   // Called every time the item is selected
   const selectItem = () => {
-    LayoutAnimation.configureNext(LayoutAnimation.create(150, 'easeInEaseOut', 'opacity'));
+    LayoutAnimation.configureNext(mainAnimation);
 
     setSelected((prevValue) => {
       // If the item was previously selected, it will get deselected,

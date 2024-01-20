@@ -77,7 +77,11 @@ export const icons = {
 
   // Upload icons (add item)
   upload: "upload",
-  tshirt: "tshirt-crew"
+  tshirt: "tshirt-crew",
+
+  // Outfit-related
+  save: "content-save-outline",
+  date_pick: "calendar-range-outline"
 }
 
 // export const svgPants = `

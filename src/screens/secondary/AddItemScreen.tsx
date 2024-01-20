@@ -224,11 +224,11 @@ const AddItemScreen = ({navigation, route}: AddItemScreen) => {
         <View style={[styles.setting, dynamicStyle.setting]}>
           <Text style={[styles.setting_title, dynamicStyle.setting_title]}>Name</Text>
           <TextInput 
-            style={[styles.setting_input, {fontSize: name != '' ? Theme.fontSize.m_s : Theme.fontSize.s_l}]}
+            style={[styles.setting_input, {fontSize: Theme.fontSize.m_s, color: currentTheme.colors.quaternary}]}
             numberOfLines={1}
             multiline={false}
-            placeholder="'Cozy', 'Red', 'Long'..."
-            placeholderTextColor={currentTheme.colors.background}
+            placeholder="'Cozy', 'Red', '90s'..."
+            placeholderTextColor={currentTheme.colors.quaternary}
             onChangeText={(text) => onChangeName(text)}
             value={name}
           />
@@ -436,6 +436,7 @@ const ButtonPress = ({value, handler, icon, color_background, color_icon}: Butto
 
 const styles = StyleSheet.create({
   page: {
+    flex: 1,
     paddingHorizontal: Theme.spacing.page,
   },
   
