@@ -145,7 +145,7 @@ const HomeScreen = ({...props}) => {
     const tomorrow = new Date()
     tomorrow.setDate(tomorrow.getDate() + 1)
 
-    //TODO
+    const strDate: string[] = date.toDateString().split(' ')
     setHeaderTitle(  
       date.setHours(0,0,0,0) == today.setHours(0,0,0,0) ? 
         "Today's Outfit"
@@ -153,7 +153,7 @@ const HomeScreen = ({...props}) => {
         "Tomorrow's Outfit"
       : date.setHours(0,0,0,0) == yesterday.setHours(0,0,0,0) ? 
         "Yesterday's Outfit"
-      : 'Outfit of ' + date.toLocaleDateString() 
+      : `${strDate[0]}, ${strDate[1]} ${strDate[2]}`
       
     )
   }, [date])
@@ -394,7 +394,6 @@ const SectionElement = ({index, category, categoryName, colorDisabled, addItem}:
                 opacity: 0.4
               }}
             >
-              <>
             {categoryName == 'bottom' ? 
                 <SvgXml xml={icons.bottom} 
                   fill={colorDisabled} 
@@ -406,8 +405,6 @@ const SectionElement = ({index, category, categoryName, colorDisabled, addItem}:
                   size={Theme.fontSize.l_m * 2} 
                 />
             }
-              <Text>Hiii</Text>
-              </>
             </TouchableOpacity>
           }
         />
@@ -449,7 +446,6 @@ const styles = StyleSheet.create({
     marginTop: Theme.spacing.l,
     flexDirection: 'row',
     justifyContent: 'space-between',
-
   },
   
   header: {

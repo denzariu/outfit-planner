@@ -135,3 +135,7 @@ export const DarkTheme = {
 
 export const mainAnimation = LayoutAnimation.create(200, 'easeInEaseOut', 'opacity');
 export const swipeAnimation = LayoutAnimation.create(200, 'easeInEaseOut', 'scaleXY');
+export const swipeXAnimation = LayoutAnimation.create(200, 'easeInEaseOut', 'scaleX');
+export const swipeYAnimation = LayoutAnimation.create(200, 'easeInEaseOut', 'scaleY');
+
+

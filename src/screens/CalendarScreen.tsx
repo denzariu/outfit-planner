@@ -1,6 +1,6 @@
-import { Alert, Animated, SafeAreaView, StyleSheet, Text, TouchableOpacity, View, useColorScheme } from 'react-native'
+import { Alert, Animated, LayoutAnimation, SafeAreaView, StyleSheet, Text, TouchableOpacity, View, useColorScheme } from 'react-native'
 import React, { useEffect, useState } from 'react'
-import { DarkTheme, Theme } from '../defaults/ui'
+import { DarkTheme, Theme, mainAnimation, swipeAnimation, swipeXAnimation, swipeYAnimation } from '../defaults/ui'
 import LinearGradient from 'react-native-linear-gradient';
 import { Calendar } from 'react-native-calendars';
 import dayjs from 'dayjs';
@@ -9,6 +9,12 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import AnimatedGradient from '../components/AnimatedGradient';
 import { icons } from '../defaults/custom-svgs';
 import { Theme as CalendarTheme } from 'react-native-calendars/src/types'  
+import { getDBConnection } from '../assets/database/db-service';
+import { getOutfitItems, getOutfits, getOutfitsBetweenDates, getOutfitsItems } from '../assets/database/db-operations/db-operations-outfit';
+import { FlatList } from 'react-native-gesture-handler';
+// @ts-ignore
+import SwitchSelector from 'react-native-switch-selector';
+import { Outfit } from '../assets/database/models';
 
 const CalendarScreen = ({...props}) => {
 
@@ -16,18 +22,41 @@ const CalendarScreen = ({...props}) => {
   const isDarkMode = useColorScheme() == 'dark';
   const currentTheme = isDarkMode ? DarkTheme : Theme;
   
-  const [list, setList] = useState([
-    {date: '2023-12-29'},
-    {date: '2023-12-17'},
-    {date: '2023-12-18'},
-    {date: '2023-12-19'},
+  const [list, setList] = useState<{date: string, outfit: {}}[]>([
+    {date: '2023-12-29', outfit: {}},
+    {date: '2023-12-17', outfit: {}},
+    {date: '2023-12-18', outfit: {}},
+    {date: '2023-12-19', outfit: {}},
   ])
 
-  const [month, setMonth] = useState<number>();
-  const [year, setYear] = useState<number>();
+  const [month, setMonth] = useState<number>(1);
+  const [year, setYear] = useState<number>(2024);
+
+  const [noOutfit, setNoOutfit] = useState<number>(0);
+  const [outfits, setOutfits] = useState<Outfit[]>()
+
+  const fetchOutfits = async () => {
+    const db = await getDBConnection()
+
+    const _month = month < 10 ? '0' + month : month?.toString()
+    const outfitsThisMonth = await getOutfitsBetweenDates(db, `${year}-${_month}-01`, `${year}-${_month}-32`)
+    // setList(outfitsThisMonth.map(date => {return {date: date}}))
+    // console.log(outfitsThisMonth.map(i => i.date = i.date.split(' ')[0]))
+    // console.log(outfitsThisMonth)
+    // setList(outfitsThisMonth)
+    LayoutAnimation.configureNext(mainAnimation)
+    setList(outfitsThisMonth.map(i => {return {...i, date: i.date.split(' ')[0]}}))
+    // console.log((
+    //   outfitsThisMonth.map(o => {
+    //   const {date, ...rest} = o;
+    //   return rest
+    // })))
+    
+  }
 
   useEffect(() => {
-    // getCalendar(year, month, setList, setCenter, setLoading);
+    
+    fetchOutfits()
   }, [month]);
 
   type DateArray = {
@@ -35,17 +64,29 @@ const CalendarScreen = ({...props}) => {
   }
   let accumulator: DateArray = {}
   const markedDates = list.reduce((acc, current) => {
-    const formattedDate = current.date
-    acc[formattedDate] = { 
+
+    const {date, ...outfit} = current
+    const dot = {
+      key: acc[date]? acc[date].dots.length : 1 + date, 
+      color: currentTheme.colors.quaternary,
+      selectedDotColor: currentTheme.colors.quaternary
+    }
+
+    acc[date] = { 
+      outfits: acc[date] ? [...acc[date].outfits, outfit] ?? outfit : [outfit],
+      items: acc[date] ? [...acc[date].items, []] ?? [] : [[]],
+      dots: acc[date] ? [...acc[date].dots, dot] : [dot],
       marked: true, 
-      markedColor: currentTheme.colors.secondary,
+      // markedColor: currentTheme.colors.primary,
       selected: true,
-      selectedColor: currentTheme.colors.secondary,
-      selectedDotColor: currentTheme.colors.secondary,
-      selectedDotTextColor: currentTheme.colors.quaternary
+      // selectedColor: currentTheme.colors.secondary,
+      // selectedDotColor: currentTheme.colors.secondary,
+      // selectedDotTextColor: currentTheme.colors.quaternary
     };
     return acc;
   }, accumulator);
+
+  // console.log(markedDates)
 
  const [selectedDate, setSelectedDate] = useState(
     dayjs().format("YYYY-MM-DD")
@@ -61,12 +102,35 @@ const CalendarScreen = ({...props}) => {
 
 
   const a = []
-  const daySchedule = (day: any) => {
-    // list.forEach((v) => {
-    //   if (v.lectureDate === day) {
-    //     a.push(v)
-    //   }
-    // })
+  const daySchedule = async (day: any) => {
+
+    if(markedDates && markedDates[day] && markedDates[day].outfits.length > 0) {
+      // console.log(markedDates[day].outfits)
+      const db = await getDBConnection()
+      
+      const outfits_ids = markedDates[day].outfits.map((o: Outfit) => o.id);
+      // console.log(outfits_ids)
+      const outfits = await getOutfitsItems(db, outfits_ids)
+      // console.log({out: outfits})
+      const associativeArray = outfits.map((i:any) => {
+        const {outfit_id, ...item} = i;
+        const index = (markedDates[day].outfits.map((o: Outfit) => o.id)).indexOf(outfit_id)
+        markedDates[day].items[index].push(item)
+      })
+      console.log({arr: markedDates[day].items})
+    }
+    // setOut
+    // const noOutfits = markedDates[day] ? markedDates[day].outfits.length ?? 0 : 0
+    // const optionOutfits = []
+    // for(let i=0; i<noOutfits; i++) 
+    //   optionOutfits.push({
+    //     label: (i+1).toString(), 
+    //     value: i.toString()
+    //   })  
+    
+    // console.log({oO: optionOutfits})
+    // setOptionOutfit(optionOutfits)
+    // setNoOutfit(0)
   }
   
 
@@ -104,6 +168,7 @@ const CalendarScreen = ({...props}) => {
   useEffect(() => {
     setThemeId(isDarkMode ? 'dark' : 'light');
   }, [isDarkMode, themeCalendar]);
+
   const calendarKey = isDarkMode ? 'dark' : 'light';
 
   const dynamicStyle = StyleSheet.create({
@@ -116,16 +181,56 @@ const CalendarScreen = ({...props}) => {
   })
   
 
+  // console.log({exista: })
 
   return (
     <SafeAreaView style={[styles.page, dynamicStyle.background_style]}>
       <AnimatedGradient props={fadeAnimation}/>
-      <Text style={[styles.header, dynamicStyle.textHeader]}>
-        Outfit Planner
-      </Text>
+      <View style={styles.header_container}>
+        <Text style={[styles.header, dynamicStyle.textHeader]}>
+          Outfit Planner
+        </Text>
+       
+        <FlatList
+          keyExtractor={(i, index) => index + '_' + i.id}
+          style={{
+            flexGrow: 0.9,
+          }}
+          contentContainerStyle={{
+            flex: 1,
+            flexDirection: 'row',
+            justifyContent: 'flex-end',
+            alignItems: 'center',
+          }}
+          data={markedDates[selectedDate] ? markedDates[selectedDate].outfits ?? [] : []}
+          renderItem={o => 
+            <TouchableOpacity
+              onPress={() => {
+                LayoutAnimation.configureNext(swipeYAnimation);
+                setNoOutfit(o.index);
+              }}
+              style={{
+                paddingHorizontal: Theme.spacing.m,
+                paddingVertical: Theme.spacing.s,
+                backgroundColor: o.index == noOutfit ? currentTheme.colors.secondary : currentTheme.colors.background,
+                borderRadius: Theme.spacing.m
+              }}
+            >
+              <Text style={{
+                color: o.index == noOutfit ? currentTheme.colors.background : currentTheme.colors.primary,
+                textAlign: 'center',
+                textAlignVertical: 'center'
+              }}>
+                {o.index + 1}
+              </Text>
+            </TouchableOpacity>
+          }
+        />
+      </View>
       <View key={calendarKey}>
         <Calendar
             // customHeaderTitle={<Text>Hi</Text>}
+            markingType='multi-dot'
             renderArrow={(direction) => 
               <MaterialCommunityIcons 
                 name= {direction === 'left' ? icons.chevron_left : icons.chevron_right} 
@@ -142,7 +247,8 @@ const CalendarScreen = ({...props}) => {
             firstDay={1}
             minDate='2023-11-10'
             onDayPress={day => {
-              console.log('selected day', day)
+              console.log('selected day', day),
+              LayoutAnimation.configureNext(swipeAnimation)
               setSelectedDate(day.dateString),
               daySchedule(day.dateString)
             }}
@@ -169,8 +275,10 @@ const CalendarScreen = ({...props}) => {
           />
         </View>
         <View style={styles.container}>
-        <View style={[styles.container_clothing, dynamicStyle.container_clothing]}>
-        </View>
+          <View style={[styles.container_clothing, dynamicStyle.container_clothing]}>
+            
+            
+          </View>
         <View style={styles.container_items}>
           
           <View style={[styles.container_items_category, dynamicStyle.container_items_category]}>
@@ -233,11 +341,17 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingHorizontal: Theme.spacing.page,
   },
+  
+  header_container: {
+    marginVertical: Theme.spacing.m,
+    marginTop: Theme.spacing.l,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+
   header: {
     alignSelf: 'flex-start',
     fontSize: Theme.fontSize.l_s,
-    marginVertical: Theme.spacing.m,
-    marginTop: Theme.spacing.l,
     fontWeight: '200'
   },
 

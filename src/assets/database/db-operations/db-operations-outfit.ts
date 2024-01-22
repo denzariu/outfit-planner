@@ -157,6 +157,34 @@ export const getOutfitItems = async (db: SQLiteDatabase, id: number | undefined)
 
 }
 
+// Get items of several Outfits
+export const getOutfitsItems = async (db: SQLiteDatabase, ids: (number | undefined)[]): Promise<ClothingItem[][]> => {
+  try {
+    const Items: ClothingItem[][] = [];
+    const ids_format = '(' + ids +  ')'
+
+    const results = await db.executeSql(
+      `SELECT C.id as outfit_id, ITEM.* FROM ${tableNameItem} AS ITEM
+        LEFT JOIN ${tableNameIntermediary} AS B ON ITEM.id = B.id_item 
+        LEFT JOIN ${tableName_Outfit} AS C ON C.id = B.id_outfit
+        WHERE C.id IN ${ids_format}
+      `
+    );
+
+    results.forEach(result => {
+      for (let index = 0; index < result.rows.length; index++) {
+        Items.push(result.rows.item(index))
+      }
+    });
+
+    return Items
+    
+  } catch (error) {
+    throw Error('Id not valid.')
+  }
+
+}
+
 // Save outfits to DB
 export const saveOutfits = async (db: SQLiteDatabase, Outfit: Outfit[]) => {
   if (Outfit.length < 1) throw Error('No items selected for saving.');
@@ -245,6 +273,30 @@ export const getOutfitsOnDate = async (db: SQLiteDatabase, date: string): Promis
         SELECT OUTFIT.* FROM ${tableName_Outfit} AS OUTFIT
         JOIN ${tablename_OutfitPlanner} AS B ON OUTFIT.id = B.id_outfit 
         WHERE B.date BETWEEN '${date} 00:00:00' AND '${date} 23:59:59'
+      `
+    );
+
+    results.forEach(result => {
+      for (let index = 0; index < result.rows.length; index++) {
+        Outfits.push(result.rows.item(index))
+      }
+    });
+
+    return Outfits
+
+  } catch (error) {
+    throw Error('Id not valid.')
+  }
+}
+
+export const getOutfitsBetweenDates = async (db: SQLiteDatabase, date_start: string, date_end: string): Promise<any[]> => {
+  try {
+    const Outfits: any = [];
+    const results = await db.executeSql(
+      `
+        SELECT B.date, OUTFIT.* FROM ${tableName_Outfit} AS OUTFIT
+        JOIN ${tablename_OutfitPlanner} AS B ON OUTFIT.id = B.id_outfit 
+        WHERE B.date BETWEEN '${date_start} 00:00:00' AND '${date_end} 23:59:59'
       `
     );
 
