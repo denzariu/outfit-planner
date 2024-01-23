@@ -1,20 +1,20 @@
-import { Alert, Animated, LayoutAnimation, SafeAreaView, StyleSheet, Text, TouchableOpacity, View, useColorScheme } from 'react-native'
+import { Alert, LayoutAnimation, SafeAreaView, StyleSheet, Text, TouchableOpacity, View, useColorScheme } from 'react-native'
 import React, { useEffect, useState } from 'react'
-import { DarkTheme, Theme, mainAnimation, swipeAnimation, swipeXAnimation, swipeYAnimation } from '../defaults/ui'
-import LinearGradient from 'react-native-linear-gradient';
+import { DarkTheme, Theme, mainAnimation, swipeAnimation, swipeYAnimation } from '../defaults/ui'
 import { Calendar } from 'react-native-calendars';
 import dayjs from 'dayjs';
-import { Direction } from 'react-native-calendars/src/types';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import AnimatedGradient from '../components/AnimatedGradient';
 import { icons } from '../defaults/custom-svgs';
 import { Theme as CalendarTheme } from 'react-native-calendars/src/types'  
 import { getDBConnection } from '../assets/database/db-service';
-import { getOutfitItems, getOutfits, getOutfitsBetweenDates, getOutfitsItems } from '../assets/database/db-operations/db-operations-outfit';
+import { getOutfitsBetweenDates, getOutfitsItems } from '../assets/database/db-operations/db-operations-outfit';
 import { FlatList } from 'react-native-gesture-handler';
-// @ts-ignore
-import SwitchSelector from 'react-native-switch-selector';
-import { Outfit } from '../assets/database/models';
+import { ClothingItem, Outfit } from '../assets/database/models';
+import Modal from 'react-native-modal'
+import { FontWeight } from '@shopify/react-native-skia';
+import OutfitOrganizer from '../components/OutfitOrganizer';
+import OutfitCreation from '../components/OutfitCreation';
 
 const CalendarScreen = ({...props}) => {
 
@@ -35,104 +35,96 @@ const CalendarScreen = ({...props}) => {
   const [noOutfit, setNoOutfit] = useState<number>(0);
   const [outfits, setOutfits] = useState<Outfit[]>()
 
+  const [modalVisible, setModalVisible] = useState<boolean>(false);
+
   const fetchOutfits = async () => {
     const db = await getDBConnection()
 
     const _month = month < 10 ? '0' + month : month?.toString()
     const outfitsThisMonth = await getOutfitsBetweenDates(db, `${year}-${_month}-01`, `${year}-${_month}-32`)
-    // setList(outfitsThisMonth.map(date => {return {date: date}}))
-    // console.log(outfitsThisMonth.map(i => i.date = i.date.split(' ')[0]))
-    // console.log(outfitsThisMonth)
-    // setList(outfitsThisMonth)
+
     LayoutAnimation.configureNext(mainAnimation)
     setList(outfitsThisMonth.map(i => {return {...i, date: i.date.split(' ')[0]}}))
-    // console.log((
-    //   outfitsThisMonth.map(o => {
-    //   const {date, ...rest} = o;
-    //   return rest
-    // })))
-    
   }
 
   useEffect(() => {
-    
     fetchOutfits()
-  }, [month]);
+  }, [month, year]);
 
-  type DateArray = {
-    [key: string]: any;
-  }
-  let accumulator: DateArray = {}
-  const markedDates = list.reduce((acc, current) => {
 
-    const {date, ...outfit} = current
-    const dot = {
-      key: acc[date]? acc[date].dots.length : 1 + date, 
-      color: currentTheme.colors.quaternary,
-      selectedDotColor: currentTheme.colors.quaternary
+  const [markedDates, setMarkedDates] = useState<any>([])
+  const [markedSelectedDates, setMarkedSelectedDates] = useState<any>()
+  const [selectedDate, setSelectedDate] = useState(dayjs().format("YYYY-MM-DD"));
+
+
+  useEffect(() => {
+    type DateArray = {
+      [key: string]: any;
     }
+    let accumulator: DateArray = {}
+    setMarkedDates(
+      list.reduce((acc, current) => {
+  
+        const {date, ...outfit} = current
+        const dot = {
+          key: acc[date]? acc[date].dots.length : 1 + date, 
+          color: currentTheme.colors.quaternary,
+          selectedDotColor: currentTheme.colors.quaternary
+        }
+    
+        acc[date] = { 
+          outfits: acc[date] ? [...acc[date].outfits, outfit] ?? outfit : [outfit],
+          items: acc[date] ? [...acc[date].items, []] ?? [] : [[]],
+          dots: acc[date] ? [...acc[date].dots, dot] : [dot],
+          marked: true, 
+          selected: true,
 
-    acc[date] = { 
-      outfits: acc[date] ? [...acc[date].outfits, outfit] ?? outfit : [outfit],
-      items: acc[date] ? [...acc[date].items, []] ?? [] : [[]],
-      dots: acc[date] ? [...acc[date].dots, dot] : [dot],
-      marked: true, 
-      // markedColor: currentTheme.colors.primary,
-      selected: true,
-      // selectedColor: currentTheme.colors.secondary,
-      // selectedDotColor: currentTheme.colors.secondary,
-      // selectedDotTextColor: currentTheme.colors.quaternary
-    };
-    return acc;
-  }, accumulator);
+          // markedColor: currentTheme.colors.primary,
+          // selectedColor: currentTheme.colors.secondary,
+          // selectedDotColor: currentTheme.colors.secondary,
+          // selectedDotTextColor: currentTheme.colors.quaternary
+        };
+        return acc;
+      }, accumulator)
+    )
+  }, [list])
 
-  // console.log(markedDates)
+  useEffect(() => {
+    setMarkedSelectedDates({
+      ...markedDates,
+      [selectedDate]: {
+        selected: true,
+      }
+    })
+  }, [markedDates, selectedDate])
 
- const [selectedDate, setSelectedDate] = useState(
-    dayjs().format("YYYY-MM-DD")
-  );
+  // Fires every time the user selects a new date/day
+  useEffect(() => {
+    daySchedule(selectedDate)
+  }, [selectedDate])
 
-  const markedSelectedDates = {
-    ...markedDates,
-    [selectedDate]: {
-      selected: true,
-      // marked: markedDates[selectedDate]?.marked,
-    }
-  }
-
-
-  const a = []
   const daySchedule = async (day: any) => {
-
     if(markedDates && markedDates[day] && markedDates[day].outfits.length > 0) {
-      // console.log(markedDates[day].outfits)
       const db = await getDBConnection()
       
       const outfits_ids = markedDates[day].outfits.map((o: Outfit) => o.id);
-      // console.log(outfits_ids)
       const outfits = await getOutfitsItems(db, outfits_ids)
-      // console.log({out: outfits})
-      const associativeArray = outfits.map((i:any) => {
+
+      for(let i=0; i<markedDates[day].items.length; i++)
+        while (markedDates[day].items[i].length)
+          markedDates[day].items[i].pop()
+
+      //Push items to each outfit
+      outfits.map((i:any) => {
         const {outfit_id, ...item} = i;
         const index = (markedDates[day].outfits.map((o: Outfit) => o.id)).indexOf(outfit_id)
         markedDates[day].items[index].push(item)
       })
-      console.log({arr: markedDates[day].items})
     }
-    // setOut
-    // const noOutfits = markedDates[day] ? markedDates[day].outfits.length ?? 0 : 0
-    // const optionOutfits = []
-    // for(let i=0; i<noOutfits; i++) 
-    //   optionOutfits.push({
-    //     label: (i+1).toString(), 
-    //     value: i.toString()
-    //   })  
-    
-    // console.log({oO: optionOutfits})
-    // setOptionOutfit(optionOutfits)
-    // setNoOutfit(0)
   }
   
+  console.log({hmm: markedDates[selectedDate]?.items[noOutfit]})
+
 
   const themeCalendar: CalendarTheme = {
     calendarBackground: currentTheme.colors.background,
@@ -181,8 +173,6 @@ const CalendarScreen = ({...props}) => {
   })
   
 
-  // console.log({exista: })
-
   return (
     <SafeAreaView style={[styles.page, dynamicStyle.background_style]}>
       <AnimatedGradient props={fadeAnimation}/>
@@ -190,42 +180,6 @@ const CalendarScreen = ({...props}) => {
         <Text style={[styles.header, dynamicStyle.textHeader]}>
           Outfit Planner
         </Text>
-       
-        <FlatList
-          keyExtractor={(i, index) => index + '_' + i.id}
-          style={{
-            flexGrow: 0.9,
-          }}
-          contentContainerStyle={{
-            flex: 1,
-            flexDirection: 'row',
-            justifyContent: 'flex-end',
-            alignItems: 'center',
-          }}
-          data={markedDates[selectedDate] ? markedDates[selectedDate].outfits ?? [] : []}
-          renderItem={o => 
-            <TouchableOpacity
-              onPress={() => {
-                LayoutAnimation.configureNext(swipeYAnimation);
-                setNoOutfit(o.index);
-              }}
-              style={{
-                paddingHorizontal: Theme.spacing.m,
-                paddingVertical: Theme.spacing.s,
-                backgroundColor: o.index == noOutfit ? currentTheme.colors.secondary : currentTheme.colors.background,
-                borderRadius: Theme.spacing.m
-              }}
-            >
-              <Text style={{
-                color: o.index == noOutfit ? currentTheme.colors.background : currentTheme.colors.primary,
-                textAlign: 'center',
-                textAlignVertical: 'center'
-              }}>
-                {o.index + 1}
-              </Text>
-            </TouchableOpacity>
-          }
-        />
       </View>
       <View key={calendarKey}>
         <Calendar
@@ -248,9 +202,8 @@ const CalendarScreen = ({...props}) => {
             minDate='2023-11-10'
             onDayPress={day => {
               console.log('selected day', day),
-              LayoutAnimation.configureNext(swipeAnimation)
-              setSelectedDate(day.dateString),
-              daySchedule(day.dateString)
+              LayoutAnimation.configureNext(swipeAnimation) //or mainAnimation?
+              setSelectedDate(day.dateString)
             }}
             markedDates={markedSelectedDates}
             monthFormat={'MMM, yyyy'}
@@ -266,70 +219,110 @@ const CalendarScreen = ({...props}) => {
             // headerStyle={{backgroundColor: currentTheme.colors.tertiary}}
             style={{
               borderRadius: currentTheme.spacing.m,
-              // borderWidth: 1,
-              // borderColor: 'gray',
-              height: '30%',
-              
+              height: 258,
             }}
             theme={themeCalendar}
           />
-        </View>
-        <View style={styles.container}>
-          <View style={[styles.container_clothing, dynamicStyle.container_clothing]}>
-            
-            
-          </View>
-        <View style={styles.container_items}>
-          
-          <View style={[styles.container_items_category, dynamicStyle.container_items_category]}>
-            <View style={styles.container_category}>
-
-              <Text style={[styles.category_text, dynamicStyle.category_text]}>Extras</Text>
-
-              <TouchableOpacity style={[styles.add_item, dynamicStyle.add_item]} onPress={()=>{Alert.alert('ok')}}>
-                <MaterialCommunityIcons name="plus" color={currentTheme.colors.tertiary} size={currentTheme.fontSize.m_m} />
-
-              </TouchableOpacity>
-            </View>
-          </View>
-
-          <View style={[styles.container_items_category, dynamicStyle.container_items_category]}>
-            <View style={styles.container_category}>
-
-              <Text style={[styles.category_text, dynamicStyle.category_text]}>Tops</Text>
-
-              <TouchableOpacity style={[styles.add_item, dynamicStyle.add_item]} onPress={()=>{Alert.alert('ok')}}>
-                <MaterialCommunityIcons name="plus" color={currentTheme.colors.tertiary} size={currentTheme.fontSize.m_m} />
-
-              </TouchableOpacity>
-            </View>
-          </View>
-
-          <View style={[styles.container_items_category, dynamicStyle.container_items_category]}>
-            <View style={styles.container_category}>
-
-              <Text style={[styles.category_text, dynamicStyle.category_text]}>Bottoms</Text>
-
-              <TouchableOpacity style={[styles.add_item, dynamicStyle.add_item]} onPress={()=>{Alert.alert('ok')}}>
-                <MaterialCommunityIcons name="plus" color={currentTheme.colors.tertiary} size={currentTheme.fontSize.m_m} />
-
-              </TouchableOpacity>
-            </View>
-          </View>
-
-          <View style={[styles.container_items_category, dynamicStyle.container_items_category]}>
-            <View style={styles.container_category}>
-
-              <Text numberOfLines={1} style={[styles.category_text, dynamicStyle.category_text]}>Feet</Text>
-
-              <TouchableOpacity style={[styles.add_item, dynamicStyle.add_item]} onPress={()=>{Alert.alert('ok')}}>
-                <MaterialCommunityIcons name="plus" color={currentTheme.colors.tertiary} size={currentTheme.fontSize.m_m} />
-
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
       </View>
+      <FlatList
+        keyExtractor={(i, index) => index + '_' + i.id}
+        style={{
+          flex: 1,
+          // borderWidth: 1,
+          // flexGrow: 0.9,
+        }}
+        contentContainerStyle={{
+          gap: Theme.spacing.ms
+          // borderWidth: 1,
+          // flex: 1,
+          // flexDirection: 'row',
+          // justifyContent: 'flex-end',
+          // alignItems: 'center',
+        }}
+        data={markedDates[selectedDate] ? markedDates[selectedDate].outfits ?? [] : []}
+        renderItem={o => 
+          <TouchableOpacity
+            onPress={() => {
+              setNoOutfit(o.index)
+              setModalVisible(true)
+            }}
+            onLongPress={() => {
+              setNoOutfit(o.index)
+              // setLongPressed(true)
+              setModalVisible(true)
+            }}
+            onPressOut={() => {
+              setNoOutfit(o.index)
+              // setLongPressed(false)
+              setModalVisible(false)
+            }}
+            style={{
+              borderColor: currentTheme.colors.secondary,
+              borderWidth: Theme.spacing.xxs,
+              paddingVertical: Theme.spacing.l,
+              paddingHorizontal: Theme.spacing.l,
+              backgroundColor: currentTheme.colors.background,
+              borderRadius: Theme.spacing.m,
+              elevation: Theme.spacing.elevation
+            }}
+          >
+            <Text style={{
+              color: currentTheme.colors.secondary,
+              textAlign: 'left',
+              textAlignVertical: 'center',
+              fontSize: Theme.fontSize.m_m,
+              fontWeight: '400'
+            }}>
+              {o.item.name}
+            </Text>
+          </TouchableOpacity>
+        }
+        ListFooterComponent={
+          <TouchableOpacity
+            onPress={() => {
+            }}
+            style={{
+              borderColor: currentTheme.colors.primary,
+              borderWidth: Theme.spacing.xxs,
+              paddingVertical: Theme.spacing.s,
+              backgroundColor: currentTheme.colors.primary,
+              borderRadius: Theme.spacing.m,
+              justifyContent: 'space-around',
+              flexDirection: 'row'
+            }}
+          >
+            <Text style={{
+              color: currentTheme.colors.background,
+              textAlign: 'center',
+              textAlignVertical: 'center',
+              fontSize: Theme.fontSize.m_m,
+              fontWeight: '200' 
+            }}>
+              Add Outfit
+            </Text>
+          </TouchableOpacity>
+        }
+      />
+      
+      <Modal
+        swipeDirection={'down'}
+        animationIn={'slideInUp'}
+        isVisible={modalVisible}
+        onSwipeComplete={(e) => {setModalVisible(prev => !prev)}}
+        onBackButtonPress={() => {setModalVisible(prev => !prev)}}
+        onDismiss={() => setModalVisible(prev => !prev)}
+        // pointerEvents='box-only'
+        style={{
+          // borderWidth: 1,
+          justifyContent: 'center',
+        }}
+        backdropColor={currentTheme.colors.background}
+      >
+        <OutfitCreation
+          items={markedDates[selectedDate] ? markedDates[selectedDate].items[noOutfit] : []}
+        />
+      </Modal>
+      
     </SafeAreaView>
   )
 }
@@ -360,7 +353,11 @@ const styles = StyleSheet.create({
     display: 'flex',
     flexDirection: 'row',
     gap: Theme.spacing.m,
-    height: '47%'
+    height: '47%',
+    // position: 'absolute',
+    // bottom: 0,
+    // left: 0,
+    // right: 0
   },
 
   container_clothing: {

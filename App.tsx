@@ -118,6 +118,7 @@ function Tabs(): JSX.Element {
 
   return (
       <Tab.Navigator
+        initialRouteName='Calendar' //DEBUG ONLY
         screenOptions={{
           headerShown: false
         }}

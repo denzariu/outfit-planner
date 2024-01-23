@@ -30,6 +30,7 @@
     "react-native-gesture-handler": "^2.14.0",
     "react-native-image-colors": "^2.3.0",
     "react-native-linear-gradient": "^2.8.3",
+    "react-native-modal": "^13.0.1",
     "react-native-paper": "^5.11.3",
     "react-native-reanimated": "^3.6.1",
     "react-native-reanimated-carousel": "^3.5.1",
@@ -37,7 +38,6 @@
     "react-native-screens": "^3.27.0",
     "react-native-sqlite-storage": "^6.0.1",
     "react-native-svg": "^14.1.0",
-    "react-native-switch-selector": "^2.3.0",
     "react-native-vector-icons": "^10.0.2",
     "yarn": "^1.22.21"
   },
