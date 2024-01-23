@@ -1,4 +1,4 @@
-import { Alert, LayoutAnimation, SafeAreaView, StyleSheet, Text, TouchableOpacity, View, useColorScheme } from 'react-native'
+import { Alert, Dimensions, Image, LayoutAnimation, SafeAreaView, StyleSheet, Text, TouchableOpacity, View, useColorScheme } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import { DarkTheme, Theme, mainAnimation, swipeAnimation, swipeYAnimation } from '../defaults/ui'
 import { Calendar } from 'react-native-calendars';
@@ -16,8 +16,10 @@ import { FontWeight } from '@shopify/react-native-skia';
 import OutfitOrganizer from '../components/OutfitOrganizer';
 import OutfitCreation from '../components/OutfitCreation';
 
+
 const CalendarScreen = ({...props}) => {
 
+  const windowWidth = Dimensions.get('window').width;
   const fadeAnimation = props.fadeAnimation;
   const isDarkMode = useColorScheme() == 'dark';
   const currentTheme = isDarkMode ? DarkTheme : Theme;
@@ -36,6 +38,7 @@ const CalendarScreen = ({...props}) => {
   const [outfits, setOutfits] = useState<Outfit[]>()
 
   const [modalVisible, setModalVisible] = useState<boolean>(false);
+  const [preview, setPreview] = useState<{x: number, y:number}>({x: 0, y: 0});
 
   const fetchOutfits = async () => {
     const db = await getDBConnection()
@@ -123,7 +126,7 @@ const CalendarScreen = ({...props}) => {
     }
   }
   
-  console.log({hmm: markedDates[selectedDate]?.items[noOutfit]})
+  // console.log({hmm: markedDates[selectedDate]?.items[noOutfit]})
 
 
   const themeCalendar: CalendarTheme = {
@@ -246,15 +249,16 @@ const CalendarScreen = ({...props}) => {
               setNoOutfit(o.index)
               setModalVisible(true)
             }}
-            onLongPress={() => {
+            delayLongPress={200}
+            onLongPress={(e) => {
               setNoOutfit(o.index)
-              // setLongPressed(true)
-              setModalVisible(true)
+              LayoutAnimation.configureNext(swipeAnimation)
+              setPreview({x: e.nativeEvent.pageX, y: e.nativeEvent.pageY})
             }}
             onPressOut={() => {
               setNoOutfit(o.index)
-              // setLongPressed(false)
-              setModalVisible(false)
+              LayoutAnimation.configureNext(swipeAnimation)
+              setPreview({x: 0, y: 0})
             }}
             style={{
               borderColor: currentTheme.colors.secondary,
@@ -322,6 +326,53 @@ const CalendarScreen = ({...props}) => {
           items={markedDates[selectedDate] ? markedDates[selectedDate].items[noOutfit] : []}
         />
       </Modal>
+
+      {(preview.x != 0 && preview.y != 0) &&
+        <View style={{
+          position: 'absolute',
+          left: preview.x < windowWidth/2 ? preview.x + 32 : preview.x - 128 - 32,
+          top: preview.y - 120,
+          // height: 240,
+          width: 128,
+          borderRadius: 16,
+          padding: 4,
+          backgroundColor: currentTheme.colors.secondary,
+          flexDirection: 'column'
+        }}>
+          <View style={{
+            flexDirection: 'row'
+          }}>
+            {markedDates[selectedDate].items[noOutfit].map((i: ClothingItem) => 
+              i.type == 'extra' &&
+                <Image key={'preview_extra_' + i.id} source={{uri: i.image}} style={{flex: i.aspect_ratio, aspectRatio: i.aspect_ratio}}/>
+          )}
+          </View>
+          <View style={{
+            flexDirection: 'row'
+          }}>
+            {markedDates[selectedDate].items[noOutfit].map((i: ClothingItem) => 
+              i.type == 'top' &&
+                <Image key={'preview_top_' + i.id} source={{uri: i.image}} style={{flex: i.aspect_ratio, aspectRatio: i.aspect_ratio}}/>
+          )}
+          </View>
+          <View style={{
+            flexDirection: 'row'
+          }}>
+            {markedDates[selectedDate].items[noOutfit].map((i: ClothingItem) => 
+              i.type == 'bottom' &&
+                <Image key={'preview_bottom_' + i.id} source={{uri: i.image}} style={{flex: i.aspect_ratio, aspectRatio: i.aspect_ratio}}/>
+          )}
+          </View>
+          <View style={{
+            flexDirection: 'row'
+          }}>
+            {markedDates[selectedDate].items[noOutfit].map((i: ClothingItem) => 
+              i.type == 'feet' &&
+                <Image key={'preview_footwear_' + i.id} source={{uri: i.image}} style={{flex: i.aspect_ratio, aspectRatio: i.aspect_ratio}}/>
+          )}
+          </View>
+        </View>
+      }
       
     </SafeAreaView>
   )

@@ -199,6 +199,7 @@ const HomeScreen = ({...props}) => {
         items={items}
         allItemsIds={allItemsIds}
         setAllItemsIds={setAllItemsIds}
+        transparent
       />
     </SafeAreaView>
   )

@@ -23,7 +23,6 @@ const OutfitCreation = ({outfit, items}: OutfitCreationProps) => {
       items={items}
       allItemsIds={allItemsIds}
       setAllItemsIds={setAllItemsIds}
-      transparent={false}
     />
   )
 }
