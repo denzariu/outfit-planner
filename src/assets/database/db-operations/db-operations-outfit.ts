@@ -112,7 +112,7 @@ export const deleteAllItemsFromOutfit = async (db: SQLiteDatabase, id_outfit: nu
 } 
 
 // Intermediary Table 
-export const getOutfitItemsTable = async (db: SQLiteDatabase, id: number | undefined): Promise<ClothingItem[]> => {
+export const getOutfitItemsTable = async (db: SQLiteDatabase): Promise<ClothingItem[]> => {
   try {
     const Items: ClothingItem[] = [];
     const results = await db.executeSql(
@@ -158,18 +158,19 @@ export const getOutfitItems = async (db: SQLiteDatabase, id: number | undefined)
 }
 
 // Get items of several Outfits
-export const getOutfitsItems = async (db: SQLiteDatabase, ids: (number | undefined)[]): Promise<ClothingItem[][]> => {
+export const getOutfitsItems = async (db: SQLiteDatabase, ids: (number | undefined)[]): Promise<(ClothingItem & {outfit_id: number})[]> => {
   try {
-    const Items: ClothingItem[][] = [];
-    const ids_format = '(' + ids +  ')'
+    const Items: (ClothingItem & {outfit_id: number})[] = [];
 
-    const results = await db.executeSql(
-      `SELECT C.id as outfit_id, ITEM.* FROM ${tableNameItem} AS ITEM
-        LEFT JOIN ${tableNameIntermediary} AS B ON ITEM.id = B.id_item 
-        LEFT JOIN ${tableName_Outfit} AS C ON C.id = B.id_outfit
-        WHERE C.id IN ${ids_format}
-      `
-    );
+    const sql = 
+    `
+      SELECT C.id as outfit_id, ITEM.* FROM ${tableNameItem} AS ITEM
+      LEFT JOIN ${tableNameIntermediary} AS B ON ITEM.id = B.id_item 
+      LEFT JOIN ${tableName_Outfit} AS C ON C.id = B.id_outfit
+      WHERE outfit_id IN (${ids})
+    `
+
+    const results = await db.executeSql(sql);
 
     results.forEach(result => {
       for (let index = 0; index < result.rows.length; index++) {
@@ -208,12 +209,7 @@ export const deleteOutfit = async (db: SQLiteDatabase, id: number) => {
 export const deleteOutfits = async (db: SQLiteDatabase, ids: Array<number>) => {
   if (ids.length < 1) throw Error('No items selected for deletion.');
 
-  let ids_stringified = ids.reduce((acc, current, index) => {
-    if (!current) return acc
-    return index == 0 ? current.toString() : acc.concat(', ' + current.toString())
-  }, '');
-
-  console.log(ids_stringified);
+  // 
   
   const deleteQuery = `DELETE from ${tableName_Outfit} where rowid IN (${ids})`;
   
@@ -308,6 +304,69 @@ export const getOutfitsBetweenDates = async (db: SQLiteDatabase, date_start: str
 
     return Outfits
 
+  } catch (error) {
+    throw Error('Id not valid.')
+  }
+}
+
+// ++ Extra ++
+
+// Used for outfit recommendations
+export const getLatestCreatedOutfits = async (db: SQLiteDatabase, maximum: number): Promise<Outfit[]> => {
+  try {
+    const Outfits: Outfit[] = [];
+    const results = await db.executeSql(
+      `
+        SELECT * FROM ${tableName_Outfit} AS OUTFIT
+        ORDER BY date_added DESC
+        LIMIT ${maximum}
+      `
+    );
+
+    results.forEach(result => {
+      for (let index = 0; index < result.rows.length; index++) {
+        Outfits.push(result.rows.item(index))
+      }
+    });
+
+    return Outfits
+
+  } catch (error) {
+    throw Error('Id not valid.')
+  }
+}
+
+
+export const getItemsFromLatestCreatedOutfits = async (db: SQLiteDatabase, maximum: number): Promise<(ClothingItem & {outfit_id: number, outfit_name: string})[]> => {
+  try {
+    const Items: (ClothingItem & {outfit_id: number, outfit_name: string})[] = [];
+
+    // Data gathered:
+    /*
+      outfit_id, 
+      id, image, aspect_ratio 
+    */
+    const sql = 
+    `
+      SELECT C.id as outfit_id, C.name as outfit_name, ITEM.id as item_id, ITEM.image, ITEM.type, ITEM.aspect_ratio
+      FROM ${tableNameItem} AS ITEM
+      LEFT JOIN ${tableNameIntermediary} AS B ON ITEM.id = B.id_item 
+      LEFT JOIN ${tableName_Outfit} AS C ON C.id = B.id_outfit
+      WHERE outfit_id IN (SELECT id FROM ${tableName_Outfit}
+                          ORDER BY date_added DESC
+                          LIMIT ${maximum})
+    `
+
+    const results = await db.executeSql(sql);
+
+    results.forEach(result => {
+      for (let index = 0; index < result.rows.length; index++) {
+        Items.push(result.rows.item(index))
+      }
+    });
+
+    return Items
+    
   } catch (error) {
     throw Error('Id not valid.')
   }

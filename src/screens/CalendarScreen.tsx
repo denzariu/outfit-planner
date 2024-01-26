@@ -1,4 +1,4 @@
-import { Alert, Dimensions, Image, LayoutAnimation, SafeAreaView, StyleSheet, Text, TouchableOpacity, View, useColorScheme } from 'react-native'
+import { Alert, Dimensions, Image, LayoutAnimation, SafeAreaView, StatusBar, StyleSheet, Text, TouchableOpacity, View, useColorScheme } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import { DarkTheme, Theme, mainAnimation, swipeAnimation, swipeYAnimation } from '../defaults/ui'
 import { Calendar } from 'react-native-calendars';
@@ -46,7 +46,7 @@ const CalendarScreen = ({...props}) => {
     const _month = month < 10 ? '0' + month : month?.toString()
     const outfitsThisMonth = await getOutfitsBetweenDates(db, `${year}-${_month}-01`, `${year}-${_month}-32`)
 
-    LayoutAnimation.configureNext(mainAnimation)
+    LayoutAnimation.configureNext(swipeAnimation)
     setList(outfitsThisMonth.map(i => {return {...i, date: i.date.split(' ')[0]}}))
   }
 
@@ -111,6 +111,7 @@ const CalendarScreen = ({...props}) => {
       const db = await getDBConnection()
       
       const outfits_ids = markedDates[day].outfits.map((o: Outfit) => o.id);
+
       const outfits = await getOutfitsItems(db, outfits_ids)
 
       for(let i=0; i<markedDates[day].items.length; i++)
@@ -125,9 +126,6 @@ const CalendarScreen = ({...props}) => {
       })
     }
   }
-  
-  // console.log({hmm: markedDates[selectedDate]?.items[noOutfit]})
-
 
   const themeCalendar: CalendarTheme = {
     calendarBackground: currentTheme.colors.background,
@@ -178,6 +176,10 @@ const CalendarScreen = ({...props}) => {
 
   return (
     <SafeAreaView style={[styles.page, dynamicStyle.background_style]}>
+      <StatusBar
+        barStyle={isDarkMode ? 'dark-content' : 'light-content'}
+        backgroundColor={currentTheme.colors.background}
+      />
       <AnimatedGradient props={fadeAnimation}/>
       <View style={styles.header_container}>
         <Text style={[styles.header, dynamicStyle.textHeader]}>
@@ -315,6 +317,7 @@ const CalendarScreen = ({...props}) => {
         onSwipeComplete={(e) => {setModalVisible(prev => !prev)}}
         onBackButtonPress={() => {setModalVisible(prev => !prev)}}
         onDismiss={() => setModalVisible(prev => !prev)}
+        propagateSwipe
         // pointerEvents='box-only'
         style={{
           // borderWidth: 1,
@@ -323,7 +326,8 @@ const CalendarScreen = ({...props}) => {
         backdropColor={currentTheme.colors.background}
       >
         <OutfitCreation
-          items={markedDates[selectedDate] ? markedDates[selectedDate].items[noOutfit] : []}
+          outfit={markedDates[selectedDate] ? markedDates[selectedDate].outfits[noOutfit] ?? [] : []}
+          items={markedDates[selectedDate] ? markedDates[selectedDate].items[noOutfit] ?? [] : []}
         />
       </Modal>
 

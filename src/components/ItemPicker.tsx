@@ -8,6 +8,7 @@ import { getClothingItems } from '../assets/database/db-operations/db-operations
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
 import { icons } from '../defaults/custom-svgs'
 import ItemShowcase from './ItemShowcase'
+import { arraysEqual } from '../defaults/data-processing'
 
 
 type ItemSelectorProps = {
@@ -63,7 +64,6 @@ const ItemPicker = ({handleItemsToBeAdded, handleCategoryToBeAddedTo, alreadySel
       const db = await getDBConnection()
       await getClothingItems(db, categoryToChooseFrom).then((res) => {
         setItems(res);
-        console.log(res);
       })
     }
   }
@@ -71,7 +71,6 @@ const ItemPicker = ({handleItemsToBeAdded, handleCategoryToBeAddedTo, alreadySel
   const addItems = () => {
     console.log('adding')
     const selectedItems = items?.filter((item) => itemsSelected.includes(item.id)) || []
-    console.log(selectedItems)
     handleCategoryToBeAddedTo(categoryToChooseFrom)
     handleItemsToBeAdded(selectedItems)
     close()
@@ -136,7 +135,7 @@ const ItemPicker = ({handleItemsToBeAdded, handleCategoryToBeAddedTo, alreadySel
               >
               </FlatList>
           </View>
-          {!(itemsSelected.every(item => alreadySelectedItems.includes(item)) && alreadySelectedItems.every(item => itemsSelected.includes(item))) &&          
+          {!arraysEqual(itemsSelected, alreadySelectedItems) &&          
             <TouchableOpacity
               onPress={() => addItems()}
               style={[{

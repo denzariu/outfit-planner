@@ -371,7 +371,9 @@ const AddItemScreen = ({navigation, route}: AddItemScreen) => {
       <TouchableOpacity  
         style={[styles.button, dynamicStyle.button]}
         onPress={() => addItem()}
-        children={<Text style={[styles.button_text, dynamicStyle.button_text]}>Add to Collection</Text>}
+        children={
+          <Text style={[styles.button_text, dynamicStyle.button_text]}>Add to Collection</Text>
+        }
       />
       
     </SafeAreaView>

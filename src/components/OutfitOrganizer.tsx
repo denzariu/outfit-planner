@@ -5,7 +5,7 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import { ClothingItem, Outfit } from '../assets/database/models'
 import { icons } from '../defaults/custom-svgs'
 import { getCategoryName } from '../defaults/data'
-import { DarkTheme, Theme, mainAnimation } from '../defaults/ui'
+import { DarkTheme, Theme, swipeAnimation } from '../defaults/ui'
 import { getDBConnection } from '../assets/database/db-service'
 import ItemPicker from './ItemPicker'
 
@@ -19,7 +19,7 @@ type OutfitOrganizerProps = {
   transparent?: boolean
 }
 
-const OutfitOrganizer = ({items, setAllItemsIds, outfit, allItemsIds, transparent}: OutfitOrganizerProps) => {
+const OutfitOrganizer = ({items, setAllItemsIds, allItemsIds, transparent}: OutfitOrganizerProps) => {
   const isDarkMode = useColorScheme() == 'dark';
   const currentTheme = isDarkMode ? DarkTheme : Theme;
 
@@ -27,6 +27,7 @@ const OutfitOrganizer = ({items, setAllItemsIds, outfit, allItemsIds, transparen
     setCategoryToBeAddedTo('all');
     setItemsToBeAdded(items);
   }, [items])
+
   // Current items shown
   const [extra, setExtra] = useState<ClothingItem[]>([]);
   const [top, setTop] = useState<ClothingItem[]>([]);
@@ -42,7 +43,8 @@ const OutfitOrganizer = ({items, setAllItemsIds, outfit, allItemsIds, transparen
 
     // Whenever items are added to a category, add their IDs to the list
   useEffect(() => {
-    setAllItemsIds(extra.concat(top, bottom, feet).map((item: ClothingItem) => item.id ? item.id : -1))
+    const allIds = extra.concat(top, bottom, feet).map((item: ClothingItem) => item.id ? item.id : -1)
+    setAllItemsIds(allIds.length ? allIds : [-1])
     console.log('Set Items')
   }, [extra, top, bottom, feet])
 
@@ -81,59 +83,29 @@ const OutfitOrganizer = ({items, setAllItemsIds, outfit, allItemsIds, transparen
   }, [itemsToBeAdded])
   // Remove item, by tapping '-'
   const removeItem = (type: string, id: number | null) => {
-    LayoutAnimation.configureNext(mainAnimation);
+    LayoutAnimation.configureNext(swipeAnimation);
 
     switch(type) {
       case 'extra':
-        setExtra(extra.filter((item) => item.id != id))
+        setExtra(prev => prev.filter((item) => item.id != id))
         break;
       case 'top':
-        setTop(top.filter((item) => item.id != id))
+        setTop(prev => prev.filter((item) => item.id != id))
         break;
       case 'bottom':
-        setBottom(bottom.filter((item) => item.id != id))
+        setBottom(prev => prev.filter((item) => item.id != id))
         break;
       case 'feet':
-        setFeet(feet.filter((item) => item.id != id))
+        setFeet(prev => prev.filter((item) => item.id != id))
         break;
     }
   } 
 
   // Add item, by tapping '+'
   const addItem = (type: typeof itemSelection) => {
-    LayoutAnimation.configureNext(mainAnimation);
+    LayoutAnimation.configureNext(swipeAnimation);
     setItemSelection(type)
   } 
-  
-  // Item array updater
-  useEffect(() => {
-    if (categoryToBeAddedTo != '') {
-
-      switch (categoryToBeAddedTo) {
-        case 'all':
-          setExtra(() => itemsToBeAdded.filter(item => item.type == 'extra'))
-          setTop(() => itemsToBeAdded.filter(item => item.type == 'top'))
-          setBottom(() => itemsToBeAdded.filter(item => item.type == 'bottom'))
-          setFeet(() => itemsToBeAdded.filter(item => item.type == 'feet'))
-          break;
-        case 'extra':
-          // Array is now replaced, so unselected items will also be removed
-          setExtra(itemsToBeAdded)
-          break;
-        case 'top':
-          setTop(itemsToBeAdded)
-          break;
-        case 'bottom':
-          setBottom(itemsToBeAdded)
-          break;
-        case 'feet':
-          setFeet(itemsToBeAdded)
-          break;
-      }
-      setCategoryToBeAddedTo('')
-      setItemsToBeAdded([])
-    }
-  }, [itemsToBeAdded])
 
   const dynamicStyle = StyleSheet.create({
     background_style: {backgroundColor: currentTheme.colors.background},

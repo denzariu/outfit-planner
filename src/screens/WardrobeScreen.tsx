@@ -104,15 +104,6 @@ const WardrobeScreen = ({...props}) => {
     })                                      
   }
 
-  const deleteIndividualFromDatabase = async (id: number | null) => {
-    if (!id) return;
-    const db = await getDBConnection()
-    await deleteClothingItem(db, id).then((res) => {
-      const newItems = items.filter((item) => {return item.id != id})
-      setItems(newItems)
-    })                                      
-  }
-
   const filterItems = (type: string) => {
     setSelectedType(type)
     let filteredItems;

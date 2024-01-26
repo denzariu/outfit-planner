@@ -42,3 +42,17 @@ export function simplifiedColorID (color: string): number {
   }
   return id[0] * 5 * 5 + id[1] * 5 + id[2] 
 }
+
+export const arraysEqual = ([...a1]: (number[] | (number | null)[]), [...a2]: (number[] | (number | null)[])): boolean => {
+  if (a1.length != a2.length) return false;
+  // or (itemsSelected.every(item => alreadySelectedItems.includes(item)) && alreadySelectedItems.every(item => itemsSelected.includes(item)))
+  a1.sort()
+  a2.sort()
+  console.log('----', a1, a2)
+  
+  for (let i=0; i<a1.length; i++)
+    if (a1[i] != a2[i]) 
+      return false
+
+  return true
+}
