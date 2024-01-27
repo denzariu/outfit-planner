@@ -17,6 +17,7 @@ import moment, { Moment } from 'moment'
 import DatePicker from 'react-native-date-picker';
 import { SvgXml } from 'react-native-svg';
 import OutfitOrganizer from '../components/OutfitOrganizer';
+import { saveOutfit } from '../assets/database/db-processing';
 
 const HomeScreen = ({...props}) => {
   const isDarkMode = useColorScheme() == 'dark';
@@ -39,23 +40,7 @@ const HomeScreen = ({...props}) => {
   const [allItemsIds, setAllItemsIds] = useState<Array<number>>([])
 
 
-  // TODO: Feature in testing, default / favourite outfits + outfit selector coming soon
-  const saveOutfit = async () => {
-    const db = await getDBConnection()
-    
-    if (!currentOutfit || !currentOutfit.id) {
-      const insertId = await createOutfit(db, 'NameNotSetYet')
-      await addItemsToOutfit(db, allItemsIds, {id: insertId, name: 'NameNotSetYet'})
-      await addOutfitsOnDate(db, [insertId], intDate)
-    }
-    else {
-      await deleteAllItemsFromOutfit(db, currentOutfit.id)
-      await addItemsToOutfit(db, allItemsIds, currentOutfit)
-
-    }
-    console.log('Added Items to Outfit')
-
-  }
+  
 
   
   // TODO: Feature in testing
@@ -162,7 +147,7 @@ const HomeScreen = ({...props}) => {
           alignItems: 'center',
         }}>
           <TouchableOpacity 
-            onPress={() => saveOutfit()} 
+            onPress={() => saveOutfit(currentOutfit, allItemsIds, intDate)} 
             style={{padding: Theme.spacing.xs}}
           >
             <MaterialCommunityIcons 

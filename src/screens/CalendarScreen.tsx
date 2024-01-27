@@ -15,6 +15,7 @@ import Modal from 'react-native-modal'
 import { FontWeight } from '@shopify/react-native-skia';
 import OutfitOrganizer from '../components/OutfitOrganizer';
 import OutfitCreation from '../components/OutfitCreation';
+import AppleStyleSwipeableRow from '../components/AppleSwipeableRow';
 
 
 const CalendarScreen = ({...props}) => {
@@ -149,7 +150,7 @@ const CalendarScreen = ({...props}) => {
     textMonthFontFamily: 'monospace',
     textDayHeaderFontFamily: 'monospace',
     textDayFontWeight: '200',
-    weekVerticalMargin: 0,
+    weekVerticalMargin: 2,
     textDayFontSize: 16,
     textMonthFontSize: 16,
   }; 
@@ -224,64 +225,77 @@ const CalendarScreen = ({...props}) => {
             // headerStyle={{backgroundColor: currentTheme.colors.tertiary}}
             style={{
               borderRadius: currentTheme.spacing.m,
-              height: 258,
+              height: 268,
             }}
             theme={themeCalendar}
           />
       </View>
       <FlatList
         keyExtractor={(i, index) => index + '_' + i.id}
-        style={{
-          flex: 1,
-          // borderWidth: 1,
-          // flexGrow: 0.9,
-        }}
-        contentContainerStyle={{
-          gap: Theme.spacing.ms
-          // borderWidth: 1,
-          // flex: 1,
-          // flexDirection: 'row',
-          // justifyContent: 'flex-end',
-          // alignItems: 'center',
-        }}
+        style={{ flex: 1, marginHorizontal: -Theme.spacing.page }}
+        contentContainerStyle={{ gap: Theme.spacing.ms }}
         data={markedDates[selectedDate] ? markedDates[selectedDate].outfits ?? [] : []}
-        renderItem={o => 
-          <TouchableOpacity
-            onPress={() => {
-              setNoOutfit(o.index)
-              setModalVisible(true)
-            }}
-            delayLongPress={200}
-            onLongPress={(e) => {
-              setNoOutfit(o.index)
-              LayoutAnimation.configureNext(swipeAnimation)
-              setPreview({x: e.nativeEvent.pageX, y: e.nativeEvent.pageY})
-            }}
-            onPressOut={() => {
-              setNoOutfit(o.index)
-              LayoutAnimation.configureNext(swipeAnimation)
-              setPreview({x: 0, y: 0})
-            }}
-            style={{
-              borderColor: currentTheme.colors.secondary,
-              borderWidth: Theme.spacing.xxs,
-              paddingVertical: Theme.spacing.l,
-              paddingHorizontal: Theme.spacing.l,
-              backgroundColor: currentTheme.colors.background,
-              borderRadius: Theme.spacing.m,
-              elevation: Theme.spacing.elevation
-            }}
-          >
-            <Text style={{
-              color: currentTheme.colors.secondary,
-              textAlign: 'left',
-              textAlignVertical: 'center',
-              fontSize: Theme.fontSize.m_m,
-              fontWeight: '400'
-            }}>
-              {o.item.name}
-            </Text>
-          </TouchableOpacity>
+        renderItem={o =>
+          <SwipeableRow 
+            outfit={o.item} 
+            setNoOutfit={setNoOutfit} 
+            setModalVisible={setModalVisible}
+            setPreview={setPreview}
+            index={o.index}
+          /> 
+          // <TouchableOpacity
+          //   onPress={() => {
+          //     setNoOutfit(o.index)
+          //     setModalVisible(true)
+          //   }}
+          //   delayLongPress={200}
+          //   onLongPress={(e) => {
+          //     setNoOutfit(o.index)
+          //     LayoutAnimation.configureNext(swipeAnimation)
+          //     setPreview({x: e.nativeEvent.pageX, y: e.nativeEvent.pageY})
+          //   }}
+          //   onPressOut={() => {
+          //     setNoOutfit(o.index)
+          //     LayoutAnimation.configureNext(swipeAnimation)
+          //     setPreview({x: 0, y: 0})
+          //   }}
+          //   style={{
+          //     flexDirection: 'row',
+          //     justifyContent: 'space-between',
+          //     borderColor: currentTheme.colors.secondary,
+          //     borderWidth: Theme.spacing.xxs,
+          //     borderRadius: Theme.spacing.m,
+          //     elevation: Theme.spacing.elevation,
+          //     backgroundColor: currentTheme.colors.background
+          //   }}
+          // >
+          //   <Text style={{
+          //     paddingVertical: Theme.spacing.l,
+          //     paddingHorizontal: Theme.spacing.l,
+          //     color: currentTheme.colors.secondary,
+          //     textAlign: 'left',
+          //     textAlignVertical: 'center',
+          //     fontSize: Theme.fontSize.m_m,
+          //     fontWeight: '400'
+          //   }}>
+          //     {o.item.name}
+          //   </Text>
+            
+          //   <TouchableOpacity style={{
+          //     // backgroundColor: currentTheme.colors.quaternary,
+          //     borderTopRightRadius: Theme.spacing.m,
+          //     borderBottomRightRadius: Theme.spacing.m,              
+          //     alignItems: 'center',
+          //     justifyContent: 'center',
+          //     paddingHorizontal: Theme.spacing.m,
+
+          //   }}>
+          //     <MaterialCommunityIcons name={icons.delete}
+          //       color={currentTheme.colors.delete}
+          //       size={Theme.fontSize.m_l}
+          //     />
+          //   </TouchableOpacity>
+          // </TouchableOpacity>
         }
         ListFooterComponent={
           <TouchableOpacity
@@ -291,15 +305,19 @@ const CalendarScreen = ({...props}) => {
               borderColor: currentTheme.colors.primary,
               borderWidth: Theme.spacing.xxs,
               paddingVertical: Theme.spacing.s,
+              paddingHorizontal: Theme.spacing.m,
               backgroundColor: currentTheme.colors.primary,
-              borderRadius: Theme.spacing.m,
-              justifyContent: 'space-around',
-              flexDirection: 'row'
+              // borderRadius: Theme.spacing.m,
+              borderTopLeftRadius: Theme.spacing.m,
+              borderBottomLeftRadius: Theme.spacing.m,
+              // justifyContent: 'space-around',
+              // flexDirection: 'row',
+              marginLeft: Theme.spacing.page
             }}
           >
             <Text style={{
               color: currentTheme.colors.background,
-              textAlign: 'center',
+              textAlign: 'left',
               textAlignVertical: 'center',
               fontSize: Theme.fontSize.m_m,
               fontWeight: '200' 
@@ -311,6 +329,7 @@ const CalendarScreen = ({...props}) => {
       />
       
       <Modal
+        // presentationStyle='overFullScreen'
         swipeDirection={'down'}
         animationIn={'slideInUp'}
         isVisible={modalVisible}
@@ -326,6 +345,7 @@ const CalendarScreen = ({...props}) => {
         backdropColor={currentTheme.colors.background}
       >
         <OutfitCreation
+          selectedDate={selectedDate}
           outfit={markedDates[selectedDate] ? markedDates[selectedDate].outfits[noOutfit] ?? [] : []}
           items={markedDates[selectedDate] ? markedDates[selectedDate].items[noOutfit] ?? [] : []}
         />
@@ -384,7 +404,91 @@ const CalendarScreen = ({...props}) => {
 
 export default CalendarScreen
 
+type RowProps = {
+  outfit: Outfit,
+  index: number,
+  setNoOutfit: any,
+  setPreview: any,
+  setModalVisible: any
+}
+
+const SwipeableRow = ({outfit, setNoOutfit, setModalVisible, setPreview, index}: RowProps) => {
+  const edit = () => {
+    console.log('pressed edit')
+  }
+  
+  const deleteOutfit = () => {
+    console.log('pressed delete')
+  }
+
+  return (
+    <AppleStyleSwipeableRow 
+      actionButton1={edit}
+      actionButton2={deleteOutfit}
+      children={
+        <Row
+          outfit={outfit} 
+          setNoOutfit={setNoOutfit} 
+          setModalVisible={setModalVisible} 
+          setPreview={setPreview}
+          index={index}
+        />  
+      } 
+      outfit={outfit} 
+    />
+  );
+};
+
+const Row = ( {outfit, setNoOutfit, setModalVisible, setPreview, index}: RowProps ) => {
+  const isDarkMode = useColorScheme() == 'dark';
+  const currentTheme = isDarkMode ? DarkTheme : Theme;
+  
+  const dynamicStyles = StyleSheet.create({
+    outfit_container: {backgroundColor: currentTheme.colors.secondary},
+    outfit_title: {color: currentTheme.colors.quaternary}
+  })
+
+  return (
+    <TouchableOpacity
+      onPress={() => {
+        setNoOutfit(index)
+        setModalVisible(true)
+      }}
+      delayLongPress={200}
+      onLongPress={(e) => {
+        setNoOutfit(index)
+        LayoutAnimation.configureNext(swipeAnimation)
+        setPreview({x: e.nativeEvent.pageX, y: e.nativeEvent.pageY})
+      }}
+      onPressOut={() => {
+        setNoOutfit(index)
+        LayoutAnimation.configureNext(swipeAnimation)
+        setPreview({x: 0, y: 0})
+      }}
+      style={[styles.outfit_container, dynamicStyles.outfit_container]}
+      activeOpacity={0.8}
+    >
+      <Text style={[styles.outfit_title, dynamicStyles.outfit_title]}>
+        {outfit.name}
+      </Text>
+    </TouchableOpacity>
+  )
+};
+
+
+
 const styles = StyleSheet.create({
+  outfit_container: {
+    paddingVertical: Theme.spacing.m,
+    borderTopLeftRadius: Theme.spacing.m,
+    borderBottomLeftRadius: Theme.spacing.m,
+  },
+
+  outfit_title: {
+    fontSize: Theme.fontSize.m_m,
+    marginLeft: Theme.spacing.m
+  },
+
   page: {
     flex: 1,
     paddingHorizontal: Theme.spacing.page,
@@ -403,57 +507,45 @@ const styles = StyleSheet.create({
     fontWeight: '200'
   },
 
-  container: {
-    marginTop: Theme.spacing.xxs,
-    display: 'flex',
-    flexDirection: 'row',
-    gap: Theme.spacing.m,
-    height: '47%',
-    // position: 'absolute',
-    // bottom: 0,
-    // left: 0,
-    // right: 0
-  },
-
   container_clothing: {
     flex: 0.52,
     borderRadius: Theme.spacing.m,
   },
 
-  container_items: {
-    flex: 0.48,
-    display: 'flex',
-    flexDirection: 'column',
-    rowGap: Theme.spacing.s,
-  },
+  // container_items: {
+  //   flex: 0.48,
+  //   display: 'flex',
+  //   flexDirection: 'column',
+  //   rowGap: Theme.spacing.s,
+  // },
 
-  container_items_category: {
-    flex: 0.25,
-    display: 'flex',
-    flexDirection: 'column',
-    borderRadius: Theme.spacing.m,
-    paddingHorizontal: Theme.spacing.s,
-    paddingVertical: Theme.spacing.xxs 
-  },
+  // container_items_category: {
+  //   flex: 0.25,
+  //   display: 'flex',
+  //   flexDirection: 'column',
+  //   borderRadius: Theme.spacing.m,
+  //   paddingHorizontal: Theme.spacing.s,
+  //   paddingVertical: Theme.spacing.xxs 
+  // },
 
-  container_category: {
-    // flex: 0.25,` 
-    display: 'flex',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    flexWrap: 'nowrap'
-  },
+  // container_category: {
+  //   // flex: 0.25,` 
+  //   display: 'flex',
+  //   flexDirection: 'row',
+  //   justifyContent: 'space-between',
+  //   flexWrap: 'nowrap'
+  // },
 
-  category_text: {
-    flex: 0.75,
-    fontSize: Theme.fontSize.m_m,
-    fontWeight: '200' 
-  },
+  // category_text: {
+  //   flex: 0.75,
+  //   fontSize: Theme.fontSize.m_m,
+  //   fontWeight: '200' 
+  // },
 
-  add_item: {
-    alignSelf: 'center',
-    padding: Theme.spacing.xxs,
-    borderRadius: Theme.spacing.m
-  }
+  // add_item: {
+  //   alignSelf: 'center',
+  //   padding: Theme.spacing.xxs,
+  //   borderRadius: Theme.spacing.m
+  // }
 })
 

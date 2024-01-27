@@ -80,6 +80,7 @@ export const icons = {
   tshirt: "tshirt-crew",
 
   // Outfit-related
+  edit: 'pencil',
   save: "content-save-outline",
   date_pick: "calendar-range-outline"
 }

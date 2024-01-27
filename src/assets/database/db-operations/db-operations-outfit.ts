@@ -84,12 +84,12 @@ export const getOutfits = async (db: SQLiteDatabase, date_start?: string, date_e
 };
 
 // Assign items to an already-existing outfit
-export const addItemsToOutfit = async (db: SQLiteDatabase, ids_items: number[], outfit: Outfit) => {
+export const addItemsToOutfit = async (db: SQLiteDatabase, ids_items: number[], outfit_id: number) => {
   try {
     // Create an intermediary for each item (to solve M2M relationship)
     const insertQuery =
       `INSERT OR REPLACE INTO ${tableNameIntermediary} (id_outfit, id_item) VALUES `
-      + ids_items.map(id_item => `('${outfit.id}', '${id_item}')`).join(',');
+      + ids_items.map(id_item => `('${outfit_id}', '${id_item}')`).join(',');
 
     return db.executeSql(insertQuery).then(res => res[0].insertId);
 

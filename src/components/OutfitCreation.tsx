@@ -7,19 +7,22 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import { icons } from '../defaults/custom-svgs'
 import RecommendedOutfits from './RecommendedOutfits'
 import { arraysEqual } from '../defaults/data-processing'
+import { saveOutfit } from '../assets/database/db-processing'
 
 type OutfitCreationProps = {
   outfit?: Outfit,
-  items: ClothingItem[]
+  items: ClothingItem[],
+  selectedDate: string,
 }
 
-const OutfitCreation = ({outfit, items}: OutfitCreationProps) => {
+const OutfitCreation = ({outfit, items, selectedDate}: OutfitCreationProps) => {
 
   const isDarkMode = useColorScheme() == 'dark';
   const currentTheme = isDarkMode ? DarkTheme : Theme;
   
   //Original ids of items
-  const [allItemsIds, setAllItemsIds] = useState<number[]>([])
+  // const [allItemsIds, setAllItemsIds] = useState<number[]>([])
+  const [outfitName, setOutfitName] = useState<string>('')
 
   //Current ids of items
   const [modifiedAllItemsIds, setModifiedAllItemsIds] = useState<number[]>([])
@@ -44,9 +47,7 @@ const OutfitCreation = ({outfit, items}: OutfitCreationProps) => {
   }, [modifiedAllItemsIds])
 
   
-  const saveOutfit = () => {
-
-  }
+  
 
   return (
     <View
@@ -71,7 +72,7 @@ const OutfitCreation = ({outfit, items}: OutfitCreationProps) => {
       </View>
       {saveVisible &&          
         <TouchableOpacity
-          onPress={() => saveOutfit()}
+          onPress={() => saveOutfit(outfit ?? {name: outfitName}, modifiedAllItemsIds, selectedDate)}
           style={[{
             position: 'absolute',
             bottom: -8, // space from bottombar, TODO: why 13? 
