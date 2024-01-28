@@ -219,10 +219,10 @@ const CalendarScreen = ({...props}) => {
             disableAllTouchEventsForDisabledDays={true}
             onMonthChange={month => {
               console.log('month changed', month);
+              LayoutAnimation.configureNext(swipeAnimation) //or mainAnimation?
               setMonth(month.month)
               setYear(month.year)
             }}
-            // headerStyle={{backgroundColor: currentTheme.colors.tertiary}}
             style={{
               borderRadius: currentTheme.spacing.m,
               height: 268,
@@ -242,60 +242,7 @@ const CalendarScreen = ({...props}) => {
             setModalVisible={setModalVisible}
             setPreview={setPreview}
             index={o.index}
-          /> 
-          // <TouchableOpacity
-          //   onPress={() => {
-          //     setNoOutfit(o.index)
-          //     setModalVisible(true)
-          //   }}
-          //   delayLongPress={200}
-          //   onLongPress={(e) => {
-          //     setNoOutfit(o.index)
-          //     LayoutAnimation.configureNext(swipeAnimation)
-          //     setPreview({x: e.nativeEvent.pageX, y: e.nativeEvent.pageY})
-          //   }}
-          //   onPressOut={() => {
-          //     setNoOutfit(o.index)
-          //     LayoutAnimation.configureNext(swipeAnimation)
-          //     setPreview({x: 0, y: 0})
-          //   }}
-          //   style={{
-          //     flexDirection: 'row',
-          //     justifyContent: 'space-between',
-          //     borderColor: currentTheme.colors.secondary,
-          //     borderWidth: Theme.spacing.xxs,
-          //     borderRadius: Theme.spacing.m,
-          //     elevation: Theme.spacing.elevation,
-          //     backgroundColor: currentTheme.colors.background
-          //   }}
-          // >
-          //   <Text style={{
-          //     paddingVertical: Theme.spacing.l,
-          //     paddingHorizontal: Theme.spacing.l,
-          //     color: currentTheme.colors.secondary,
-          //     textAlign: 'left',
-          //     textAlignVertical: 'center',
-          //     fontSize: Theme.fontSize.m_m,
-          //     fontWeight: '400'
-          //   }}>
-          //     {o.item.name}
-          //   </Text>
-            
-          //   <TouchableOpacity style={{
-          //     // backgroundColor: currentTheme.colors.quaternary,
-          //     borderTopRightRadius: Theme.spacing.m,
-          //     borderBottomRightRadius: Theme.spacing.m,              
-          //     alignItems: 'center',
-          //     justifyContent: 'center',
-          //     paddingHorizontal: Theme.spacing.m,
-
-          //   }}>
-          //     <MaterialCommunityIcons name={icons.delete}
-          //       color={currentTheme.colors.delete}
-          //       size={Theme.fontSize.m_l}
-          //     />
-          //   </TouchableOpacity>
-          // </TouchableOpacity>
+          />
         }
         ListFooterComponent={
           <TouchableOpacity
@@ -329,11 +276,11 @@ const CalendarScreen = ({...props}) => {
       />
       
       <Modal
-        // presentationStyle='overFullScreen'
+        // useNativeDriver
         swipeDirection={'down'}
         animationIn={'slideInUp'}
         isVisible={modalVisible}
-        onSwipeComplete={(e) => {setModalVisible(prev => !prev)}}
+        onSwipeComplete={() => {setModalVisible(prev => !prev)}}
         onBackButtonPress={() => {setModalVisible(prev => !prev)}}
         onDismiss={() => setModalVisible(prev => !prev)}
         propagateSwipe
@@ -414,7 +361,7 @@ type RowProps = {
 
 const SwipeableRow = ({outfit, setNoOutfit, setModalVisible, setPreview, index}: RowProps) => {
   const edit = () => {
-    console.log('pressed edit')
+    
   }
   
   const deleteOutfit = () => {
@@ -468,6 +415,11 @@ const Row = ( {outfit, setNoOutfit, setModalVisible, setPreview, index}: RowProp
       style={[styles.outfit_container, dynamicStyles.outfit_container]}
       activeOpacity={0.8}
     >
+      <MaterialCommunityIcons 
+        name={icons.dots}
+        size={Theme.fontSize.m_m}
+        color={currentTheme.colors.background}
+      />
       <Text style={[styles.outfit_title, dynamicStyles.outfit_title]}>
         {outfit.name}
       </Text>
@@ -482,6 +434,8 @@ const styles = StyleSheet.create({
     paddingVertical: Theme.spacing.m,
     borderTopLeftRadius: Theme.spacing.m,
     borderBottomLeftRadius: Theme.spacing.m,
+    flexDirection: 'row',
+    alignItems: 'center'
   },
 
   outfit_title: {

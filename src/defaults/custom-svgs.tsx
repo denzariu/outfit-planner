@@ -82,7 +82,9 @@ export const icons = {
   // Outfit-related
   edit: 'pencil',
   save: "content-save-outline",
-  date_pick: "calendar-range-outline"
+  date_pick: "calendar-range-outline",
+
+  dots: 'dots-vertical'
 }
 
 // export const svgPants = `

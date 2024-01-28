@@ -1,4 +1,4 @@
-import { StatusBar, StyleSheet, Text, TouchableOpacity, View, useColorScheme } from 'react-native'
+import { StatusBar, StyleSheet, Text, TextInput, TouchableOpacity, View, useColorScheme } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import OutfitOrganizer from './OutfitOrganizer'
 import { ClothingItem, Outfit } from '../assets/database/models'
@@ -20,17 +20,12 @@ const OutfitCreation = ({outfit, items, selectedDate}: OutfitCreationProps) => {
   const isDarkMode = useColorScheme() == 'dark';
   const currentTheme = isDarkMode ? DarkTheme : Theme;
   
-  //Original ids of items
-  // const [allItemsIds, setAllItemsIds] = useState<number[]>([])
-  const [outfitName, setOutfitName] = useState<string>('')
+  const [outfitName, setOutfitName] = useState<string | undefined>(outfit?.name ?? undefined)
 
   //Current ids of items
   const [modifiedAllItemsIds, setModifiedAllItemsIds] = useState<number[]>([])
   const [saveVisible, setSaveVisible] = useState<boolean>(true)
 
-  useEffect(() => {
-    // console.log({items: items})
-  }, [items])
 
   useEffect(() => {
     // TODO: Any attempt to get items[].id leads to unexpected behavior
@@ -55,24 +50,41 @@ const OutfitCreation = ({outfit, items, selectedDate}: OutfitCreationProps) => {
         flex: 1,
       }}
     >
-      
+      {/* Recommended outfits to select from */}
       {outfit &&
-      <RecommendedOutfits 
-        outfit={outfit}
-      />
+        <RecommendedOutfits 
+          outfit={outfit}
+        />
       }
+
+      {/* TODO: Outfit icon / name */}
       <View style={{
-        height: '99%'
+        backgroundColor: currentTheme.colors.primary,
+        borderRadius: Theme.spacing.m,
+        marginBottom: Theme.spacing.m,
+        paddingHorizontal: Theme.spacing.m
       }}>
-        <OutfitOrganizer
-          items={items}
-          allItemsIds={modifiedAllItemsIds}
-          setAllItemsIds={setModifiedAllItemsIds}
+        <TextInput
+          selectTextOnFocus
+          numberOfLines={1}
+          onChangeText={(text) => setOutfitName(text)}
+          placeholder={'Outfit Name'}
+          value={outfitName}
         />
       </View>
+
+      {/* Current clothing items showcase */}
+      <OutfitOrganizer
+        items={items}
+        allItemsIds={modifiedAllItemsIds}
+        setAllItemsIds={setModifiedAllItemsIds}
+      />
+      
+
+      {/* Save (changes to) outfit */}
       {saveVisible &&          
         <TouchableOpacity
-          onPress={() => saveOutfit(outfit ?? {name: outfitName}, modifiedAllItemsIds, selectedDate)}
+          onPress={() => saveOutfit(outfit ?? {name: outfitName ?? 'Outfit'}, modifiedAllItemsIds, selectedDate)}
           style={[{
             position: 'absolute',
             bottom: -8, // space from bottombar, TODO: why 13? 
@@ -88,7 +100,7 @@ const OutfitCreation = ({outfit, items, selectedDate}: OutfitCreationProps) => {
         >
             <MaterialCommunityIcons 
               style={{alignContent: 'center'}}
-              name={icons.save} color={currentTheme.colors.tabActive} size={32} 
+              name={icons.save} color={currentTheme.colors.tabActive} size={Theme.fontSize.l_s} 
             />
         </TouchableOpacity>
       }

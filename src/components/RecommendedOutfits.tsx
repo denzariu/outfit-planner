@@ -125,7 +125,9 @@ const RecommendedOutfits = ({outfit}: RecommendedOutfitsProps) => {
           renderItem={o => 
 
             // The square-shaped recommendation (outfit)
-            <View 
+            <TouchableOpacity 
+              onPress={() => console.log("TODO: import outfit")}
+              activeOpacity={0.8}
               style={{
                 padding: Theme.spacing.xxs,
                 borderWidth: Theme.spacing.xxs,
@@ -187,7 +189,7 @@ const RecommendedOutfits = ({outfit}: RecommendedOutfitsProps) => {
               </View>
               : <></>
               }
-            </View>
+            </TouchableOpacity>
             
           }
           ListEmptyComponent={

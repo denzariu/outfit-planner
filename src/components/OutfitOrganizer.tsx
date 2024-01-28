@@ -81,6 +81,7 @@ const OutfitOrganizer = ({items, setAllItemsIds, allItemsIds, transparent}: Outf
       setItemsToBeAdded([])
     }
   }, [itemsToBeAdded])
+  
   // Remove item, by tapping '-'
   const removeItem = (type: string, id: number | null) => {
     LayoutAnimation.configureNext(swipeAnimation);
@@ -226,9 +227,16 @@ const SectionElement = ({index, category, categoryName, colorDisabled, addItem}:
         <Pressable 
           key={'all_items_' + index + '_id_' + item.id}
           onPress={() => setView(!view)}
-          style={{flex: item.aspect_ratio - 0.08, aspectRatio: item.aspect_ratio}}
+          style={{
+            // TODO: better formula for flex
+            flex: 1,
+            alignItems: 'center',
+          }}
         >
-          <Image source={{uri: item.image}} style={{flex: 1}}/> 
+          <Image source={{uri: item.image}} style={{
+            flex: 1/item.aspect_ratio/category.length, 
+            aspectRatio: item.aspect_ratio  
+          }}/> 
         </Pressable>
         )
       :
@@ -287,11 +295,14 @@ const EachItem = ({imageUri, handleView, aspectRatio}: EachItemProps) => {
 
   return (
     <Pressable onPress={() => handleView((currentValue) => !currentValue)}>
-      {/* TODO: better formula */}
       <Animated.View style={{ flex: 1}}>
           <Animated.Image 
             source={{uri: imageUri}} 
-            style={{ flex: 0.9/aspectRatio, aspectRatio: aspectRatio  }}
+            style={{ 
+              // TODO: get a better formula for flex
+              flex: 0.9/aspectRatio, 
+              aspectRatio: aspectRatio  
+            }}
           />
       </Animated.View>
     </Pressable>
