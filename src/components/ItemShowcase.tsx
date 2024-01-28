@@ -19,10 +19,8 @@ type ItemShowcaseProps = {
 }
 
 // Item Component
-const ItemShowcase = (props: ItemShowcaseProps) => {
+const ItemShowcase = ({item, index, currentTheme, aspectRatio, showCategory, selectOnly, setSelectedItems, selectedItems}: ItemShowcaseProps) => {
   const navigator = useNavigation();
-
-  const {item, index, currentTheme, aspectRatio, showCategory, selectOnly, setSelectedItems, selectedItems} = props || {}
 
   const [selected, setSelected] = useState<boolean>(false);
   const [animatedValuePress] = useState(new Animated.Value(0));
@@ -106,7 +104,7 @@ const ItemShowcase = (props: ItemShowcaseProps) => {
         onPressIn={() => animateIn()}
         onPressOut={() => animateOut()}
         onLongPress={() => selectItem()}
-        onPress={() => (selectOnly || selectedItems.length) ? selectItem() : navigator.navigate('AddItemScreen', {item: item})}
+        onPress={() => (selectOnly || selectedItems.length) ? selectItem() : navigator.navigate('AddItemScreen', {item: item, editMode: true})}
         delayLongPress={150}
         key={'wardrobe_image_container_' + index + item.image}
         style={[styles.article, dynamicStyle.article_container]}

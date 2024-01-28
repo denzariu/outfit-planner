@@ -1,6 +1,6 @@
 import { SQLiteDatabase } from "react-native-sqlite-storage";
 import { ClothingItem } from "../models";
-import { tableName_ClothingItem as tableName } from "../db-service";
+import { tableName_ClothingItem as tableName, tableName_Item_Outfit } from "../db-service";
 
 
 export const createClothingTable = async (db: SQLiteDatabase) => {
@@ -50,10 +50,25 @@ export const saveClothingItems = async (db: SQLiteDatabase, clothingItems: Cloth
   return db.executeSql(insertQuery);
 };
 
+// Update items of DB
+export const updateClothingItem = async (db: SQLiteDatabase, id: number, newItem: ClothingItem) => {
+  const updateQuery =
+  `
+    UPDATE ${tableName}
+    SET adjective = '${newItem.adjective}', type = '${newItem.type}', subtype = '${newItem.subtype}', seasons = '${newItem.seasons}', image = '${newItem.image}', aspect_ratio = ${newItem.aspect_ratio}
+    WHERE id = ${id};
+  `
+
+  return db.executeSql(updateQuery)
+}
+
 // Delete from DB - single item
 export const deleteClothingItem = async (db: SQLiteDatabase, id: number) => {
-  const deleteQuery = `DELETE from ${tableName} where rowid = ${id}`;
+  const deleteFromOutfits = `DELETE from ${tableName_Item_Outfit} where id_item = ${id}`
+  await db.executeSql(deleteFromOutfits)
+    .catch((err) => Error(`Failed to delete item from outfits`))
   
+  const deleteQuery = `DELETE from ${tableName} where rowid = ${id}`;
   await db.executeSql(deleteQuery)
     .catch((err) => Error(`Failed to delete item with id ${id}`))
 };
@@ -68,11 +83,16 @@ export const deleteClothingItems = async (db: SQLiteDatabase, ids: Array<number 
   }, '');
 
   console.log(ids_stringified);
+
   
+  const deleteFromOutfits = `DELETE from ${tableName_Item_Outfit} where id_item IN (${ids})`
+  await db.executeSql(deleteFromOutfits)
+    .catch((err) => Error(`Failed to delete item from outfits`))
+
   const deleteQuery = `DELETE from ${tableName} where rowid IN (${ids})`;
-  
   await db.executeSql(deleteQuery)
     .catch((err) => Error(`Failed to delete item with ids: ${ids}`))
+
 };
 
 

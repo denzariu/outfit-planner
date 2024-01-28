@@ -1,7 +1,7 @@
 import { Animated, BackHandler, Easing, FlatList, Image, LayoutAnimation, RefreshControl, SafeAreaView, StyleSheet, Text, TouchableHighlight, TouchableOpacity, View, useColorScheme } from 'react-native'
 import React, { useEffect, useRef, useState } from 'react'
 import AnimatedGradient from '../components/AnimatedGradient'
-import { DarkTheme, Theme } from '../defaults/ui';
+import { DarkTheme, Theme, mainAnimation, swipeAnimation } from '../defaults/ui';
 import { getDBConnection } from '../assets/database/db-service';
 import { ClothingItem } from '../assets/database/models';
 import { deleteClothingItem, deleteClothingItems, getClothingItems } from '../assets/database/db-operations/db-operations-clothingitem';
@@ -26,7 +26,7 @@ const WardrobeScreen = ({...props}) => {
     'extra': 0,
     'top': 1,
     'bottom': 2,
-    'feet': 3
+    'footwear': 3
   })
   const [avgAspectRatio, setAvgAspectRatio] = useState(0.71);
   const [refreshing, setRefreshing] = useState(false);
@@ -48,21 +48,6 @@ const WardrobeScreen = ({...props}) => {
     }, 2000);
   }, []);
 
-  // Animation for item deletion
-  const layoutAnimConfig = {
-    duration: 250,
-    update: {
-      type: LayoutAnimation.Types.easeOut, 
-      property: LayoutAnimation.Properties.scaleY,
-
-    },
-    delete: {
-      type: LayoutAnimation.Types.linear,
-      property: LayoutAnimation.Properties.scaleY,
-      duration: 100,
-    },
-  };
-
   // TODO: Debug only! Duplicate selected elements (inefficiently)
   const duplicateSelected = () => {
     if (!itemsSelected) return;
@@ -72,43 +57,39 @@ const WardrobeScreen = ({...props}) => {
     })
     let lastId = [...items].reduce((acc, item) => item.id ? acc < item.id ? item.id : acc : acc, 0);
     
-    console.log({lastId: lastId})
-
-    console.log({items: items, newItems: newItems})
-
     let newNewItems = new Array<any>;
     newItems.forEach((item) => {
       lastId = lastId + 1
       newNewItems.push({...item, id: lastId})
     })
-
-    console.log({items: items, newItems: newNewItems})
-
     setItems([...items, ...newNewItems])
-    // setItemsSelected([])
   }
   
   const deleteSelected = () => {
     deleteMultipleFromDatabase(itemsSelected)
-    setItemsSelected([])
   }
 
   const deleteMultipleFromDatabase = async (ids: Array<number | null>) => {
     if (!ids) return;
+    
     const db = await getDBConnection()
-    await deleteClothingItems(db, ids).then((res) => {
-      const newItems = items.filter((item) => {
-        return ids.indexOf(item.id) == -1 ? true : false
-      })
-      setItems(newItems)
-    })                                      
+    try {
+    await deleteClothingItems(db, ids)
+    .then((res) => {
+      setItemsSelected([])
+      setRefreshing(true)
+      // const newItems = items.filter((item) => {
+      //   return ids.indexOf(item.id) == -1 ? true : false
+      // })
+      // setItems(newItems)
+    })} catch (e) {console.log(e)}                                 
   }
 
   const filterItems = (type: string) => {
     setSelectedType(type)
     let filteredItems;
 
-    // Group items by type: extra > top > bottom > feet
+    // Group items by type: extra > top > bottom > footwear
     if (type == 'all')
       filteredItems = items.sort((a, b) => 
         filter[a.type] < filter[b.type] ? -1 : (filter[a.type] > filter[b.type] ? 1 : 0)
@@ -123,15 +104,16 @@ const WardrobeScreen = ({...props}) => {
     }, 0)
     setAvgAspectRatio(aspect_ratio / filteredItems.length)
 
-    LayoutAnimation.configureNext(layoutAnimConfig)
+    LayoutAnimation.configureNext(swipeAnimation)
     setShownItems(filteredItems)
   }
   
   const loadItems = async () => {
-    console.log('load')
     const db = await getDBConnection()
     await getClothingItems(db).then((res) => {
-      setSelectedType(() => 'all'), setItems(res)
+      setSelectedType(() => 'all'), 
+      setItems(res),
+      setRefreshing(false)
     })
   }
 
@@ -151,7 +133,6 @@ const WardrobeScreen = ({...props}) => {
   // Unselect (selected items) handle for back button behavior 
   useFocusEffect(
     React.useCallback(() => {
-      console.log({selectedCallback: itemsSelected.length})
 
       const onBackPress = () => {
         if (itemsSelected.length > 0) {
@@ -201,8 +182,8 @@ const WardrobeScreen = ({...props}) => {
               <SvgXml xml={icons.bottom} fill={selectedType == 'bottom' ? currentTheme.colors.primary : currentTheme.colors.tertiary} height={currentTheme.fontSize.m_l} width={currentTheme.fontSize.m_l}/>
             </TouchableOpacity>
             
-            <TouchableOpacity onPress={() => filterItems('feet')} style={{padding: Theme.spacing.xs}}>
-              <MaterialCommunityIcons name={icons.feet} color={selectedType == 'feet' ? currentTheme.colors.primary : currentTheme.colors.tertiary} size={currentTheme.fontSize.m_l} />
+            <TouchableOpacity onPress={() => filterItems('footwear')} style={{padding: Theme.spacing.xs}}>
+              <MaterialCommunityIcons name={icons.footwear} color={selectedType == 'footwear' ? currentTheme.colors.primary : currentTheme.colors.tertiary} size={currentTheme.fontSize.m_l} />
             </TouchableOpacity>
 
             <TouchableOpacity onPress={() => filterItems('all')} style={{padding: Theme.spacing.xs}}>
@@ -246,7 +227,7 @@ const WardrobeScreen = ({...props}) => {
         </View>
         
       </View>
-      <View style={{maxHeight: '80%'}}>
+      <View style={{maxHeight: '85%'}}>
         <FlatList
           data={shownItems}
           // TODO: Move this to 'styles'
@@ -264,10 +245,11 @@ const WardrobeScreen = ({...props}) => {
             <RefreshControl 
               refreshing={refreshing} 
               onRefresh={onRefresh} 
-              colors={[currentTheme.colors.tertiary, currentTheme.colors.secondary]}
+              progressBackgroundColor={currentTheme.colors.secondary}
+              colors={[currentTheme.colors.background, currentTheme.colors.quaternary]}
             />
           }
-          keyExtractor={(item) => item.id ? 'key_items_listed_' + item.id.toString() : 'key_items_listed_0'}
+          keyExtractor={(item) => 'key_items_listed_' + item.id?.toString() ?? '0'}
           ListEmptyComponent={
             <View style={[styles.list_empty, {opacity: 0.7}]}>
               <MaterialCommunityIcons 

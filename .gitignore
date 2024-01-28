@@ -72,3 +72,4 @@ web-build/
 
 # Gradle Properties
 android/gradle.properties
+android/app/build.gradle

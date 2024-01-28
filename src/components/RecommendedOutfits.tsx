@@ -55,9 +55,9 @@ const RecommendedOutfits = ({outfit}: RecommendedOutfitsProps) => {
                                   : clothingItem.type == 'bottom' ? [{...clothingItem}]
                                                                   : [],
                                                            
-          feet: acc[outfit_id]  ? clothingItem.type == 'feet' ? [...acc[outfit_id].items.feet, {...clothingItem}] 
-                                                              : [...acc[outfit_id].items.feet]
-                                : clothingItem.type == 'feet' ? [{...clothingItem}]
+          footwear: acc[outfit_id]  ? clothingItem.type == 'footwear' ? [...acc[outfit_id].items.footwear, {...clothingItem}] 
+                                                              : [...acc[outfit_id].items.footwear]
+                                : clothingItem.type == 'footwear' ? [{...clothingItem}]
                                                               : []
                   
         }
@@ -166,7 +166,7 @@ const RecommendedOutfits = ({outfit}: RecommendedOutfitsProps) => {
               }
               
               {/* The second half */}
-              {(o.item[1].items.bottom.length || o.item[1].items.feet.length) ?
+              {(o.item[1].items.bottom.length || o.item[1].items.footwear.length) ?
               <View 
                 style={{
                   flexDirection: 'row',
@@ -185,7 +185,7 @@ const RecommendedOutfits = ({outfit}: RecommendedOutfitsProps) => {
                 {/* Bottom-left */}
                 <Quarter array={o.item[1].items.bottom} category='bottom' outfit_id={o.item[0]} direction='row'/>
                 {/* Bottom-right */}
-                <Quarter array={o.item[1].items.feet} category='feet' outfit_id={o.item[0]}/>
+                <Quarter array={o.item[1].items.footwear} category='footwear' outfit_id={o.item[0]}/>
               </View>
               : <></>
               }

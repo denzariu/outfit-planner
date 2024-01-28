@@ -4,7 +4,6 @@ import { SvgXml } from 'react-native-svg'
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
 import { ClothingItem, Outfit } from '../assets/database/models'
 import { icons } from '../defaults/custom-svgs'
-import { getCategoryName } from '../defaults/data'
 import { DarkTheme, Theme, swipeAnimation } from '../defaults/ui'
 import { getDBConnection } from '../assets/database/db-service'
 import ItemPicker from './ItemPicker'
@@ -32,21 +31,21 @@ const OutfitOrganizer = ({items, setAllItemsIds, allItemsIds, transparent}: Outf
   const [extra, setExtra] = useState<ClothingItem[]>([]);
   const [top, setTop] = useState<ClothingItem[]>([]);
   const [bottom, setBottom] = useState<ClothingItem[]>([]);
-  const [feet, setFeet] = useState<ClothingItem[]>([]);
+  const [footwear, setFootwear] = useState<ClothingItem[]>([]);
 
   // Display a custom-made menu where the user can select
   // the desired item(s) [ClothingItem | Outfit] to be added
 
-  const [categoryToBeAddedTo, setCategoryToBeAddedTo] = useState<'all' | 'extra' | 'top' | 'bottom' | 'feet' | ''>('')
+  const [categoryToBeAddedTo, setCategoryToBeAddedTo] = useState<'all' | 'extra' | 'top' | 'bottom' | 'footwear' | ''>('')
   const [itemsToBeAdded, setItemsToBeAdded] = useState<ClothingItem[]>([]);
-  const [itemSelection, setItemSelection] = useState<'all' | 'extra' | 'top' | 'bottom' | 'feet' | ''>('');
+  const [itemSelection, setItemSelection] = useState<'all' | 'extra' | 'top' | 'bottom' | 'footwear' | ''>('');
 
     // Whenever items are added to a category, add their IDs to the list
   useEffect(() => {
-    const allIds = extra.concat(top, bottom, feet).map((item: ClothingItem) => item.id ? item.id : -1)
+    const allIds = extra.concat(top, bottom, footwear).map((item: ClothingItem) => item.id ? item.id : -1)
     setAllItemsIds(allIds.length ? allIds : [-1])
     console.log('Set Items')
-  }, [extra, top, bottom, feet])
+  }, [extra, top, bottom, footwear])
 
   
   
@@ -61,7 +60,7 @@ const OutfitOrganizer = ({items, setAllItemsIds, allItemsIds, transparent}: Outf
           setExtra(() => itemsToBeAdded.filter(item => item.type == 'extra'))
           setTop(() => itemsToBeAdded.filter(item => item.type == 'top'))
           setBottom(() => itemsToBeAdded.filter(item => item.type == 'bottom'))
-          setFeet(() => itemsToBeAdded.filter(item => item.type == 'feet'))
+          setFootwear(() => itemsToBeAdded.filter(item => item.type == 'footwear'))
           break;
         case 'extra':
           // Array is now replaced, so unselected items will also be removed
@@ -73,8 +72,8 @@ const OutfitOrganizer = ({items, setAllItemsIds, allItemsIds, transparent}: Outf
         case 'bottom':
           setBottom(itemsToBeAdded)
           break;
-        case 'feet':
-          setFeet(itemsToBeAdded)
+        case 'footwear':
+          setFootwear(itemsToBeAdded)
           break;
       }
       setCategoryToBeAddedTo('')
@@ -96,8 +95,8 @@ const OutfitOrganizer = ({items, setAllItemsIds, allItemsIds, transparent}: Outf
       case 'bottom':
         setBottom(prev => prev.filter((item) => item.id != id))
         break;
-      case 'feet':
-        setFeet(prev => prev.filter((item) => item.id != id))
+      case 'footwear':
+        setFootwear(prev => prev.filter((item) => item.id != id))
         break;
     }
   } 
@@ -135,13 +134,13 @@ const OutfitOrganizer = ({items, setAllItemsIds, allItemsIds, transparent}: Outf
           <SectionElement index={0} colorDisabled={currentTheme.colors.tertiary} addItem={addItem} category={extra} categoryName={'extra'} />
           <SectionElement index={1} colorDisabled={currentTheme.colors.tertiary} addItem={addItem} category={top} categoryName={'top'} />
           <SectionElement index={2} colorDisabled={currentTheme.colors.tertiary} addItem={addItem} category={bottom} categoryName={'bottom'} />
-          <SectionElement index={3} colorDisabled={currentTheme.colors.tertiary} addItem={addItem} category={feet} categoryName={'feet'} />
+          <SectionElement index={3} colorDisabled={currentTheme.colors.tertiary} addItem={addItem} category={footwear} categoryName={'footwear'} />
         </View>
         <View style={styles.container_items}>
           <SectionElementName dynamicStyle={dynamicStyle} currentTheme={currentTheme} addItem={addItem} removeItem={removeItem} fieldName={'extra'} field={extra}/>
           <SectionElementName dynamicStyle={dynamicStyle} currentTheme={currentTheme} addItem={addItem} removeItem={removeItem} fieldName={'top'} field={top}/>
           <SectionElementName dynamicStyle={dynamicStyle} currentTheme={currentTheme} addItem={addItem} removeItem={removeItem} fieldName={'bottom'} field={bottom}/>
-          <SectionElementName dynamicStyle={dynamicStyle} currentTheme={currentTheme} addItem={addItem} removeItem={removeItem} fieldName={'feet'} field={feet}/>          
+          <SectionElementName dynamicStyle={dynamicStyle} currentTheme={currentTheme} addItem={addItem} removeItem={removeItem} fieldName={'footwear'} field={footwear}/>          
         </View>
       </View>
     </>
@@ -154,16 +153,16 @@ export default OutfitOrganizer
 type SectionElementNameProps = {
   dynamicStyle: any, 
   currentTheme: any, 
-  addItem: (type: "" | "all" | "extra" | "top" | "bottom" | "feet") => void, 
+  addItem: (type: "" | "all" | "extra" | "top" | "bottom" | "footwear") => void, 
   removeItem: (type: string, id: number | null) => void, 
   field: ClothingItem[], 
-  fieldName: "" | "all" | "extra" | "top" | "bottom" | "feet",
+  fieldName: "" | "all" | "extra" | "top" | "bottom" | "footwear",
 }
 const SectionElementName = ({dynamicStyle, currentTheme, addItem, removeItem, field, fieldName}: SectionElementNameProps) => {
   const [category, setCategory] = useState('')
 
   useEffect(() => {
-    setCategory(getCategoryName(fieldName)) 
+    setCategory(fieldName.slice(0,1).toUpperCase() + fieldName.slice(1)) 
   }, [fieldName])
 
   return (
@@ -212,9 +211,9 @@ const SectionElementName = ({dynamicStyle, currentTheme, addItem, removeItem, fi
 type SectionElementProps = {
   index: number, 
   category: ClothingItem[],
-  categoryName: "extra" | "top" | "bottom" | "feet",
+  categoryName: "extra" | "top" | "bottom" | "footwear",
   colorDisabled: string,
-  addItem: (type: "" | "all" | "extra" | "top" | "bottom" | "feet") => void, 
+  addItem: (type: "" | "all" | "extra" | "top" | "bottom" | "footwear") => void, 
 }
 
 const SectionElement = ({index, category, categoryName, colorDisabled, addItem}: SectionElementProps) => {
@@ -272,7 +271,7 @@ const SectionElement = ({index, category, categoryName, colorDisabled, addItem}:
                   height={Theme.fontSize.l_m * 2} 
                   width={Theme.fontSize.l_m * 2}
                 />
-              : <MaterialCommunityIcons name={categoryName == 'extra' ? icons.extra : categoryName == 'top' ? icons.top : icons.feet} 
+              : <MaterialCommunityIcons name={categoryName == 'extra' ? icons.extra : categoryName == 'top' ? icons.top : icons.footwear} 
                   color={colorDisabled} 
                   size={Theme.fontSize.l_m * 2} 
                 />

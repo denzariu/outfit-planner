@@ -83,35 +83,35 @@ export const CLOTHING_TYPES = [
   {"parent": "bottom", "label": "High-waisted Pants", "value": "high-waisted-pants"},
   {"parent": "bottom", "label": "Cropped Pants", "value": "cropped-pants"},
 
-  {label: 'Footwear', value: 'feet'},
-  {"parent": "feet", "label": "Sneakers", "value": "sneakers"},
-  {"parent": "feet", "label": "Boots", "value": "boots"},
-  {"parent": "feet", "label": "Flats", "value": "flats"},
-  {"parent": "feet", "label": "Heels", "value": "heels"},
-  {"parent": "feet", "label": "Oxfords", "value": "oxfords"},
-  {"parent": "feet", "label": "Loafers", "value": "loafers"},
-  {"parent": "feet", "label": "Sandals", "value": "sandals"},
-  {"parent": "feet", "label": "Espadrilles", "value": "espadrilles"},
-  {"parent": "feet", "label": "Mules", "value": "mules"},
-  {"parent": "feet", "label": "Slippers", "value": "slippers"},
-  {"parent": "feet", "label": "Flip-Flops", "value": "flip-flops"},
-  {"parent": "feet", "label": "Wedges", "value": "wedges"},
-  {"parent": "feet", "label": "Clogs", "value": "clogs"},
-  {"parent": "feet", "label": "Platform Shoes", "value": "platform-shoes"},
-  {"parent": "feet", "label": "Ankle Boots", "value": "ankle-boots"},
-  {"parent": "feet", "label": "Brogues", "value": "brogues"},
-  {"parent": "feet", "label": "Derby Shoes", "value": "derby-shoes"},
-  {"parent": "feet", "label": "Chelsea Boots", "value": "chelsea-boots"},
-  {"parent": "feet", "label": "Pumps", "value": "pumps"},
-  {"parent": "feet", "label": "Athletic Shoes", "value": "athletic-shoes"},
-  {"parent": "feet", "label": "Hiking Boots", "value": "hiking-boots"},
-  {"parent": "feet", "label": "Dress Shoes", "value": "dress-shoes"},
-  {"parent": "feet", "label": "Running Shoes", "value": "running-shoes"},
-  {"parent": "feet", "label": "Boat Shoes", "value": "boat-shoes"},
-  {"parent": "feet", "label": "Wingtip Shoes", "value": "wingtip-shoes"},
-  {"parent": "feet", "label": "Mary Janes", "value": "mary-janes"},
-  {"parent": "feet", "label": "Slingback Shoes", "value": "slingback-shoes"},
-  {"parent": "feet", "label": "Peep-Toe Shoes", "value": "peep-toe-shoes"}]
+  {label: 'Footwear', value: 'footwear'},
+  {"parent": "footwear", "label": "Sneakers", "value": "sneakers"},
+  {"parent": "footwear", "label": "Boots", "value": "boots"},
+  {"parent": "footwear", "label": "Flats", "value": "flats"},
+  {"parent": "footwear", "label": "Heels", "value": "heels"},
+  {"parent": "footwear", "label": "Oxfords", "value": "oxfords"},
+  {"parent": "footwear", "label": "Loafers", "value": "loafers"},
+  {"parent": "footwear", "label": "Sandals", "value": "sandals"},
+  {"parent": "footwear", "label": "Espadrilles", "value": "espadrilles"},
+  {"parent": "footwear", "label": "Mules", "value": "mules"},
+  {"parent": "footwear", "label": "Slippers", "value": "slippers"},
+  {"parent": "footwear", "label": "Flip-Flops", "value": "flip-flops"},
+  {"parent": "footwear", "label": "Wedges", "value": "wedges"},
+  {"parent": "footwear", "label": "Clogs", "value": "clogs"},
+  {"parent": "footwear", "label": "Platform Shoes", "value": "platform-shoes"},
+  {"parent": "footwear", "label": "Ankle Boots", "value": "ankle-boots"},
+  {"parent": "footwear", "label": "Brogues", "value": "brogues"},
+  {"parent": "footwear", "label": "Derby Shoes", "value": "derby-shoes"},
+  {"parent": "footwear", "label": "Chelsea Boots", "value": "chelsea-boots"},
+  {"parent": "footwear", "label": "Pumps", "value": "pumps"},
+  {"parent": "footwear", "label": "Athletic Shoes", "value": "athletic-shoes"},
+  {"parent": "footwear", "label": "Hiking Boots", "value": "hiking-boots"},
+  {"parent": "footwear", "label": "Dress Shoes", "value": "dress-shoes"},
+  {"parent": "footwear", "label": "Running Shoes", "value": "running-shoes"},
+  {"parent": "footwear", "label": "Boat Shoes", "value": "boat-shoes"},
+  {"parent": "footwear", "label": "Wingtip Shoes", "value": "wingtip-shoes"},
+  {"parent": "footwear", "label": "Mary Janes", "value": "mary-janes"},
+  {"parent": "footwear", "label": "Slingback Shoes", "value": "slingback-shoes"},
+  {"parent": "footwear", "label": "Peep-Toe Shoes", "value": "peep-toe-shoes"}]
 
 export const CLOTHING_FABRICS = [
   {"label": "Cotton", "value": "cotton"},
@@ -146,16 +146,3 @@ export const CLOTHING_FABRICS = [
   {"label": "Bamboo", "value": "bamboo"}
 ]
 
-export const getCategoryName = (fieldName: string) => {
-  switch (fieldName) {
-    case 'extra': 
-      return 'Extra'
-    case 'top':
-      return 'Top'
-    case 'bottom':
-      return 'Bottom'
-    case 'feet':
-      return 'Footwear'
-  }
-  return 'All'
-} 

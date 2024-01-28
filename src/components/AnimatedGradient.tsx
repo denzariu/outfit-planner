@@ -16,7 +16,6 @@ import {
 import { DarkTheme, Theme, mainAnimation } from '../defaults/ui';
 import { useEffect, useState } from 'react';
 
-
 const AnimatedGradient = ({...props}) => {
   const { width, height } = useWindowDimensions();
   
@@ -30,7 +29,6 @@ const AnimatedGradient = ({...props}) => {
   const smallerFade = width/1.25;
   const [spread, setSpread] = useState(smallerFade);
 
-  console.log('update')
 
   useEffect(() => {
     LayoutAnimation.configureNext(mainAnimation);

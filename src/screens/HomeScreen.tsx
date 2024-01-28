@@ -1,18 +1,12 @@
-import { ActivityIndicator, Alert, Animated, Dimensions, Easing, LayoutAnimation, Pressable, SafeAreaView, StyleSheet, Text, TouchableOpacity, View, useColorScheme } from 'react-native'
-import React, { useCallback, useEffect, useRef, useState } from 'react'
+import { LayoutAnimation, SafeAreaView, StyleSheet, Text, TouchableOpacity, View, useColorScheme } from 'react-native'
+import React, { useEffect, useState } from 'react'
 import { DarkTheme, Theme, mainAnimation } from '../defaults/ui';
-import { Image } from 'react-native';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import AnimatedGradient from '../components/AnimatedGradient';
-import { deleteTable, getDBConnection, tableName_ClothingItem } from '../assets/database/db-service';
-import { deleteClothingItem, getClothingItems } from '../assets/database/db-operations/db-operations-clothingitem';
+import { getDBConnection } from '../assets/database/db-service';
 import { ClothingItem, Outfit } from '../assets/database/models';
-import ItemPicker from '../components/ItemPicker';
-import { useNavigation } from '@react-navigation/native';
 import { icons } from '../defaults/custom-svgs';
-import { FlatList } from 'react-native-gesture-handler';
-import { getCategoryName } from '../defaults/data';
-import { addItemsToOutfit, addOutfitsOnDate, createOutfit, deleteAllItemsFromOutfit, deleteOutfit, getOutfitItems, getOutfitItemsTable, getOutfitPlannerTable, getOutfits, getOutfitsOnDate } from '../assets/database/db-operations/db-operations-outfit';
+import { getOutfitItems, getOutfitsOnDate } from '../assets/database/db-operations/db-operations-outfit';
 import moment, { Moment } from 'moment'
 import DatePicker from 'react-native-date-picker';
 import { SvgXml } from 'react-native-svg';
@@ -38,10 +32,6 @@ const HomeScreen = ({...props}) => {
 
   const [items, setItems] = useState<Array<ClothingItem>>([])
   const [allItemsIds, setAllItemsIds] = useState<Array<number>>([])
-
-
-  
-
   
   // TODO: Feature in testing
   const loadOutfit = async () => {
@@ -283,7 +273,6 @@ const styles = StyleSheet.create({
   },
 
   item_name: {
-    // textAlign: 'center',
     verticalAlign: 'middle',
     fontSize: Theme.fontSize.s_m,
     flex: 1

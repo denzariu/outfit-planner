@@ -8,23 +8,24 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import { Dropdown, MultiSelect } from 'react-native-element-dropdown'
 import { getColors } from 'react-native-image-colors'
 import { useNavigation } from '@react-navigation/native'
-import { createClothingTable, getClothingItems, saveClothingItems } from '../../assets/database/db-operations/db-operations-clothingitem'
+import { createClothingTable, getClothingItems, saveClothingItems, updateClothingItem } from '../../assets/database/db-operations/db-operations-clothingitem'
 import { deleteTable, getDBConnection, tableName_ClothingItem } from '../../assets/database/db-service'
 import { icons } from '../../defaults/custom-svgs'
 import { ClothingItem } from '../../assets/database/models'
-import { CLOTHING_FABRICS, CLOTHING_TYPES, getCategoryName } from '../../defaults/data'
+import { CLOTHING_FABRICS, CLOTHING_TYPES } from '../../defaults/data'
 import { simplifiedColor512, simplifiedColorID } from '../../defaults/data-processing'
 
 type AddItemScreen = {
   navigation: any,
   route: {params: {
-    item?: ClothingItem
+    item?: ClothingItem,
+    editMode: boolean
   }}
 }
 
 const AddItemScreen = ({navigation, route}: AddItemScreen) => {
 
-  const {item} = route.params || []
+  const {item, editMode} = route.params || []
 
   useEffect (() => {
     if (item) {
@@ -149,21 +150,28 @@ const AddItemScreen = ({navigation, route}: AddItemScreen) => {
   const addItem = async () => {
     const db = await getDBConnection();
     
-    try {
-      const item = {
-        id: null,
-        adjective: name,
-        type: category.parent ? category.parent : category.value,
-        subtype: category.value,
-        seasons: seasons.map((item) => Number(item)).join(''),        // [false, true] => '01'
-        image: image,
-        aspect_ratio: aspectRatio
+    const new_item: ClothingItem = {
+      id: null,
+      adjective: name,
+      type: category.parent ? category.parent : category.value,
+      subtype: category.value,
+      seasons: seasons.map((item) => Number(item)).join(''),  // [false, true] => '01'
+      image: image,
+      aspect_ratio: aspectRatio
+    }
+    // If user creates the item
+    if (!editMode) {
+      try {
+        await saveClothingItems(db, [new_item])
+
+      } catch (e) {
+        console.error(e)
       }
-
-      await saveClothingItems(db, [item])
-
-    } catch (e) {
-      console.error(e)
+    }
+    // If user updates information about the item
+    else {
+      console.log({item:item, new:new_item})
+      await updateClothingItem(db, item?.id ?? 0, new_item)
     }
   }
   
@@ -372,7 +380,7 @@ const AddItemScreen = ({navigation, route}: AddItemScreen) => {
         style={[styles.button, dynamicStyle.button]}
         onPress={() => addItem()}
         children={
-          <Text style={[styles.button_text, dynamicStyle.button_text]}>Add to Collection</Text>
+          <Text style={[styles.button_text, dynamicStyle.button_text]}>{editMode? 'Update' : 'Add to Collection'}</Text>
         }
       />
       

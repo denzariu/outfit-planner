@@ -338,7 +338,7 @@ const CalendarScreen = ({...props}) => {
             flexDirection: 'row'
           }}>
             {markedDates[selectedDate].items[noOutfit].map((i: ClothingItem) => 
-              i.type == 'feet' &&
+              i.type == 'footwear' &&
                 <Image key={'preview_footwear_' + i.id} source={{uri: i.image}} style={{flex: i.aspect_ratio, aspectRatio: i.aspect_ratio}}/>
           )}
           </View>

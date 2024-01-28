@@ -14,11 +14,11 @@ import { arraysEqual } from '../defaults/data-processing'
 type ItemSelectorProps = {
   // These two are used to transfer data to the component's parent
   handleItemsToBeAdded: React.Dispatch<React.SetStateAction<ClothingItem[]>>
-  handleCategoryToBeAddedTo: React.Dispatch<React.SetStateAction<'extra' | 'top' | 'bottom' | 'feet' | 'all' | ''>>,
+  handleCategoryToBeAddedTo: React.Dispatch<React.SetStateAction<'extra' | 'top' | 'bottom' | 'footwear' | 'all' | ''>>,
   alreadySelectedItems: Array<number | null>,
 
-  categoryToChooseFrom: 'extra' | 'top' | 'bottom' | 'feet' | 'all' | '',
-  handleItemSelection:  React.Dispatch<React.SetStateAction<'extra' | 'top' | 'bottom' | 'feet' | 'all' | ''>>
+  categoryToChooseFrom: 'extra' | 'top' | 'bottom' | 'footwear' | 'all' | '',
+  handleItemSelection:  React.Dispatch<React.SetStateAction<'extra' | 'top' | 'bottom' | 'footwear' | 'all' | ''>>
 }
 
 const ItemPicker = ({handleItemsToBeAdded, handleCategoryToBeAddedTo, alreadySelectedItems,  handleItemSelection, categoryToChooseFrom}: ItemSelectorProps) => {

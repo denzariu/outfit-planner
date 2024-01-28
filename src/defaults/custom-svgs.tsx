@@ -29,7 +29,7 @@ export const icons = {
   extra: 'hat-fedora',
   top: 'tshirt-crew',
   bottom: svgPants,
-  feet: 'shoe-heel',
+  footwear: 'shoe-heel',
   all: 'all-inclusive',
 
   delete: 'trash-can-outline',
