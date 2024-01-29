@@ -1,6 +1,6 @@
-import { Alert, Dimensions, Image, LayoutAnimation, SafeAreaView, StatusBar, StyleSheet, Text, TouchableOpacity, View, useColorScheme } from 'react-native'
+import { Dimensions, Image, LayoutAnimation, SafeAreaView, StatusBar, StyleSheet, Text, TouchableOpacity, View, useColorScheme } from 'react-native'
 import React, { useEffect, useState } from 'react'
-import { DarkTheme, Theme, mainAnimation, swipeAnimation, swipeYAnimation } from '../defaults/ui'
+import { DarkTheme, Theme, swipeAnimation } from '../defaults/ui'
 import { Calendar } from 'react-native-calendars';
 import dayjs from 'dayjs';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -8,36 +8,35 @@ import AnimatedGradient from '../components/AnimatedGradient';
 import { icons } from '../defaults/custom-svgs';
 import { Theme as CalendarTheme } from 'react-native-calendars/src/types'  
 import { getDBConnection } from '../assets/database/db-service';
-import { getOutfitsBetweenDates, getOutfitsItems } from '../assets/database/db-operations/db-operations-outfit';
+import { getOutfitsBetweenDates, getOutfitsItems, getOutfitsOnDate } from '../assets/database/db-operations/db-operations-outfit';
 import { FlatList } from 'react-native-gesture-handler';
 import { ClothingItem, Outfit } from '../assets/database/models';
 import Modal from 'react-native-modal'
-import { FontWeight } from '@shopify/react-native-skia';
-import OutfitOrganizer from '../components/OutfitOrganizer';
 import OutfitCreation from '../components/OutfitCreation';
 import AppleStyleSwipeableRow from '../components/AppleSwipeableRow';
+import { useIsFocused } from '@react-navigation/native';
+import { deleteOutfit as deleteFromDB } from '../assets/database/db-processing';
 
 
 const CalendarScreen = ({...props}) => {
+
+  const isFocused = useIsFocused()
 
   const windowWidth = Dimensions.get('window').width;
   const fadeAnimation = props.fadeAnimation;
   const isDarkMode = useColorScheme() == 'dark';
   const currentTheme = isDarkMode ? DarkTheme : Theme;
   
-  const [list, setList] = useState<{date: string, outfit: {}}[]>([
-    {date: '2023-12-29', outfit: {}},
-    {date: '2023-12-17', outfit: {}},
-    {date: '2023-12-18', outfit: {}},
-    {date: '2023-12-19', outfit: {}},
-  ])
 
-  const [month, setMonth] = useState<number>(1);
-  const [year, setYear] = useState<number>(2024);
+  const [month, setMonth] = useState<number>(dayjs().month() + 1);
+  const [year, setYear] = useState<number>(dayjs().year());
+
+  const [list, setList] = useState<{date: string, outfit: {}}[]>([])
+  const [markedDates, setMarkedDates] = useState<any>([])
+  const [markedSelectedDates, setMarkedSelectedDates] = useState<any>()
+  const [selectedDate, setSelectedDate] = useState(dayjs().format("YYYY-MM-DD"));
 
   const [noOutfit, setNoOutfit] = useState<number>(0);
-  const [outfits, setOutfits] = useState<Outfit[]>()
-
   const [modalVisible, setModalVisible] = useState<boolean>(false);
   const [preview, setPreview] = useState<{x: number, y:number}>({x: 0, y: 0});
 
@@ -51,14 +50,41 @@ const CalendarScreen = ({...props}) => {
     setList(outfitsThisMonth.map(i => {return {...i, date: i.date.split(' ')[0]}}))
   }
 
-  useEffect(() => {
+  const refreshOutfit = async () => {
     fetchOutfits()
-  }, [month, year]);
 
+    //Dropping outfit-only update in favor of a total refresh
+    //TODO: rework this if there are significant performance issues
 
-  const [markedDates, setMarkedDates] = useState<any>([])
-  const [markedSelectedDates, setMarkedSelectedDates] = useState<any>()
-  const [selectedDate, setSelectedDate] = useState(dayjs().format("YYYY-MM-DD"));
+    // const db = await getDBConnection()
+    // const outfits_on_date = await getOutfitsOnDate(db, selectedDate)
+
+    // //Pop outfits
+    // while (markedDates[selectedDate].outfits.length)
+    //   markedDates[selectedDate].outfits.pop()
+
+    // //Push new outfits
+    // for (let i=0; i<outfits_on_date.length; i++)
+    //   markedDates[selectedDate].outfits.push(outfits_on_date[i])
+
+    // console.log({marked: markedDates[selectedDate].outfits})
+
+  }
+
+  const deleteOutfit = async (outfit_id: number) => {
+    deleteFromDB(outfit_id)
+    .then(refreshOutfit)
+  }
+
+  useEffect(() => {
+    if (!isFocused) return;
+
+    // Setting the value to -1 in order to know if
+    // user refreshed the page (outfit wasn't selected before)
+    setNoOutfit(-1)
+    fetchOutfits()
+  }, [month, year, isFocused]);
+
 
 
   useEffect(() => {
@@ -82,11 +108,6 @@ const CalendarScreen = ({...props}) => {
           dots: acc[date] ? [...acc[date].dots, dot] : [dot],
           marked: true, 
           selected: true,
-
-          // markedColor: currentTheme.colors.primary,
-          // selectedColor: currentTheme.colors.secondary,
-          // selectedDotColor: currentTheme.colors.secondary,
-          // selectedDotTextColor: currentTheme.colors.quaternary
         };
         return acc;
       }, accumulator)
@@ -100,20 +121,27 @@ const CalendarScreen = ({...props}) => {
         selected: true,
       }
     })
+
+    // Update outfit items when user reloaded the page
+    if(noOutfit == -1)
+      daysOutfits(selectedDate)
+
   }, [markedDates, selectedDate])
 
-  // Fires every time the user selects a new date/day
+  // Fires every time the user selects a new date
   useEffect(() => {
-    daySchedule(selectedDate)
+    daysOutfits(selectedDate)
   }, [selectedDate])
 
-  const daySchedule = async (day: any) => {
+  // Loads today's outfits' items
+  const daysOutfits = async (day: any) => {
     if(markedDates && markedDates[day] && markedDates[day].outfits.length > 0) {
       const db = await getDBConnection()
       
       const outfits_ids = markedDates[day].outfits.map((o: Outfit) => o.id);
 
       const outfits = await getOutfitsItems(db, outfits_ids)
+      setNoOutfit(0)
 
       for(let i=0; i<markedDates[day].items.length; i++)
         while (markedDates[day].items[i].length)
@@ -155,14 +183,7 @@ const CalendarScreen = ({...props}) => {
     textMonthFontSize: 16,
   }; 
   
-  
-  // Force calendar update
-  const [themeId, setThemeId] = React.useState(isDarkMode ? 'dark' : 'light');
-
-  useEffect(() => {
-    setThemeId(isDarkMode ? 'dark' : 'light');
-  }, [isDarkMode, themeCalendar]);
-
+  // Force calendar (and gradient) update by updating its key
   const calendarKey = isDarkMode ? 'dark' : 'light';
 
   const dynamicStyle = StyleSheet.create({
@@ -181,7 +202,7 @@ const CalendarScreen = ({...props}) => {
         barStyle={isDarkMode ? 'dark-content' : 'light-content'}
         backgroundColor={currentTheme.colors.background}
       />
-      <AnimatedGradient props={fadeAnimation}/>
+      <AnimatedGradient props={fadeAnimation} key={calendarKey + '_update_gradient'}/>
       <View style={styles.header_container}>
         <Text style={[styles.header, dynamicStyle.textHeader]}>
           Outfit Planner
@@ -189,6 +210,7 @@ const CalendarScreen = ({...props}) => {
       </View>
       <View key={calendarKey}>
         <Calendar
+            key={calendarKey + '_force_update'}
             // customHeaderTitle={<Text>Hi</Text>}
             markingType='multi-dot'
             renderArrow={(direction) => 
@@ -241,6 +263,7 @@ const CalendarScreen = ({...props}) => {
             setNoOutfit={setNoOutfit} 
             setModalVisible={setModalVisible}
             setPreview={setPreview}
+            deleteOutfit={deleteOutfit}
             index={o.index}
           />
         }
@@ -283,10 +306,15 @@ const CalendarScreen = ({...props}) => {
         onSwipeComplete={() => {setModalVisible(prev => !prev)}}
         onBackButtonPress={() => {setModalVisible(prev => !prev)}}
         onDismiss={() => setModalVisible(prev => !prev)}
+        onModalHide={() =>
+          // When the user closes the modal, automatically update outfit's items
+          // daysOutfits(selectedDate)
+          refreshOutfit()
+
+        }
         propagateSwipe
         // pointerEvents='box-only'
         style={{
-          // borderWidth: 1,
           justifyContent: 'center',
         }}
         backdropColor={currentTheme.colors.background}
@@ -356,22 +384,23 @@ type RowProps = {
   index: number,
   setNoOutfit: any,
   setPreview: any,
-  setModalVisible: any
+  setModalVisible: any,
+  deleteOutfit?: any
 }
 
-const SwipeableRow = ({outfit, setNoOutfit, setModalVisible, setPreview, index}: RowProps) => {
-  const edit = () => {
+const SwipeableRow = ({outfit, setNoOutfit, setModalVisible, setPreview, index, deleteOutfit}: RowProps) => {
+  const editItem = () => {
     
   }
   
-  const deleteOutfit = () => {
-    console.log('pressed delete')
+  const deleteItem = () => {
+    deleteOutfit(outfit.id)
   }
 
   return (
     <AppleStyleSwipeableRow 
-      actionButton1={edit}
-      actionButton2={deleteOutfit}
+      actionButton1={editItem}
+      actionButton2={deleteItem}
       children={
         <Row
           outfit={outfit} 
@@ -418,6 +447,11 @@ const Row = ( {outfit, setNoOutfit, setModalVisible, setPreview, index}: RowProp
       <MaterialCommunityIcons 
         name={icons.dots}
         size={Theme.fontSize.m_m}
+        color={currentTheme.colors.background}
+      />
+      <MaterialCommunityIcons 
+        name={outfit.icon}
+        size={Theme.fontSize.l_s}
         color={currentTheme.colors.background}
       />
       <Text style={[styles.outfit_title, dynamicStyles.outfit_title]}>

@@ -152,9 +152,12 @@ const WardrobeScreen = ({...props}) => {
     }, [itemsSelected.length])
   );
 
+  // Force gradient update by updating its key
+  const gradientKey = isDarkMode ? 'dark_update_gradient' : 'light_update_gradient';
+
   return (
     <SafeAreaView style={[styles.page, dynamicStyle.background_style]}>
-      <AnimatedGradient props={fadeAnimation}/>
+      <AnimatedGradient props={fadeAnimation} key={gradientKey}/>
       <View style={styles.header_container}>
         <Text style={[styles.header, dynamicStyle.text_header]}>
           Wardrobe

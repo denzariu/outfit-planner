@@ -77,13 +77,6 @@ export const deleteClothingItem = async (db: SQLiteDatabase, id: number) => {
 export const deleteClothingItems = async (db: SQLiteDatabase, ids: Array<number | null>) => {
   if (ids.length < 1) throw Error('No items selected for deletion.');
 
-  let ids_stringified = ids.reduce((acc, current, index) => {
-    if (!current) return acc
-    return index == 0 ? current.toString() : acc.concat(', ' + current.toString())
-  }, '');
-
-  console.log(ids_stringified);
-
   
   const deleteFromOutfits = `DELETE from ${tableName_Item_Outfit} where id_item IN (${ids})`
   await db.executeSql(deleteFromOutfits)

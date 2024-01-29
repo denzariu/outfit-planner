@@ -66,8 +66,6 @@ const RecommendedOutfits = ({outfit}: RecommendedOutfitsProps) => {
     }, accumulator)
 
     const recommendations: any = Object.entries(accumulator)
-
-    console.log({RESULT: recommendations})
     setRecommended(recommendations)
   }
 

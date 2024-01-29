@@ -11,6 +11,7 @@ export const createOutfitTable = async (db: SQLiteDatabase) => {
   const query = `CREATE TABLE IF NOT EXISTS ${tableName_Outfit} (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT,
+    icon TEXT,
     date_added TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
   )`;
 
@@ -44,10 +45,10 @@ export const createOutfitPlannerTable = async (db: SQLiteDatabase) => {
 
 // ++ Gets & Sets ++
 // Get items from DB
-export const createOutfit = async (db: SQLiteDatabase, name?: string): Promise<number> => {
+export const createOutfit = async (db: SQLiteDatabase, outfit: Outfit): Promise<number> => {
   try {
     const query = 
-      `INSERT OR REPLACE INTO ${tableName_Outfit} (name) VALUES ('${name}')`;
+      `INSERT OR REPLACE INTO ${tableName_Outfit} (name, icon) VALUES ('${outfit.name ?? 'Default Outfit'}', '${outfit.icon ?? 'shopping'}')`;
 
     const results = await db.executeSql(query)
 
@@ -63,7 +64,7 @@ export const getOutfits = async (db: SQLiteDatabase, date_start?: string, date_e
     const Outfits: Outfit[] = [];
 
     const query = `
-                    SELECT rowid as id, name, date_added FROM ${tableName_Outfit}
+                    SELECT rowid as id, name, icon, date_added FROM ${tableName_Outfit}
                     ${(date_start && date_end) ? 
                       ` WHERE date_added >= '${date_start} 00:00:00' AND date_added <= '${date_end} 23:59:59'` 
                     : ``}
@@ -82,6 +83,18 @@ export const getOutfits = async (db: SQLiteDatabase, date_start?: string, date_e
     throw Error(`Failed to get ${tableName_Outfit}!`);
   }
 };
+
+// Update outfit's fields (name, icon)
+export const updateOutfit = async (db: SQLiteDatabase, id: number, newItem: Outfit) => {
+  const updateQuery =
+    `
+      UPDATE OR REPLACE ${tableName_Outfit}
+      SET name = '${newItem.name}', icon = '${newItem.icon}'
+      WHERE id = ${id};
+    `
+  
+    return db.executeSql(updateQuery)
+} 
 
 // Assign items to an already-existing outfit
 export const addItemsToOutfit = async (db: SQLiteDatabase, ids_items: number[], outfit_id: number) => {
@@ -187,12 +200,12 @@ export const getOutfitsItems = async (db: SQLiteDatabase, ids: (number | undefin
 }
 
 // Save outfits to DB
-export const saveOutfits = async (db: SQLiteDatabase, Outfit: Outfit[]) => {
-  if (Outfit.length < 1) throw Error('No items selected for saving.');
+export const saveOutfit = async (db: SQLiteDatabase, outfit: Outfit) => {
+  // if (outfit.length < 1) throw Error('No items selected for saving.');
 
   const insertQuery =
-    `INSERT OR REPLACE INTO ${tableName_Outfit} (date_added) VALUES ` +
-      Outfit.map(i => `('CURRENT_TIMESTAMP')`).join(',');
+    `INSERT OR REPLACE INTO ${tableName_Outfit} (name, icon, date_added) VALUES ` +
+      `('${outfit.name}', '${outfit.icon}', 'CURRENT_TIMESTAMP')`
 
   return db.executeSql(insertQuery);
 };
@@ -205,12 +218,18 @@ export const deleteOutfit = async (db: SQLiteDatabase, id: number) => {
     .catch((err) => Error(`Failed to delete item with id ${id}`))
 };
 
+// Delete from DB - Outfits from OutfitPlanner
+export const deleteOutfitPlanner = async (db: SQLiteDatabase, id_outfit: number) => {
+  const deleteQuery = `DELETE from ${tablename_OutfitPlanner} where id_outfit = ${id_outfit}`;
+  
+  await db.executeSql(deleteQuery)
+    .catch((err) => Error(`Failed to delete outfit date with id ${id_outfit}`))
+};
+
 // Delete from DB - multiple outfits
 export const deleteOutfits = async (db: SQLiteDatabase, ids: Array<number>) => {
   if (ids.length < 1) throw Error('No items selected for deletion.');
 
-  // 
-  
   const deleteQuery = `DELETE from ${tableName_Outfit} where rowid IN (${ids})`;
   
   await db.executeSql(deleteQuery)
@@ -348,7 +367,7 @@ export const getItemsFromLatestCreatedOutfits = async (db: SQLiteDatabase, maxim
     */
     const sql = 
     `
-      SELECT C.id as outfit_id, C.name as outfit_name, ITEM.id as item_id, ITEM.image, ITEM.type, ITEM.aspect_ratio
+      SELECT C.id as outfit_id, C.name as outfit_name, C.icon as outfit_icon, ITEM.id as item_id, ITEM.image, ITEM.type, ITEM.aspect_ratio
       FROM ${tableNameItem} AS ITEM
       LEFT JOIN ${tableNameIntermediary} AS B ON ITEM.id = B.id_item 
       LEFT JOIN ${tableName_Outfit} AS C ON C.id = B.id_outfit

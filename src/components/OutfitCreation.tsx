@@ -1,12 +1,11 @@
 import { StatusBar, StyleSheet, Text, TextInput, TouchableOpacity, View, useColorScheme } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import OutfitOrganizer from './OutfitOrganizer'
-import { ClothingItem, Outfit } from '../assets/database/models'
+import { ClothingItem, Outfit, OutfitIcons } from '../assets/database/models'
 import { DarkTheme, Theme } from '../defaults/ui'
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
 import { icons } from '../defaults/custom-svgs'
 import RecommendedOutfits from './RecommendedOutfits'
-import { arraysEqual } from '../defaults/data-processing'
 import { saveOutfit } from '../assets/database/db-processing'
 
 type OutfitCreationProps = {
@@ -20,7 +19,8 @@ const OutfitCreation = ({outfit, items, selectedDate}: OutfitCreationProps) => {
   const isDarkMode = useColorScheme() == 'dark';
   const currentTheme = isDarkMode ? DarkTheme : Theme;
   
-  const [outfitName, setOutfitName] = useState<string | undefined>(outfit?.name ?? undefined)
+  const [outfitName, setOutfitName] = useState<string | undefined>(outfit?.name ?? 'Default Outfit')
+  const [outfitIcon, setOutfitIcon] = useState<OutfitIcons>(outfit?.icon ?? 'palette')
 
   //Current ids of items
   const [modifiedAllItemsIds, setModifiedAllItemsIds] = useState<number[]>([])
@@ -84,7 +84,7 @@ const OutfitCreation = ({outfit, items, selectedDate}: OutfitCreationProps) => {
       {/* Save (changes to) outfit */}
       {saveVisible &&          
         <TouchableOpacity
-          onPress={() => saveOutfit(outfit ?? {name: outfitName ?? 'Outfit'}, modifiedAllItemsIds, selectedDate)}
+          onPress={() => saveOutfit({id: outfit? outfit.id : undefined, name: outfitName ?? 'Default Outfit', icon: outfitIcon}, modifiedAllItemsIds, selectedDate)}
           style={[{
             position: 'absolute',
             bottom: -8, // space from bottombar, TODO: why 13? 
@@ -109,5 +109,3 @@ const OutfitCreation = ({outfit, items, selectedDate}: OutfitCreationProps) => {
 }
 
 export default OutfitCreation
-
-const styles = StyleSheet.create({})

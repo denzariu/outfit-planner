@@ -12,8 +12,10 @@ import DatePicker from 'react-native-date-picker';
 import { SvgXml } from 'react-native-svg';
 import OutfitOrganizer from '../components/OutfitOrganizer';
 import { saveOutfit } from '../assets/database/db-processing';
+import { useIsFocused } from '@react-navigation/native';
 
 const HomeScreen = ({...props}) => {
+  const isFocused = useIsFocused();
   const isDarkMode = useColorScheme() == 'dark';
   const currentTheme = isDarkMode ? DarkTheme : Theme;
   const fadeAnimation = props.fadeAnimation;
@@ -27,7 +29,7 @@ const HomeScreen = ({...props}) => {
   const [headerTitle, setHeaderTitle] = useState<string>("Today's Outfit")
   
   // Outfit manager
-  const [currentOutfit, setCurrentOutfit] = useState<Outfit>({name: 'Default'})
+  const [currentOutfit, setCurrentOutfit] = useState<Outfit>({name: 'Default Outfit', icon: 'bag-suitcase'})
 
 
   const [items, setItems] = useState<Array<ClothingItem>>([])
@@ -54,15 +56,19 @@ const HomeScreen = ({...props}) => {
     }
   }
 
+  useEffect(() => {
+    if (!isFocused) return
+    updateOutfit(intDate)
+
+  }, [isFocused])
   // Whenever the outfit changes, update the items
   useEffect(() => {
+
     loadOutfit()
   }, [currentOutfit])
 
   const updateOutfit = async (intFullDate: string) => {
     const db = await getDBConnection()
-
-    console.log(intFullDate)
 
     await getOutfitsOnDate(db, intFullDate)
     .then( results => {
@@ -75,7 +81,6 @@ const HomeScreen = ({...props}) => {
       setCurrentOutfit(results[0])
     })
   }
-
 
   // Whenever the date changes, update the outfit
   useEffect(() => {
@@ -106,7 +111,6 @@ const HomeScreen = ({...props}) => {
     )
   }, [date])
 
-
   const dynamicStyle = StyleSheet.create({
     background_style: {backgroundColor: currentTheme.colors.background},
     text_header: {color: currentTheme.colors.tertiary},
@@ -118,11 +122,14 @@ const HomeScreen = ({...props}) => {
     item_name: {color: currentTheme.colors.primary}
   })
 
+    
+  // Force gradient update by updating its key
+  const gradientKey = isDarkMode ? 'dark_update_gradient' : 'light_update_gradient';
 
   return (
     <SafeAreaView style={[styles.page, dynamicStyle.background_style]}>
       
-      <AnimatedGradient props={fadeAnimation}/>
+      <AnimatedGradient props={fadeAnimation} key={gradientKey}/>
 
       <View style={styles.header_container}>
         <Text style={[styles.header, dynamicStyle.text_header]}>
@@ -137,7 +144,7 @@ const HomeScreen = ({...props}) => {
           alignItems: 'center',
         }}>
           <TouchableOpacity 
-            onPress={() => saveOutfit(currentOutfit, allItemsIds, intDate)} 
+            onPress={() => saveOutfit(currentOutfit ?? {name: 'Default Outfit', icon: 'bag-suitcase'}, allItemsIds, intDate)} 
             style={{padding: Theme.spacing.xs}}
           >
             <MaterialCommunityIcons 

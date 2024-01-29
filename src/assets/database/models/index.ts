@@ -1,8 +1,12 @@
 // WIP
 // Outfit --- OutfitClothing --- ClothingItem
+
+export type OutfitIcons = 'glass-cocktail' | 'school' | 'briefcase' | 'microphone' | 'camera' | 'palette' | 'monitor' | 'beach' | 'umbrella' | 'bag-suitcase' | 'baguette' | 'shopping';
+
 export type Outfit = {
   id?: number;
   name: string;
+  icon: OutfitIcons;
   date_added?: string;
 }
 
