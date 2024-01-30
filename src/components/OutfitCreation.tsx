@@ -1,12 +1,13 @@
-import { StatusBar, StyleSheet, Text, TextInput, TouchableOpacity, View, useColorScheme } from 'react-native'
+import { LayoutAnimation, StatusBar, StyleSheet, Text, TextInput, TouchableOpacity, View, useColorScheme } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import OutfitOrganizer from './OutfitOrganizer'
 import { ClothingItem, Outfit, OutfitIcons } from '../assets/database/models'
-import { DarkTheme, Theme } from '../defaults/ui'
+import { DarkTheme, Theme, swipeAnimation } from '../defaults/ui'
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
 import { icons } from '../defaults/custom-svgs'
 import RecommendedOutfits from './RecommendedOutfits'
 import { saveOutfit } from '../assets/database/db-processing'
+import OutfitIconSelect from './OutfitIconSelect'
 
 type OutfitCreationProps = {
   outfit?: Outfit,
@@ -26,6 +27,12 @@ const OutfitCreation = ({outfit, items, selectedDate}: OutfitCreationProps) => {
   const [modifiedAllItemsIds, setModifiedAllItemsIds] = useState<number[]>([])
   const [saveVisible, setSaveVisible] = useState<boolean>(true)
 
+  //Icon modifier is selected
+  const [changeIcon, setChangeIcon] = useState<boolean>(false)
+
+  useEffect(() => {
+    LayoutAnimation.configureNext(swipeAnimation)
+  }, [changeIcon])
 
   useEffect(() => {
     // TODO: Any attempt to get items[].id leads to unexpected behavior
@@ -41,7 +48,10 @@ const OutfitCreation = ({outfit, items, selectedDate}: OutfitCreationProps) => {
     */
   }, [modifiedAllItemsIds])
 
-  
+  const dynamicStyles = StyleSheet.create({
+    outfit_icon: {backgroundColor: currentTheme.colors.primary},
+    outfit_name: {backgroundColor: currentTheme.colors.primary, color: currentTheme.colors.quaternary}
+  })
   
 
   return (
@@ -50,26 +60,43 @@ const OutfitCreation = ({outfit, items, selectedDate}: OutfitCreationProps) => {
         flex: 1,
       }}
     >
-      {/* Recommended outfits to select from */}
-      {outfit &&
+      {/* Recommended outfits to select from OR Outfit Icon selector*/}
+      {(!changeIcon && outfit) ?
         <RecommendedOutfits 
           outfit={outfit}
         />
+        :
+        <OutfitIconSelect
+          currentIcon={outfitIcon}
+          setOutfitIcon={setOutfitIcon}
+        />
       }
 
-      {/* TODO: Outfit icon / name */}
       <View style={{
-        backgroundColor: currentTheme.colors.primary,
-        borderRadius: Theme.spacing.m,
+        // backgroundColor: currentTheme.colors.primary,
         marginBottom: Theme.spacing.m,
-        paddingHorizontal: Theme.spacing.m
+        flexDirection: 'row',
+        alignItems: 'center',
+        columnGap: Theme.spacing.s
       }}>
+        <TouchableOpacity
+          onPress={() => setChangeIcon(prev => !prev)}
+          style={[styles.outfit_icon, dynamicStyles.outfit_icon]}
+          activeOpacity={0.8}
+        >
+          <MaterialCommunityIcons
+            name={outfitIcon}
+            size={Theme.fontSize.l_s}
+            color={currentTheme.colors.quaternary}
+          />
+        </TouchableOpacity>
         <TextInput
           selectTextOnFocus
           numberOfLines={1}
           onChangeText={(text) => setOutfitName(text)}
           placeholder={'Outfit Name'}
           value={outfitName}
+          style={[styles.outfit_name, dynamicStyles.outfit_name]}
         />
       </View>
 
@@ -107,5 +134,23 @@ const OutfitCreation = ({outfit, items, selectedDate}: OutfitCreationProps) => {
     </View>
   )
 }
+
+const styles = StyleSheet.create({
+  outfit_name: {
+    flex: 1,
+    borderRadius: Theme.spacing.ms,
+
+    fontSize: Theme.fontSize.m_l,
+    fontWeight: '200',
+
+    padding: Theme.spacing.ms,
+    paddingLeft: Theme.spacing.m
+  },
+
+  outfit_icon: {
+    padding: Theme.spacing.ms,
+    borderRadius: Theme.spacing.s,
+  }
+})
 
 export default OutfitCreation

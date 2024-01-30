@@ -333,7 +333,6 @@ const CalendarScreen = ({...props}) => {
           position: 'absolute',
           left: preview.x < windowWidth/2 ? preview.x + 32 : preview.x - 128 - 32,
           top: preview.y - 120,
-          // height: 240,
           width: 128,
           borderRadius: 16,
           padding: 4,
@@ -456,6 +455,7 @@ const Row = ( {outfit, setNoOutfit, setModalVisible, setPreview, index}: RowProp
         name={outfit.icon}
         size={Theme.fontSize.l_s}
         color={currentTheme.colors.background}
+        style={styles.outfit_icon}
       />
       <Text style={[styles.outfit_title, dynamicStyles.outfit_title]}>
         {outfit.name}
@@ -475,9 +475,11 @@ const styles = StyleSheet.create({
     alignItems: 'center'
   },
 
+  outfit_icon: {marginLeft: Theme.spacing.xs},
+
   outfit_title: {
     fontSize: Theme.fontSize.m_m,
-    marginLeft: Theme.spacing.m
+    marginLeft: Theme.spacing.s
   },
 
   page: {

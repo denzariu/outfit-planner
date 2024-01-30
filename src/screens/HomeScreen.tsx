@@ -1,6 +1,6 @@
 import { LayoutAnimation, SafeAreaView, StyleSheet, Text, TouchableOpacity, View, useColorScheme } from 'react-native'
 import React, { useEffect, useState } from 'react'
-import { DarkTheme, Theme, mainAnimation, swipeAnimation } from '../defaults/ui';
+import { DarkTheme, Theme, swipeAnimation } from '../defaults/ui';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import AnimatedGradient from '../components/AnimatedGradient';
 import { getDBConnection } from '../assets/database/db-service';
@@ -135,17 +135,13 @@ const HomeScreen = ({...props}) => {
       <AnimatedGradient props={fadeAnimation} key={gradientKey}/>
 
       <View style={styles.header_container}>
+        {/* Header title */}
         <Text style={[styles.header, dynamicStyle.text_header]}>
           {headerTitle}
         </Text>
         
-        <View style={{
-          // TODO: move these to 'styles'
-          flex: 0.7, 
-          flexDirection: 'row', 
-          justifyContent: 'flex-end', 
-          alignItems: 'center',
-        }}>
+        <View style={styles.header_buttons}>
+          {/* Save button */}
           <TouchableOpacity 
             onPress={() => saveOutfit(currentOutfit ?? {name: 'Default Outfit', icon: 'bag-suitcase'}, allItemsIds, intDate)} 
             style={{padding: Theme.spacing.xs}}
@@ -156,6 +152,7 @@ const HomeScreen = ({...props}) => {
               size={currentTheme.fontSize.l_s} 
             />
           </TouchableOpacity>
+          {/* Calendar button */}
           <TouchableOpacity 
             onPress={() => setOpenDatePicker(true)} 
             style={{paddingHorizontal: Theme.spacing.xs}}
@@ -168,6 +165,8 @@ const HomeScreen = ({...props}) => {
           </TouchableOpacity>
         </View>
       </View>
+
+      {/* Modal which opens when pressing on calendar button */}
       <DatePicker 
         modal
         open={openDatePicker}
@@ -180,6 +179,8 @@ const HomeScreen = ({...props}) => {
           setDate(date)
         }}
       />
+
+      {/* Item viewer */}
       <OutfitOrganizer
         items={items}
         allItemsIds={allItemsIds}
@@ -211,6 +212,13 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-start',
     fontSize: Theme.fontSize.l_s,
     fontWeight: '200'
+  },
+
+  header_buttons: {
+    flex: 0.7, 
+    flexDirection: 'row', 
+    justifyContent: 'flex-end', 
+    alignItems: 'center',
   },
 
   container: {
