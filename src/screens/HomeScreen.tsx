@@ -1,15 +1,13 @@
 import { LayoutAnimation, SafeAreaView, StyleSheet, Text, TouchableOpacity, View, useColorScheme } from 'react-native'
 import React, { useEffect, useState } from 'react'
-import { DarkTheme, Theme, mainAnimation } from '../defaults/ui';
+import { DarkTheme, Theme, mainAnimation, swipeAnimation } from '../defaults/ui';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import AnimatedGradient from '../components/AnimatedGradient';
 import { getDBConnection } from '../assets/database/db-service';
 import { ClothingItem, Outfit } from '../assets/database/models';
 import { icons } from '../defaults/custom-svgs';
 import { getOutfitItems, getOutfitsOnDate } from '../assets/database/db-operations/db-operations-outfit';
-import moment, { Moment } from 'moment'
 import DatePicker from 'react-native-date-picker';
-import { SvgXml } from 'react-native-svg';
 import OutfitOrganizer from '../components/OutfitOrganizer';
 import { saveOutfit } from '../assets/database/db-processing';
 import { useIsFocused } from '@react-navigation/native';
@@ -33,39 +31,43 @@ const HomeScreen = ({...props}) => {
 
 
   const [items, setItems] = useState<Array<ClothingItem>>([])
+  const [updatingOutfit, setUpdatingOutfit] = useState<boolean>(false)
   const [allItemsIds, setAllItemsIds] = useState<Array<number>>([])
   
-  // TODO: Feature in testing
-  const loadOutfit = async () => {
-    const db = await getDBConnection()
 
-    LayoutAnimation.configureNext(mainAnimation);
-  
-    if (currentOutfit?.id) 
-      await getOutfitItems(db, currentOutfit.id)
-        .then(res => {
-          console.log({outfit_items: res})
-          setItems(res)
-        console.log('UPDATED ITEMS')
-
-        }) 
-
-    else {
-      console.log('LOADING NO OUTFIT ID')
-      console.log('NO ITEMS?')
-    }
-  }
 
   useEffect(() => {
     if (!isFocused) return
+
     updateOutfit(intDate)
-
   }, [isFocused])
-  // Whenever the outfit changes, update the items
-  useEffect(() => {
 
-    loadOutfit()
-  }, [currentOutfit])
+
+  // Whenever the outfit changes, update its itemss
+  useEffect(() => {
+    if (updatingOutfit)
+      loadOutfitItems()
+  }, [updatingOutfit])
+
+
+  // TODO: Feature in testing
+  // Load the outfit items from the DB
+  const loadOutfitItems = async () => {
+    LayoutAnimation.configureNext(swipeAnimation);
+    const db = await getDBConnection()
+  
+    if (currentOutfit?.id) {
+      await getOutfitItems(db, currentOutfit.id)
+      .then(res => {
+        setItems(res)
+      }) 
+    } else {
+      setItems([])
+      console.log('There is no outfit on this date.')
+    }
+
+    setUpdatingOutfit(false)
+  }
 
   const updateOutfit = async (intFullDate: string) => {
     const db = await getDBConnection()
@@ -75,10 +77,11 @@ const HomeScreen = ({...props}) => {
       // Not necessary to check if outfit exists yet
       // TODO: add all outfit options for the day
 
-      // Setting items to [] is needed in case results 
-      // does not change the current outfit ([] -> [] doesn't trigger update)
-      setItems([])
+      // Setting 'updatingOutfit' to true, because results[0]
+      // might return undefined and thus not trigger updatesS
       setCurrentOutfit(results[0])
+      setUpdatingOutfit(true)
+
     })
   }
 

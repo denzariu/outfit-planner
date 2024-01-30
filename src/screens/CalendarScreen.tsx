@@ -51,6 +51,7 @@ const CalendarScreen = ({...props}) => {
   }
 
   const refreshOutfit = async () => {
+    setNoOutfit(-1)
     fetchOutfits()
 
     //Dropping outfit-only update in favor of a total refresh
@@ -326,6 +327,7 @@ const CalendarScreen = ({...props}) => {
         />
       </Modal>
 
+      {/* TODO: move this into a component */}
       {(preview.x != 0 && preview.y != 0) &&
         <View style={{
           position: 'absolute',
@@ -394,6 +396,7 @@ const SwipeableRow = ({outfit, setNoOutfit, setModalVisible, setPreview, index, 
   }
   
   const deleteItem = () => {
+    // Call function from parent component
     deleteOutfit(outfit.id)
   }
 
@@ -498,42 +501,6 @@ const styles = StyleSheet.create({
   container_clothing: {
     flex: 0.52,
     borderRadius: Theme.spacing.m,
-  },
-
-  // container_items: {
-  //   flex: 0.48,
-  //   display: 'flex',
-  //   flexDirection: 'column',
-  //   rowGap: Theme.spacing.s,
-  // },
-
-  // container_items_category: {
-  //   flex: 0.25,
-  //   display: 'flex',
-  //   flexDirection: 'column',
-  //   borderRadius: Theme.spacing.m,
-  //   paddingHorizontal: Theme.spacing.s,
-  //   paddingVertical: Theme.spacing.xxs 
-  // },
-
-  // container_category: {
-  //   // flex: 0.25,` 
-  //   display: 'flex',
-  //   flexDirection: 'row',
-  //   justifyContent: 'space-between',
-  //   flexWrap: 'nowrap'
-  // },
-
-  // category_text: {
-  //   flex: 0.75,
-  //   fontSize: Theme.fontSize.m_m,
-  //   fontWeight: '200' 
-  // },
-
-  // add_item: {
-  //   alignSelf: 'center',
-  //   padding: Theme.spacing.xxs,
-  //   borderRadius: Theme.spacing.m
-  // }
+  }
 })
 
