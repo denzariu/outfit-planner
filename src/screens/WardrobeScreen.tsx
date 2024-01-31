@@ -1,4 +1,4 @@
-import { Animated, BackHandler, Easing, FlatList, Image, LayoutAnimation, RefreshControl, SafeAreaView, StyleSheet, Text, TouchableHighlight, TouchableOpacity, View, useColorScheme } from 'react-native'
+import { Alert, Animated, BackHandler, Easing, FlatList, Image, LayoutAnimation, RefreshControl, SafeAreaView, StyleSheet, Text, TouchableHighlight, TouchableOpacity, View, useColorScheme } from 'react-native'
 import React, { useEffect, useRef, useState } from 'react'
 import AnimatedGradient from '../components/AnimatedGradient'
 import { DarkTheme, Theme, mainAnimation, swipeAnimation } from '../defaults/ui';
@@ -197,28 +197,39 @@ const WardrobeScreen = ({...props}) => {
           :
           // Selected items actions (TODO)
           <>
-            <TouchableOpacity onPress={() => duplicateSelected()} style={{padding: Theme.spacing.xs}}>
+            {/* <TouchableOpacity onPress={() => duplicateSelected()} style={{padding: Theme.spacing.xs}}>
               <MaterialCommunityIcons 
                 name={icons.duplicate} 
                 color={currentTheme.colors.tertiary} 
                 size={Theme.fontSize.m_l} 
               />
-            </TouchableOpacity>
-            <TouchableOpacity onPress={() => filterItems('all')} style={{padding: Theme.spacing.xs}}>
-              <MaterialCommunityIcons 
-                name={icons.favorite} 
-                color={currentTheme.colors.tertiary} 
-                size={Theme.fontSize.m_l} 
-              />
-            </TouchableOpacity>
-            <TouchableOpacity onPress={() => filterItems('all')} style={{padding: Theme.spacing.xs}}>
+            </TouchableOpacity> */}
+            <TouchableOpacity 
+              onPress={() => navigator.navigate('AddOutfitScreen', {items_ids: itemsSelected})} 
+              style={{padding: Theme.spacing.xs}}
+            >
               <MaterialCommunityIcons 
                 name={icons.create_outfit} 
                 color={currentTheme.colors.tertiary} 
                 size={Theme.fontSize.m_l} 
               />
             </TouchableOpacity>
-            <TouchableOpacity onPress={() => deleteSelected()} style={{padding: Theme.spacing.xs}}>
+
+            <TouchableOpacity 
+              onPress={() => Alert.alert('Feature not implemented yet.')} 
+              style={{padding: Theme.spacing.xs}}
+            >
+              <MaterialCommunityIcons 
+                name={icons.favorite} 
+                color={currentTheme.colors.tertiary} 
+                size={Theme.fontSize.m_l} 
+              />
+            </TouchableOpacity>
+            
+            <TouchableOpacity 
+              onPress={() => deleteSelected()} 
+              style={{padding: Theme.spacing.xs}}
+            >
               <MaterialCommunityIcons 
                 name={icons.delete} 
                 color={currentTheme.colors.delete} 

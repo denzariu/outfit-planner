@@ -83,7 +83,7 @@ const CustomTab = ({ state, descriptors, navigation, setExpanded, expanded }: Ta
           </Text>  
         </TouchableOpacity>
         <TouchableOpacity
-          onPress={() => navigation.navigate('AddItemScreen')}
+          onPress={() => navigation.navigate('AddOutfitScreen')}
           activeOpacity={0.75}
           style={{
             width: 120,

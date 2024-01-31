@@ -1,4 +1,4 @@
-import { LayoutAnimation, StatusBar, StyleSheet, Text, TextInput, TouchableOpacity, View, useColorScheme } from 'react-native'
+import { LayoutAnimation, StyleSheet, TextInput, TouchableOpacity, View, useColorScheme } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import OutfitOrganizer from './OutfitOrganizer'
 import { ClothingItem, Outfit, OutfitIcons } from '../assets/database/models'
@@ -8,6 +8,7 @@ import { icons } from '../defaults/custom-svgs'
 import RecommendedOutfits from './RecommendedOutfits'
 import { saveOutfit } from '../assets/database/db-processing'
 import OutfitIconSelect from './OutfitIconSelect'
+import { useNavigation } from '@react-navigation/native'
 
 type OutfitCreationProps = {
   outfit?: Outfit,
@@ -17,6 +18,7 @@ type OutfitCreationProps = {
 
 const OutfitCreation = ({outfit, items, selectedDate}: OutfitCreationProps) => {
 
+  const navigator = useNavigation()
   const isDarkMode = useColorScheme() == 'dark';
   const currentTheme = isDarkMode ? DarkTheme : Theme;
   
@@ -58,6 +60,7 @@ const OutfitCreation = ({outfit, items, selectedDate}: OutfitCreationProps) => {
     <View
       style={{
         flex: 1,
+        marginVertical: Theme.spacing.page
       }}
     >
       {/* Recommended outfits to select from OR Outfit Icon selector*/}
@@ -111,10 +114,18 @@ const OutfitCreation = ({outfit, items, selectedDate}: OutfitCreationProps) => {
       {/* Save (changes to) outfit */}
       {saveVisible &&          
         <TouchableOpacity
-          onPress={() => saveOutfit({id: outfit? outfit.id : undefined, name: outfitName ?? 'Default Outfit', icon: outfitIcon}, modifiedAllItemsIds, selectedDate)}
+          onPress={() => {
+            saveOutfit(
+              //Updated outfit
+              {id: outfit? outfit.id : undefined, name: outfitName ?? 'Default Outfit', icon: outfitIcon}, 
+              modifiedAllItemsIds, 
+              selectedDate
+            )
+            //TODO: set outfit save behavior: go back or show save message
+          }}
           style={[{
             position: 'absolute',
-            bottom: -8, // space from bottombar, TODO: why 13? 
+            bottom: -8,
             alignSelf: 'center',
             height: 64,
             width: 64,

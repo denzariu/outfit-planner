@@ -378,7 +378,10 @@ const AddItemScreen = ({navigation, route}: AddItemScreen) => {
 
       <TouchableOpacity  
         style={[styles.button, dynamicStyle.button]}
-        onPress={() => addItem()}
+        onPress={() => {
+          addItem()
+          navigator.goBack()
+        }}
         children={
           <Text style={[styles.button_text, dynamicStyle.button_text]}>{editMode? 'Update' : 'Add to Collection'}</Text>
         }

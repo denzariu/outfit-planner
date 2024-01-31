@@ -20,13 +20,18 @@ export const createClothingTable = async (db: SQLiteDatabase) => {
 
 // ++ Gets & Sets ++
 // Get items from DB
-export const getClothingItems = async (db: SQLiteDatabase, type?: string): Promise<ClothingItem[]> => {
+export const getClothingItems = async (db: SQLiteDatabase, type?: string, ids?: number[]): Promise<ClothingItem[]> => {
   try {
+    const searchCriteria = 
+      (type && ids) ? `WHERE type = '${type}' AND id IN (${ids})` 
+      : type ? `WHERE type = '${type}'`
+      : ids ? `WHERE id IN (${ids})` 
+      : ``
     const clothingItems: ClothingItem[] = [];
     const results = await db.executeSql(
-      `SELECT rowid as id, adjective, type, subtype, seasons, image, aspect_ratio FROM ${tableName}
-      ${type ? `WHERE type = '${type}'` : ``}
-      `
+      `SELECT rowid as id, adjective, type, subtype, seasons, image, aspect_ratio FROM ${tableName} ` +
+      searchCriteria
+      
     );
     results.forEach(result => {
       for (let index = 0; index < result.rows.length; index++) {
@@ -39,6 +44,8 @@ export const getClothingItems = async (db: SQLiteDatabase, type?: string): Promi
     throw Error(`Failed to get ${tableName}!`);
   }
 };
+
+
 
 // Save items to DB
 export const saveClothingItems = async (db: SQLiteDatabase, clothingItems: ClothingItem[]) => {

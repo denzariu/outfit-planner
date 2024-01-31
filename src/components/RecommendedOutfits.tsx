@@ -103,7 +103,7 @@ const RecommendedOutfits = ({outfit}: RecommendedOutfitsProps) => {
           fontWeight: '200',
           textAlign: 'center'
         }}>
-          Recommended Outfits
+          See Recommended Outfits
         </Text>
       </TouchableOpacity>
       

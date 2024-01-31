@@ -14,16 +14,19 @@ import { ClothingItem, Outfit } from '../assets/database/models';
 import Modal from 'react-native-modal'
 import OutfitCreation from '../components/OutfitCreation';
 import AppleStyleSwipeableRow from '../components/AppleSwipeableRow';
-import { useIsFocused } from '@react-navigation/native';
+import { useIsFocused, useNavigation } from '@react-navigation/native';
 import { deleteOutfit as deleteFromDB } from '../assets/database/db-processing';
 
+type CalendarProps = {
+  fadeAnimation: boolean
+}
 
 const CalendarScreen = ({...props}) => {
+  const fadeAnimation = props.fadeAnimation;
 
   const isFocused = useIsFocused()
 
   const windowWidth = Dimensions.get('window').width;
-  const fadeAnimation = props.fadeAnimation;
   const isDarkMode = useColorScheme() == 'dark';
   const currentTheme = isDarkMode ? DarkTheme : Theme;
   
@@ -271,6 +274,8 @@ const CalendarScreen = ({...props}) => {
         ListFooterComponent={
           <TouchableOpacity
             onPress={() => {
+              setNoOutfit(-1)
+              setModalVisible(true)
             }}
             style={{
               borderColor: currentTheme.colors.primary,
@@ -317,7 +322,9 @@ const CalendarScreen = ({...props}) => {
         // pointerEvents='box-only'
         style={{
           justifyContent: 'center',
+          marginVertical: 0
         }}
+        backdropOpacity={1}
         backdropColor={currentTheme.colors.background}
       >
         <OutfitCreation

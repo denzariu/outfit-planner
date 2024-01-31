@@ -1,15 +1,10 @@
 import React, { useEffect, useRef, useState } from 'react';
-import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { createNativeStackNavigator } from '@react-navigation/native-stack'
 import HomeScreen from './src/screens/HomeScreen';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { DarkTheme as DarkThemeNav, DefaultTheme as DefaultThemeNav, NavigationContainer, useNavigation } from '@react-navigation/native';
-import { createMaterialBottomTabNavigator } from '@react-navigation/material-bottom-tabs';
 
 import {
-  Animated,
-  LayoutAnimation,
-  Text,
   useColorScheme,
 } from 'react-native';
 
@@ -45,13 +40,13 @@ import AddItemScreen from './src/screens/secondary/AddItemScreen';
 
 import { Logs } from 'expo'
 import WardrobeScreen from './src/screens/WardrobeScreen';
-import { icons } from './src/defaults/custom-svgs';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import CustomTab from './src/components/CustomTab';
-import AnimatedGradient from './src/components/AnimatedGradient';
 import { getDBConnection } from './src/assets/database/db-service';
 import { createClothingTable } from './src/assets/database/db-operations/db-operations-clothingitem';
 import { createItemOutfitTable, createOutfitPlannerTable, createOutfitTable } from './src/assets/database/db-operations/db-operations-outfit';
+import SettingsScreen from './src/screens/SettingsScreen';
+import AddOutfitScreen from './src/screens/secondary/AddOutfitScreen';
 Logs.enableExpoCliLogging()
 
 // const Tab = createMaterialBottomTabNavigator();
@@ -93,16 +88,23 @@ function App(): JSX.Element {
             screenOptions={{
               animation: 'slide_from_right',
               statusBarStyle: useColorScheme() == 'dark' ? 'dark' : 'light',
-              statusBarColor: currentTheme.colors.background,
+              // statusBarColor: currentTheme.colors.background,
               headerShown: false
             }}
           >
-            <Stack.Screen name="Tabs" component={Tabs} />
+            <Stack.Screen name="Tabs" component={Tabs} 
+              options={{
+                statusBarColor: currentTheme.colors.background
+            }}/>
             <Stack.Screen name="AddItemScreen" component={AddItemScreen}
-              // options={{
-              //   animation: 'slide_from_right'
-              // }}
-            />
+              options={{
+                statusBarColor: currentTheme.colors.background
+            }}/>
+            <Stack.Screen name="AddOutfitScreen" component={AddOutfitScreen}
+              options={{
+                statusBarColor: currentTheme.colors.secondary
+            }}/>
+              
           </Stack.Navigator>
         </NavigationContainer>
       </PaperProvider>
@@ -118,7 +120,7 @@ function Tabs(): JSX.Element {
 
   return (
       <Tab.Navigator
-        initialRouteName='Calendar' //DEBUG ONLY
+        // initialRouteName='Calendar' //DEBUG ONLY
         screenOptions={{
           headerShown: false
         }}
@@ -146,7 +148,7 @@ function Tabs(): JSX.Element {
 
         <Tab.Screen 
           name="Settings"
-          component={HomeScreen}
+          component={SettingsScreen}
         />
       </Tab.Navigator>
   );
