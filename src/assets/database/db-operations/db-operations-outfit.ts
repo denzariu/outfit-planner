@@ -140,7 +140,7 @@ export const getOutfitItemsTable = async (db: SQLiteDatabase): Promise<ClothingI
 
     return Items
   } catch (error) {
-    throw Error('Id not valid.')
+    throw Error('Couldn\'t get OutfitItemsTable. Id not valid.')
   }
 
 }
@@ -165,7 +165,7 @@ export const getOutfitItems = async (db: SQLiteDatabase, id: number | undefined)
 
     return Items
   } catch (error) {
-    throw Error('Id not valid.')
+    throw Error('Couldn\'t get OutfitItems. Id not valid.')
   }
 
 }
@@ -194,7 +194,7 @@ export const getOutfitsItems = async (db: SQLiteDatabase, ids: (number | undefin
     return Items
     
   } catch (error) {
-    throw Error('Id not valid.')
+    throw Error('Couldn\'t get OutfitsItems. Id not valid.')
   }
 
 }
@@ -300,7 +300,7 @@ export const getOutfitsOnDate = async (db: SQLiteDatabase, date: string): Promis
     return Outfits
 
   } catch (error) {
-    throw Error('Id not valid.')
+    throw Error('Couldn\'t get Outfits On 7Date.')
   }
 }
 
@@ -324,7 +324,7 @@ export const getOutfitsBetweenDates = async (db: SQLiteDatabase, date_start: str
     return Outfits
 
   } catch (error) {
-    throw Error('Id not valid.')
+    throw Error('Couldn\'t get Outfit Between Dates.')
   }
 }
 

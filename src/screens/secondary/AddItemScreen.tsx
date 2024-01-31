@@ -460,7 +460,8 @@ const styles = StyleSheet.create({
   },
 
   container: {
-    height: '40%',
+    flex: 1,
+    // maxHeight: '35%',
     justifyContent: 'center',
     borderRadius: Theme.spacing.m,
     elevation: Theme.spacing.elevation,

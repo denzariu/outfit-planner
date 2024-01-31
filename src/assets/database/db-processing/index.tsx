@@ -7,6 +7,7 @@ export const saveOutfit = async (outfit: Outfit, items_ids: number[], date?: str
   const db = await getDBConnection()
   
   if (!outfit || !outfit.id) {
+    // Keep track of how many
     const idNewOutfit = await createOutfit(db, outfit)
     await addItemsToOutfit(db, items_ids, idNewOutfit)
     if (date)
