@@ -19,7 +19,6 @@ const AddOutfitScreen = ({navigation, route}: AddOutfitProps) => {
 
   const {date, items_ids} = route.params || []
 
-  console.log(date, items_ids)
   const isDarkMode = useColorScheme() == 'dark';
   const currentTheme = isDarkMode ? DarkTheme : Theme;
 

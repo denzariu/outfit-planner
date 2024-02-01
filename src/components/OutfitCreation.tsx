@@ -14,9 +14,10 @@ type OutfitCreationProps = {
   outfit?: Outfit,
   items: ClothingItem[],
   selectedDate: string,
+  setModalVisible?:  React.Dispatch<React.SetStateAction<boolean>>,
 }
 
-const OutfitCreation = ({outfit, items, selectedDate}: OutfitCreationProps) => {
+const OutfitCreation = ({outfit, items, selectedDate, setModalVisible}: OutfitCreationProps) => {
 
   const navigator = useNavigation()
   const isDarkMode = useColorScheme() == 'dark';
@@ -52,17 +53,14 @@ const OutfitCreation = ({outfit, items, selectedDate}: OutfitCreationProps) => {
 
   const dynamicStyles = StyleSheet.create({
     outfit_icon: {backgroundColor: currentTheme.colors.primary},
-    outfit_name: {backgroundColor: currentTheme.colors.primary, color: currentTheme.colors.quaternary}
+    outfit_name: {backgroundColor: currentTheme.colors.primary, color: currentTheme.colors.quaternary},
+    button_save: {backgroundColor: currentTheme.colors.primary}
   })
   
 
   return (
-    <View
-      style={{
-        flex: 1,
-        marginVertical: Theme.spacing.page
-      }}
-    >
+    <View style={styles.page}>
+      
       {/* Recommended outfits to select from OR Outfit Icon selector*/}
       {(!changeIcon && outfit) ?
         <RecommendedOutfits 
@@ -75,13 +73,8 @@ const OutfitCreation = ({outfit, items, selectedDate}: OutfitCreationProps) => {
         />
       }
 
-      <View style={{
-        // backgroundColor: currentTheme.colors.primary,
-        marginBottom: Theme.spacing.m,
-        flexDirection: 'row',
-        alignItems: 'center',
-        columnGap: Theme.spacing.s
-      }}>
+      {/* Icon & name container */}
+      <View style={styles.container_outfit_info}>
         <TouchableOpacity
           onPress={() => setChangeIcon(prev => !prev)}
           style={[styles.outfit_icon, dynamicStyles.outfit_icon]}
@@ -121,20 +114,10 @@ const OutfitCreation = ({outfit, items, selectedDate}: OutfitCreationProps) => {
               modifiedAllItemsIds, 
               selectedDate
             )
-            //TODO: set outfit save behavior: go back or show save message
+            //Outfit save behavior: 
+            setModalVisible? setModalVisible(false) : navigator.goBack() 
           }}
-          style={[{
-            position: 'absolute',
-            bottom: -8,
-            alignSelf: 'center',
-            height: 64,
-            width: 64,
-            borderRadius: 64,
-            backgroundColor: currentTheme.colors.primary,
-            justifyContent: 'center',
-            alignItems: 'center',
-          }
-        ]}
+          style={[styles.button_save, dynamicStyles.button_save]}
         >
             <MaterialCommunityIcons 
               style={{alignContent: 'center'}}
@@ -147,6 +130,11 @@ const OutfitCreation = ({outfit, items, selectedDate}: OutfitCreationProps) => {
 }
 
 const styles = StyleSheet.create({
+  page: {
+    flex: 1,
+    marginVertical: Theme.spacing.page
+  },
+
   outfit_name: {
     flex: 1,
     borderRadius: Theme.spacing.ms,
@@ -161,6 +149,24 @@ const styles = StyleSheet.create({
   outfit_icon: {
     padding: Theme.spacing.ms,
     borderRadius: Theme.spacing.s,
+  },
+
+  container_outfit_info: {
+    marginBottom: Theme.spacing.m,
+    flexDirection: 'row',
+    alignItems: 'center',
+    columnGap: Theme.spacing.s
+  },
+
+  button_save: {
+    position: 'absolute',
+    bottom: -8,
+    alignSelf: 'center',
+    height: 64,
+    width: 64,
+    borderRadius: 64,
+    justifyContent: 'center',
+    alignItems: 'center',
   }
 })
 

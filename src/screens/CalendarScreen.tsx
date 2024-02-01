@@ -331,6 +331,7 @@ const CalendarScreen = ({...props}) => {
           selectedDate={selectedDate}
           outfit={markedDates[selectedDate] ? markedDates[selectedDate].outfits[noOutfit] ?? [] : []}
           items={markedDates[selectedDate] ? markedDates[selectedDate].items[noOutfit] ?? [] : []}
+          setModalVisible={setModalVisible}
         />
       </Modal>
 

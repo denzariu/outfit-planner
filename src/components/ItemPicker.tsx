@@ -97,7 +97,6 @@ const ItemPicker = ({handleItemsToBeAdded, handleCategoryToBeAddedTo, alreadySel
 
             <FlatList
                 data={items}
-                // TODO: Move this to 'styles'
                 style={[styles.list_style, dynamicStyle.list_style]}
                 contentContainerStyle={[styles.container_content]}
                 columnWrapperStyle={[styles.container_wrapper]}

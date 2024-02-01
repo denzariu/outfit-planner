@@ -12,6 +12,8 @@ type RecommendedOutfitsProps = {
 }
 
 const RecommendedOutfits = ({outfit}: RecommendedOutfitsProps) => {
+
+  const noRecommendations = 5;
   const isDarkMode = useColorScheme() == 'dark';
   const currentTheme = isDarkMode ? DarkTheme : Theme;
   
@@ -25,9 +27,8 @@ const RecommendedOutfits = ({outfit}: RecommendedOutfitsProps) => {
 
   const loadRecommendations = async () => {
     const db = await getDBConnection()
-    const howMany = 5
 
-    const items = await getItemsFromLatestCreatedOutfits(db, howMany);
+    const items = await getItemsFromLatestCreatedOutfits(db, noRecommendations);
     
     let accumulator: {
       [key: string]: any;
@@ -73,24 +74,26 @@ const RecommendedOutfits = ({outfit}: RecommendedOutfitsProps) => {
     if(!recommended) loadRecommendations()
   }, [outfit])
 
+
+  const dynamicStyles = StyleSheet.create({
+    container: { borderColor: currentTheme.colors.secondary },
+    list: { backgroundColor: currentTheme.colors.secondary },
+    outfit_square: { borderColor: currentTheme.colors.secondary, backgroundColor: currentTheme.colors.background },
+    outfit_no_recommendation: { backgroundColor: currentTheme.colors.background, color: currentTheme.colors.secondary }
+  })
+
   return (
     
     <View
-      style={{
-      marginBottom: Theme.spacing.s,
-      borderWidth: Theme.spacing.xs,
+      style={[styles.container, dynamicStyles.container]}>
 
-      marginHorizontal: -Theme.spacing.page - Theme.spacing.s,
-      marginTop: -Theme.spacing.m - Theme.spacing.s,
-
-      borderTopWidth: 0,
-      borderColor: currentTheme.colors.secondary,
-
-    }}>
+      {/* Status Bar color change */}
       <StatusBar
         barStyle={isDarkMode ? 'light-content' : 'dark-content'}
         backgroundColor={currentTheme.colors.secondary}
       />
+
+      {/* Action Button */}
       <TouchableOpacity style={{
           backgroundColor: currentTheme.colors.secondary,
           paddingVertical: Theme.spacing.xs,
@@ -107,16 +110,12 @@ const RecommendedOutfits = ({outfit}: RecommendedOutfitsProps) => {
         </Text>
       </TouchableOpacity>
       
+      {/* Items shown */}
       {showRecommended &&
         <FlatList
           centerContent
-          style={{
-            backgroundColor: currentTheme.colors.secondary,
-          }}
-          contentContainerStyle={{
-            columnGap: Theme.spacing.xs,
-            paddingHorizontal: Theme.spacing.s
-          }}
+          style={dynamicStyles.list}
+          contentContainerStyle={styles.list_content}
           horizontal
           showsHorizontalScrollIndicator={false}
           data={recommended}
@@ -126,35 +125,15 @@ const RecommendedOutfits = ({outfit}: RecommendedOutfitsProps) => {
             <TouchableOpacity 
               onPress={() => console.log("TODO: import outfit")}
               activeOpacity={0.8}
-              style={{
-                padding: Theme.spacing.xxs,
-                borderWidth: Theme.spacing.xxs,
-                borderRadius: Theme.spacing.s,
-                borderColor: currentTheme.colors.secondary,
-                backgroundColor: currentTheme.colors.background,
-                height: 100,
-                width: 100,
-                
-                alignItems: 'center',
-                justifyContent: 'center',
-                
-            }}>
+              style={[styles.outfit_square, dynamicStyles.outfit_square]}>
+              
+              {/* I've split the square in 2 flex halfs (4-quarters) 
+                  in order to get the best preview */}
+                  
               {/* The first half */}
               {(o.item[1].items.extra.length || o.item[1].items.top.length) ?
                 <View 
-                style={{
-                  flexDirection: 'row',
-                  flexGrow: 1,
-                  flex: 0.5,
-                  // width: '100%',
-
-                  // Test flexbox
-                  // borderColor: 'red',
-                  // borderWidth: 1,
-                  
-                  alignItems: 'center',
-                  justifyContent: 'center',
-              }}>
+                style={styles.outfit_square_half}>
                 {/* Top-left */}
                 <Quarter array={o.item[1].items.extra} category='extra' outfit_id={o.item[0]}/>
                 {/* Top-right */}
@@ -166,21 +145,8 @@ const RecommendedOutfits = ({outfit}: RecommendedOutfitsProps) => {
               {/* The second half */}
               {(o.item[1].items.bottom.length || o.item[1].items.footwear.length) ?
               <View 
-                style={{
-                  flexDirection: 'row',
-                  flexGrow: 1,
-                  flex: 0.5,
-                  // width: '100%',
-
-                  // Test flexbox
-                  // borderColor: 'blue',
-                  // borderWidth: 1,
-                  
-                  alignItems: 'center',
-                  alignContent: 'center',
-                  justifyContent: 'center',
-              }}>
-                {/* Bottom-left */}
+                style={styles.outfit_square_half}>
+                {/* Bottom-left -> this one will row-flex (pants usually have height > width) */}
                 <Quarter array={o.item[1].items.bottom} category='bottom' outfit_id={o.item[0]} direction='row'/>
                 {/* Bottom-right */}
                 <Quarter array={o.item[1].items.footwear} category='footwear' outfit_id={o.item[0]}/>
@@ -191,12 +157,8 @@ const RecommendedOutfits = ({outfit}: RecommendedOutfitsProps) => {
             
           }
           ListEmptyComponent={
-            <Text style={{
-              color: currentTheme.colors.secondary
-              // paddingVertical: Theme.spacing.m,
-              // paddingLeft: Theme.spacing.m,
-            }}>
-              No recommendations available.
+            <Text style={[styles.outfit_no_recommendation, dynamicStyles.outfit_no_recommendation]}>
+              Add more outfits in order to get recommendations.
             </Text>
           }
         />
@@ -217,27 +179,15 @@ const Quarter = ({array, outfit_id, category, direction}: QuarterProps) => {
 
   if (!array.length) return
 
-  console.log(array.length)
   return (
     <View 
-      style={{
-        justifyContent: 'center',
-        alignItems: 'center',
+      style={[
+        styles.outfit_square_quarter,
+        {flexDirection: direction ?? 'column'}
+    ]}>
 
-        flexDirection: direction ?? 'column',
-        flex: 1,
-        flexGrow: 1,
-    }}>
-      <View 
-        style={{
-          flexDirection: 'row',
-          
-          // borderWidth: 1, 
-          // borderColor: 'purple',
-
-          maxHeight: '100%',
-          maxWidth: '100%',
-      }}>
+      {/* Quarter is also split in two, to maximize space */}
+      <View style={styles.outfit_square_quarter_half}>
         {array.slice(0, array.length / 2).map((i: any) =>
             <Image 
               key={`preview_${category}_outfit_${outfit_id}_${i.item_id}`} 
@@ -250,11 +200,6 @@ const Quarter = ({array, outfit_id, category, direction}: QuarterProps) => {
                 objectFit: 'contain'
               }}/>
         )}
-      {/* </View>
-      <View 
-        style={{
-          flexDirection: 'row',
-      }}> */}
         {array.slice(array.length / 2, array.length).map((i: any) =>
             <Image 
               key={`preview_${category}_outfit_${outfit_id}_${i.item_id}`} 
@@ -272,4 +217,71 @@ const Quarter = ({array, outfit_id, category, direction}: QuarterProps) => {
   )
 }
 
-const styles = StyleSheet.create({})
+const styles = StyleSheet.create({
+  container: {
+    marginBottom: Theme.spacing.s,
+
+    borderWidth: Theme.spacing.xs,
+    borderTopWidth: 0,
+
+    marginHorizontal: -Theme.spacing.page - Theme.spacing.s,
+    marginTop: -Theme.spacing.m - Theme.spacing.s,
+  },
+
+  list_content: {
+    columnGap: Theme.spacing.xs,
+    paddingHorizontal: Theme.spacing.s,
+
+    flex: 1,
+  },
+
+  outfit_square: {
+    padding: Theme.spacing.xxs,
+    borderWidth: Theme.spacing.xxs,
+    borderRadius: Theme.spacing.s,
+    height: 100,
+    width: 100,
+    
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+
+  outfit_square_half: {
+    flexDirection: 'row',
+    flexGrow: 1,
+    flex: 0.5,
+
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+
+  outfit_square_quarter: {
+    flex: 1,
+    flexGrow: 1,
+
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+
+  outfit_square_quarter_half: {
+    flexDirection: 'row',
+
+    maxHeight: '100%',
+    maxWidth: '100%',
+  },
+
+  outfit_no_recommendation: {
+    flex: 1,
+    textAlignVertical: 'center',
+    textAlign: 'center',
+
+    borderRadius: Theme.spacing.ms,
+    fontWeight: '300',
+    paddingVertical: Theme.spacing.m,
+    marginHorizontal: Theme.spacing.m,
+  },
+
+
+  
+
+})

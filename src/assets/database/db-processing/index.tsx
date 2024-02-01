@@ -16,7 +16,6 @@ export const saveOutfit = async (outfit: Outfit, items_ids: number[], date?: str
   else {
     await deleteAllItemsFromOutfit(db, outfit.id)
     await addItemsToOutfit(db, items_ids, outfit.id)
-    //TODO: override name/icon for outfit
     await updateOutfit(db, outfit.id, {name: outfit.name, icon: outfit.icon});
 
   }
