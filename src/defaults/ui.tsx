@@ -82,7 +82,7 @@ export const Theme = {
     
     m_s: 16,
     m_m: 20,
-    m_l: 24,
+    m_l: 22,
     
     l_s: 32,
     l_m: 48,

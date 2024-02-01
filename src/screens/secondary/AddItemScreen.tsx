@@ -1,15 +1,14 @@
-import { Button, Image, LayoutAnimation, SafeAreaView, StyleSheet, Text, View, useColorScheme } from 'react-native'
+import { Image, LayoutAnimation, SafeAreaView, StyleSheet, Text, View, useColorScheme } from 'react-native'
 import React, { useEffect, useState } from 'react'
-import AnimatedGradient from '../../components/AnimatedGradient'
-import { DarkTheme, Theme, mainAnimation } from '../../defaults/ui'
+import { DarkTheme, Theme, mainAnimation, swipeAnimation } from '../../defaults/ui'
 import { TextInput, TouchableOpacity } from 'react-native-gesture-handler'
 import * as ImagePicker from 'expo-image-picker'
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
 import { Dropdown, MultiSelect } from 'react-native-element-dropdown'
 import { getColors } from 'react-native-image-colors'
 import { useNavigation } from '@react-navigation/native'
-import { createClothingTable, getClothingItems, saveClothingItems, updateClothingItem } from '../../assets/database/db-operations/db-operations-clothingitem'
-import { deleteTable, getDBConnection, tableName_ClothingItem } from '../../assets/database/db-service'
+import { saveClothingItems, updateClothingItem } from '../../assets/database/db-operations/db-operations-clothingitem'
+import { getDBConnection, tableName_ClothingItem } from '../../assets/database/db-service'
 import { icons } from '../../defaults/custom-svgs'
 import { ClothingItem } from '../../assets/database/models'
 import { CLOTHING_FABRICS, CLOTHING_TYPES } from '../../defaults/data'
@@ -110,7 +109,7 @@ const AddItemScreen = ({navigation, route}: AddItemScreen) => {
     })
     .then((res) => {return res})
 
-    LayoutAnimation.configureNext(mainAnimation);
+    LayoutAnimation.configureNext(swipeAnimation);
     if (!result.canceled) {
       setImage(result.assets[0].uri);
       setAspectRatio(result.assets[0].width/result.assets[0].height)
@@ -228,6 +227,8 @@ const AddItemScreen = ({navigation, route}: AddItemScreen) => {
         </TouchableOpacity>
       </View>
 
+      {image &&
+      <>
       <View style={styles.container_clothing_settings}>
         <View style={[styles.setting, dynamicStyle.setting]}>
           <Text style={[styles.setting_title, dynamicStyle.setting_title]}>Name</Text>
@@ -386,7 +387,8 @@ const AddItemScreen = ({navigation, route}: AddItemScreen) => {
           <Text style={[styles.button_text, dynamicStyle.button_text]}>{editMode? 'Update' : 'Add to Collection'}</Text>
         }
       />
-      
+      </>
+      }
     </SafeAreaView>
   )
 }
@@ -457,11 +459,14 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-start',
     fontSize: Theme.fontSize.l_s,
     fontWeight: '200',
+    // borderWidth: 1,
+    flex: 1,
   },
 
   container: {
     flex: 1,
     // maxHeight: '35%',
+    maxHeight: '80%',
     justifyContent: 'center',
     borderRadius: Theme.spacing.m,
     elevation: Theme.spacing.elevation,
